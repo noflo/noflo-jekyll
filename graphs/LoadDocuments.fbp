@@ -1,0 +1,21 @@
+# This graph loads a list of documents from a directory and sends it out for processing
+Directory(Split) OUT -> SOURCE Dir(ReadDir)
+Directory() OUT -> IN Display(Output)
+Dir() OUT -> IN Stat(Stat)
+
+# Routing rules
+'isDirectory' -> ROUTES FileRouter(GroupRouter)
+
+'isDirectory' -> KEY Group(GroupByObjectKey)
+'path' -> KEY GetPath(GetObjectKey)
+Stat() OUT -> IN Group() OUT -> IN FileRouter()
+
+# First route: recurse folders
+FileRouter() OUT -> IN GetPath()
+# GetPath() OUT -> DIRECTORY.IN SubDir(jekyll/LoadDocuments)
+GetPath() OUT -> IN Display(Output)
+
+# Error handling
+FileRouter() MISSED -> IN Drop(Drop)
+Dir() ERROR -> IN Display(Output)
+Stat() ERROR -> IN Display(Output)
