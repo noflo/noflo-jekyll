@@ -1,0 +1,2 @@
+'/home/bergie/Projects/bergie' -> DIRECTORY.IN GetConfig(jekyll/GetConfig)
+GetConfig() PARSE.OUT -> IN Display(Output)
