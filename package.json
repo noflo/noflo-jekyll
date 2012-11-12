@@ -7,7 +7,8 @@
   },
   "noflo": {
     "graphs": {
-      "GetConfig": "./graphs/GetConfig.fbp"
+      "GetConfig": "./graphs/GetConfig.fbp",
+      "LoadDocuments": "./graphs/LoadDocuments.fbp"
     }
   }
 }
