@@ -1,0 +1,10 @@
+# This graph reads the _config.yml file from the given directory, parses it, and sends the configuration values out
+Directory(Repeat) OUT -> IN FilenameParts(Concat)
+'_config.yml' -> IN File(Repeat) OUT -> IN FilenameParts()
+'/' -> DELIMITER Filename(CompileString)
+FilenameParts() OUT -> IN Filename(CompileString)
+Filename() OUT -> IN Read(ReadFile)
+Read(ReadFile) OUT -> IN Parse(yaml/ParseYaml)
+
+# Error handling
+Read() ERROR -> IN Display(Output)
