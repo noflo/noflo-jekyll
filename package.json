@@ -1,0 +1,7 @@
+{
+  "name": "noflo-jekyll",
+  "version": "0.0.1",
+  "dependencies": {
+    "noflo": "0.2.x"
+  }
+}
