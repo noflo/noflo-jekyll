@@ -5,17 +5,17 @@ Dir() OUT -> IN Stat(Stat)
 
 # Routing rules
 'isDirectory' -> ROUTES FileRouter(GroupRouter)
-
 'isDirectory' -> KEY Group(GroupByObjectKey)
-'path' -> KEY GetPath(GetObjectKey)
 Stat() OUT -> IN Group() OUT -> IN FileRouter()
 
-# First route: recurse folders
-FileRouter() OUT -> IN GetPath()
-# GetPath() OUT -> DIRECTORY.IN SubDir(jekyll/LoadDocuments)
-GetPath() OUT -> IN Display(Output)
+# First route: subfolder
+'path=^(?:(?!\.git).)*$' -> REGEXP FilterDirs(FilterPropertyValue)
+'path' -> KEY SubDirectory(GetObjectKey)
+FileRouter() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
+
+# Fallback route: regular file
+FileRouter() MISSED -> IN Drop(Drop)
 
 # Error handling
-FileRouter() MISSED -> IN Drop(Drop)
 Dir() ERROR -> IN Display(Output)
 Stat() ERROR -> IN Display(Output)
