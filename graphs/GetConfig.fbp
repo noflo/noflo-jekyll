@@ -1,4 +1,12 @@
 # This graph reads the _config.yml file from the given directory, parses it, and sends the configuration values out
+#
+# The directory inport accepts a path for a folder where to look for a 
+# configuration file
+EXPORT=DIRECTORY.IN:DIRECTORY
+# The config output is where the object containing configuration keys and
+# values is sent
+EXPORT=PARSE.OUT:CONFIG
+
 Directory(Repeat) OUT -> IN FilenameParts(Concat)
 '_config.yml' -> IN File(Repeat) OUT -> IN FilenameParts()
 '/' -> DELIMITER Filename(CompileString)
