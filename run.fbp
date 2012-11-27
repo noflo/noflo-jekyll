@@ -4,4 +4,15 @@ GetConfig() CONFIG -> IN Display(Output)
 '/home/bergie/Projects/bergie' -> IN FindFiles(Merge)
 FindFiles() OUT -> DIRECTORY LoadDocuments(jekyll/LoadDocuments)
 LoadDocuments() SUBDIRECTORY -> IN FindFiles()
-LoadDocuments() DOCUMENT -> IN Drop(Drop)
+
+'text' -> ROUTES DetermineType(jekyll/MimeRouter)
+LoadDocuments() DOCUMENT -> IN DetermineType()
+
+# Text files parsed for Front Matter
+DetermineType() OUT -> IN Read(ReadFile)
+Read() OUT -> IN Clean(RemoveGroups)
+Clean() OUT -> CONTENT Parse(yaml/ParseFrontmatter)
+Parse() RESULTS -> IN Display(Output)
+
+# Binary files that will be copied as-is
+DetermineType() MISSED -> IN Drop(Drop)
