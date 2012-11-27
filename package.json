@@ -3,12 +3,16 @@
   "version": "0.0.1",
   "dependencies": {
     "noflo": "0.2.x",
-    "noflo-yaml": "0.0.x"
+    "noflo-yaml": "0.0.x",
+    "mimetype": "0.0.x"
   },
   "noflo": {
     "graphs": {
       "GetConfig": "./graphs/GetConfig.fbp",
       "LoadDocuments": "./graphs/LoadDocuments.fbp"
+    },
+    "components": {
+      "MimeRouter": "./components/MimeRouter.coffee"
     }
   }
 }
