@@ -13,8 +13,7 @@ LoadDocuments() DOCUMENT -> IN DetermineType()
 
 # Text files parsed for Front Matter
 DetermineType() OUT -> IN Read(ReadFile)
-Read() OUT -> IN Clean(RemoveGroups)
-Clean() OUT -> CONTENT Parse(yaml/ParseFrontmatter)
+Read() OUT -> CONTENT Parse(yaml/ParseFrontmatter)
 Parse() RESULTS -> IN Drop(Drop)
 
 # Binary files that will be copied as-is
