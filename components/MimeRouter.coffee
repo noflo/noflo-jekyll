@@ -19,12 +19,20 @@ class MimeRouter extends noflo.Component
 
     @inPorts.in.on 'data', (data) =>
       mime = mimetype.lookup data
-      return @outPorts.missed.send data unless mime
+      return @missed data unless mime
 
       mimeParts = mime.split '/'
       selected = @routes.indexOf mimeParts[0]
-      return @outPorts.missed.send data if selected is -1
+      return @missed data if selected is -1
 
       @outPorts.out.send data, selected
+
+    @inPorts.in.on 'disconnect', =>
+      @outPorts.out.disconnect()
+      @outPorts.missed.disconnect() if @outPorts.missed.isAttached()
+
+  missed: (data) ->
+    return unless @outPorts.missed.isAttached()
+    @outPorts.missed.send data
 
 exports.getComponent = -> new MimeRouter
