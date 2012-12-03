@@ -33,4 +33,10 @@ UniqueDir() OUT -> IN MakeDir(MakeDir)
 
 # Copy files over once directories have been created
 NewFile() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
-MakeDir() OUT -> RELEASE NewFiles() OUT -> IN Display(Output)
+MakeDir() OUT -> RELEASE NewFiles()
+NewFiles() OUT -> IN PrepareCopy(Split)
+PrepareCopy() OUT -> DESTINATION Copy(CopyFile)
+Destination() OUT -> PATTERN OrigPath(Replace)
+Source() OUT -> REPLACEMENT OrigPath()
+PrepareCopy() OUT -> IN OrigPath() OUT -> SOURCE Copy()
+Copy() OUT -> IN Display(Output)
