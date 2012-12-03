@@ -1,9 +1,10 @@
-'/home/bergie/Projects/bergie' -> IN Root(Split)
+'/home/bergie/Projects/bergie' -> IN Source(Split)
+'/home/bergie/Projects/noflo-jekyll/bergie' -> IN Destination(Split)
 
-Root() OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
+Source() OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
 GetConfig() CONFIG -> IN Display(Output)
 
-Root() OUT -> IN FindFiles(Merge)
+Source() OUT -> IN FindFiles(Merge)
 FindFiles() OUT -> DIRECTORY LoadDocuments(jekyll/LoadDocuments)
 LoadDocuments() SUBDIRECTORY -> IN FindFiles()
 
@@ -14,7 +15,15 @@ LoadDocuments() DOCUMENT -> IN DetermineType()
 DetermineType() OUT -> IN Read(ReadFile)
 Read() OUT -> IN Clean(RemoveGroups)
 Clean() OUT -> CONTENT Parse(yaml/ParseFrontmatter)
-Parse() RESULTS -> IN Display(Output)
+Parse() RESULTS -> IN Drop(Drop)
 
 # Binary files that will be copied as-is
-DetermineType() MISSED -> IN Drop(Drop)
+Source() OUT -> PATTERN NewPath(Replace)
+Destination() OUT -> REPLACEMENT NewPath()
+'/_' -> REGEXP FilterDirs(FilterPacket)
+DetermineType() MISSED -> IN FilterDirs()
+FilterDirs() OUT -> IN DropDir(Drop)
+FilterDirs() MISSED -> IN NewPath()
+NewPath() OUT -> IN NewDir(DirName)
+NewDir() OUT -> IN UniqueDir(UniquePacket)
+UniqueDir() OUT -> IN MakeDir(MakeDir) OUT -> IN Display(Output)
