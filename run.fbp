@@ -1,7 +1,9 @@
-'/home/bergie/Projects/bergie' -> DIRECTORY GetConfig(jekyll/GetConfig)
+'/home/bergie/Projects/bergie' -> IN Root(Split)
+
+Root() OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
 GetConfig() CONFIG -> IN Display(Output)
 
-'/home/bergie/Projects/bergie' -> IN FindFiles(Merge)
+Root() OUT -> IN FindFiles(Merge)
 FindFiles() OUT -> DIRECTORY LoadDocuments(jekyll/LoadDocuments)
 LoadDocuments() SUBDIRECTORY -> IN FindFiles()
 
