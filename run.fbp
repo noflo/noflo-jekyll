@@ -24,6 +24,13 @@ Destination() OUT -> REPLACEMENT NewPath()
 DetermineType() MISSED -> IN FilterDirs()
 FilterDirs() OUT -> IN DropDir(Drop)
 FilterDirs() MISSED -> IN NewPath()
-NewPath() OUT -> IN NewDir(DirName)
+NewPath() OUT -> IN NewFile(Split)
+
+# Create folders for the files
+NewFile() OUT -> IN NewDir(DirName)
 NewDir() OUT -> IN UniqueDir(UniquePacket)
-UniqueDir() OUT -> IN MakeDir(MakeDir) OUT -> IN Display(Output)
+UniqueDir() OUT -> IN MakeDir(MakeDir)
+
+# Copy files over once directories have been created
+NewFile() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
+MakeDir() OUT -> RELEASE NewFiles() OUT -> IN Display(Output)
