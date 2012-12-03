@@ -12,7 +12,8 @@
       "LoadDocuments": "./graphs/LoadDocuments.fbp"
     },
     "components": {
-      "MimeRouter": "./components/MimeRouter.coffee"
+      "MimeRouter": "./components/MimeRouter.coffee",
+      "DirectoryBuffer": "./components/DirectoryBuffer.coffee"
     }
   }
 }
