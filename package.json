@@ -9,7 +9,8 @@
   "noflo": {
     "graphs": {
       "GetConfig": "./graphs/GetConfig.fbp",
-      "LoadDocuments": "./graphs/LoadDocuments.fbp"
+      "LoadDocuments": "./graphs/LoadDocuments.fbp",
+      "CopyFile": "./graphs/CopyFile.fbp"
     },
     "components": {
       "MimeRouter": "./components/MimeRouter.coffee",

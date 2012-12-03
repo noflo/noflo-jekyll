@@ -1,0 +1,33 @@
+# This graph copies files based on a given path from a source base
+# directory to under a corresponding folder in a destination directory.
+
+# The source basedir
+EXPORT=SOURCE.IN:SOURCE
+
+# The destination basedir
+EXPORT=DESTINATION.IN:DESTINATION
+
+# File paths to be copied
+EXPORT=FILE.IN:IN
+
+# Full path of a successfully copied file
+EXPORT=COPY.OUT:OUT
+
+Source(Split) OUT -> PATTERN NewPath(Replace)
+Destination(Split) OUT -> REPLACEMENT NewPath()
+File(Split) OUT -> IN NewPath()
+NewPath() OUT -> IN NewFile(Split)
+
+# Create folders for the files
+NewFile() OUT -> IN NewDir(DirName)
+NewDir() OUT -> IN UniqueDir(UniquePacket)
+UniqueDir() OUT -> IN MakeDir(MakeDir)
+
+# Copy files over once directories have been created
+NewFile() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
+MakeDir() OUT -> RELEASE NewFiles()
+NewFiles() OUT -> IN PrepareCopy(Split)
+PrepareCopy() OUT -> DESTINATION Copy(CopyFile)
+Destination() OUT -> PATTERN OrigPath(Replace)
+Source() OUT -> REPLACEMENT OrigPath()
+PrepareCopy() OUT -> IN OrigPath() OUT -> SOURCE Copy()
