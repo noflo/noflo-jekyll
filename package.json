@@ -10,6 +10,7 @@
     "graphs": {
       "GetConfig": "./graphs/GetConfig.fbp",
       "LoadDocuments": "./graphs/LoadDocuments.fbp",
+      "GroupDocuments": "./graphs/GroupDocuments.fbp",
       "CopyFile": "./graphs/CopyFile.fbp"
     },
     "components": {

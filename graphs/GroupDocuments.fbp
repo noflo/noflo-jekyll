@@ -1,0 +1,48 @@
+# This graph groups all textual documents to various groups,
+# parses them, and outputs them to the corresponding output
+# port.
+
+# Filenames to be processed. These should only contain text/* files
+EXPORT=READ.IN:IN
+
+# Layout templates
+EXPORT=LAYOUT.OUT:LAYOUT
+
+# Layout include files
+EXPORT=INCLUDE.OUT:INCLUDE
+
+# Posts
+EXPORT=POST.OUT:POST
+
+# Other Front Matter documents, to be copied as-is after templating
+EXPORT=DOCROUTER.MISSED:STATIC
+
+# Parse Front Matter from files
+Read(ReadFile) OUT -> CONTENT Parse(yaml/ParseFrontmatter)
+Parse() RESULTS -> IN Parsed(Split)
+
+'path' -> KEY FileName(GetObjectKey)
+Parsed() OUT -> IN FileName()
+'/' -> DELIMITER SplitPath(SplitStr)
+FileName() OUT -> IN DirName(DirName)
+DirName() OUT -> IN SplitPath()
+SplitPath() OUT -> IN FileDir(LastPacket)
+'collection' -> PROPERTY SetGroup(SetPropertyValue)
+FileDir() OUT -> VALUE SetGroup()
+
+Parsed() OUT -> IN SetGroup()
+'collection' -> KEY Group(GroupByObjectKey)
+SetGroup() OUT -> IN Group()
+
+'_layouts,_includes,_posts' -> ROUTES DocRouter(GroupRouter)
+
+# Layout templates
+DocRouter() OUT -> IN Layout(Repeat)
+
+# Includes
+DocRouter() OUT -> IN Include(Repeat)
+
+# Posts
+DocRouter() OUT -> IN Post(Repeat)
+
+Group() OUT -> IN DocRouter()

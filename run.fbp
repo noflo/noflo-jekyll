@@ -12,9 +12,11 @@ LoadDocuments() SUBDIRECTORY -> IN FindFiles()
 LoadDocuments() DOCUMENT -> IN DetermineType()
 
 # Text files parsed for Front Matter
-DetermineType() OUT -> IN Read(ReadFile)
-Read() OUT -> CONTENT Parse(yaml/ParseFrontmatter)
-Parse() RESULTS -> IN Drop(Drop)
+DetermineType() OUT -> IN GroupDocs(jekyll/GroupDocuments)
+GroupDocs() LAYOUT -> IN Display(Output)
+GroupDocs() INCLUDE -> IN DropIncludes(Drop)
+GroupDocs() POST -> IN DropPosts(Drop)
+GroupDocs() STATIC -> IN DropStatic(Drop)
 
 # Binary files that will be copied as-is
 '/_' -> REGEXP FilterDirs(FilterPacket)
