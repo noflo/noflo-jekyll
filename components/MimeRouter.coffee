@@ -1,6 +1,9 @@
 noflo = require 'noflo'
 mimetype = require 'mimetype'
 
+# Extra MIME types config
+mimetype.set '.markdown', 'text/x-markdown'
+
 class MimeRouter extends noflo.Component
   constructor: ->
     @routes = []
