@@ -4,6 +4,7 @@
   "dependencies": {
     "noflo": "0.2.x",
     "noflo-yaml": "0.0.x",
+    "noflo-liquid": "0.0.x",
     "mimetype": "0.0.x"
   },
   "noflo": {
