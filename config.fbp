@@ -1,0 +1,6 @@
+'/home/bergie/Projects/bergie' -> IN Source(Split)
+'/home/bergie/Projects/noflo-jekyll/bergie' -> IN Destination(Split)
+
+Source() OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
+GetConfig() CONFIG -> IN SplitConfig(Split)
+SplitConfig() OUT -> IN Display(Output)
