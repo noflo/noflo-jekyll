@@ -4,6 +4,7 @@ mimetype = require 'mimetype'
 # Extra MIME types config
 mimetype.set '.markdown', 'text/x-markdown'
 mimetype.set '.md', 'text/x-markdown'
+mimetype.set '.xml', 'text/xml'
 
 class MimeRouter extends noflo.Component
   constructor: ->
