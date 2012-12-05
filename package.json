@@ -16,6 +16,7 @@
     },
     "components": {
       "MimeRouter": "./components/MimeRouter.coffee",
+      "DocumentBuilder": "./components/DocumentBuilder.coffee",
       "DirectoryBuffer": "./components/DirectoryBuffer.coffee"
     }
   }
