@@ -34,7 +34,7 @@ Parsed() OUT -> IN SetGroup()
 'collection' -> KEY Group(GroupByObjectKey)
 SetGroup() OUT -> IN Group()
 
-'_layouts,_includes,_posts' -> ROUTES DocRouter(GroupRouter)
+'_layouts,_includes,_posts,_midgard' -> ROUTES DocRouter(GroupRouter)
 
 # Layout templates
 DocRouter() OUT -> IN Layout(Repeat)
@@ -44,5 +44,8 @@ DocRouter() OUT -> IN Include(Repeat)
 
 # Posts
 DocRouter() OUT -> IN Post(Repeat)
+
+# Midgard stuff, ignore
+DocRouter() OUT -> IN DropMidgard(Drop)
 
 Group() OUT -> IN DocRouter()
