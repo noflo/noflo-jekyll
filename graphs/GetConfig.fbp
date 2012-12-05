@@ -7,8 +7,10 @@ EXPORT=DIRECTORY.IN:DIRECTORY
 # values is sent
 EXPORT=PARSE.OUT:CONFIG
 
-Directory(Repeat) OUT -> IN FilenameParts(Concat)
-'_config.yml' -> IN File(Repeat) OUT -> IN FilenameParts()
+Directory(Split) OUT -> IN FilenameParts(Concat)
+'_config.yml' -> DATA BuildName(Kick)
+Directory() OUT -> IN BuildName()
+BuildName() OUT -> IN FilenameParts()
 '/' -> DELIMITER Filename(CompileString)
 FilenameParts() OUT -> IN Filename(CompileString)
 Filename() OUT -> IN Read(ReadFile)
