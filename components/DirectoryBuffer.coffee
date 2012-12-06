@@ -12,12 +12,24 @@ class DirectoryBuffer extends noflo.Component
     @outPorts =
       out: new noflo.Port()
 
+    @groups = []
+    @inPorts.collect.on 'begingroup', (group) =>
+      @groups.push group
     @inPorts.collect.on 'data', (data) =>
       bufName = path.dirname data
-      return @release data unless @released.indexOf(bufName) is -1
+      unless @released.indexOf(bufName) is -1
+        @release
+          data: data
+          groups: @groups.slice 0
+        return
 
       @buffers[bufName] = [] unless @buffers[bufName]
-      @buffers[bufName].push data
+      @buffers[bufName].push
+        data: data
+        groups: @groups.slice 0
+
+    @inPorts.collect.on 'endgroup', =>
+      @groups.pop()
 
     @inPorts.release.on 'data', (data) =>
       @released.push data
@@ -32,7 +44,13 @@ class DirectoryBuffer extends noflo.Component
     @inPorts.release.on 'disconnect', =>
       @outPorts.out.disconnect() unless @inPorts.collect.isConnected()
 
-  release: (packet, buffer) ->
-    @outPorts.out.send packet
+  release: (packet) ->
+    for group in packet.groups
+      @outPorts.out.beginGroup group
+
+    @outPorts.out.send packet.data
+
+    for group in packet.groups
+      @outPorts.out.endGroup()
 
 exports.getComponent = -> new DirectoryBuffer
