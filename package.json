@@ -7,6 +7,11 @@
     "noflo-liquid": "0.0.x",
     "mimetype": "0.0.x"
   },
+  "devDependencies": {
+    "nodeunit": ">=0.6.0",
+    "coffeelint": "*",
+    "coffee-script": "1.4.x"
+  },
   "noflo": {
     "graphs": {
       "GetConfig": "./graphs/GetConfig.fbp",
@@ -19,5 +24,9 @@
       "DocumentBuilder": "./components/DocumentBuilder.coffee",
       "DirectoryBuffer": "./components/DirectoryBuffer.coffee"
     }
+  },
+  "scripts": {
+    "pretest": "./node_modules/.bin/coffeelint -r components",
+    "test": "./node_modules/.bin/nodeunit test"
   }
 }
