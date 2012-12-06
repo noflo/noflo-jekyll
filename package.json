@@ -10,10 +10,12 @@
   "devDependencies": {
     "nodeunit": ">=0.6.0",
     "coffeelint": "*",
-    "coffee-script": "1.4.x"
+    "coffee-script": "1.4.x",
+    "rimraf": "2.x.x"
   },
   "noflo": {
     "graphs": {
+      "Jekyll": "./graphs/Jekyll.fbp",
       "GetConfig": "./graphs/GetConfig.fbp",
       "LoadDocuments": "./graphs/LoadDocuments.fbp",
       "GroupDocuments": "./graphs/GroupDocuments.fbp",

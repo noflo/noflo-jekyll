@@ -1,28 +1,5 @@
-'/home/bergie/Projects/bergie' -> IN Source(Split)
-'/home/bergie/Projects/noflo-jekyll/bergie' -> IN Destination(Split)
+'/home/bergie/Projects/bergie' -> SOURCE Jekyll(jekyll/Jekyll)
+'/home/bergie/Projects/noflo-jekyll/bergie' -> DESTINATION Jekyll()
 
-Source() OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
-GetConfig() CONFIG -> IN Display(Output)
-
-Source() OUT -> IN FindFiles(Merge)
-FindFiles() OUT -> DIRECTORY LoadDocuments(jekyll/LoadDocuments)
-LoadDocuments() SUBDIRECTORY -> IN FindFiles()
-
-'text' -> ROUTES DetermineType(jekyll/MimeRouter)
-LoadDocuments() DOCUMENT -> IN DetermineType()
-
-# Text files parsed for Front Matter
-DetermineType() OUT -> IN GroupDocs(jekyll/GroupDocuments)
-GroupDocs() LAYOUT -> IN Display(Output)
-GroupDocs() INCLUDE -> IN DropIncludes(Drop)
-GroupDocs() POST -> IN DropPosts(Drop)
-GroupDocs() STATIC -> IN DropStatic(Drop)
-
-# Binary files that will be copied as-is
-'/_' -> REGEXP FilterDirs(FilterPacket)
-DetermineType() MISSED -> IN FilterDirs()
-FilterDirs() OUT -> IN DropDir(Drop)
-Source() OUT -> SOURCE CopyFiles(jekyll/CopyFile)
-Destination() OUT -> DESTINATION CopyFiles()
-FilterDirs() MISSED -> IN CopyFiles()
-CopyFiles() OUT -> IN Display(Output)
+Jekyll() GENERATED -> IN Display(Output)
+Jekyll() ERRORS -> IN Display(Output)

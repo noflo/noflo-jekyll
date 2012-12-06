@@ -1,0 +1,60 @@
+# This graph contains the main control flow of the Jekyll site-building process
+
+# The source inport is where the graph finds the Jekyll site sources
+EXPORT=SOURCE.IN:SOURCE
+
+# The destination inport is where the graph creates the site
+EXPORT=DESTINATION.IN:DESTINATION
+
+# The generated outport tells paths of all generated files
+EXPORT=GENERATED.OUT:GENERATED
+
+# The errors outport outputs any errors
+EXPORT=ERRORS.OUT:ERRORS
+
+Source(Split) OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
+GetConfig() CONFIG -> IN SplitConfig(Split)
+
+Source() OUT -> IN FindFiles(Merge)
+FindFiles() OUT -> DIRECTORY LoadDocuments(jekyll/LoadDocuments)
+LoadDocuments() SUBDIRECTORY -> IN FindFiles()
+
+'text' -> ROUTES DetermineType(jekyll/MimeRouter)
+LoadDocuments() DOCUMENT -> IN DetermineType()
+
+# Text files parsed for Front Matter
+DetermineType() OUT -> IN GroupDocs(jekyll/GroupDocuments)
+GroupDocs() LAYOUT -> LAYOUTS Build(jekyll/DocumentBuilder)
+GroupDocs() INCLUDE -> INCLUDES Build()
+GroupDocs() POST -> IN DropPosts(Drop)
+GroupDocs() STATIC -> IN Build()
+
+Build() TEMPLATE -> TEMPLATE Liquid(liquid/Template)
+Build() VARIABLES -> IN SplitDoc(Split)
+SplitDoc() OUT -> START CreateVars(CreateObject)
+'page' -> PROPERTY SetPageVar(SetPropertyValue)
+SplitDoc() OUT -> VALUE SetPageVar()
+
+'site' -> PROPERTY SetSiteVar(SetPropertyValue)
+SplitConfig() OUT -> VALUE SetSiteVar()
+CreateVars() OUT -> IN SetPageVar() OUT -> IN SetSiteVar()
+SetSiteVar() OUT -> VARIABLES Liquid()
+Liquid() OUT -> IN Save(WriteFile)
+Liquid() ERROR -> IN Errors(Merge)
+
+'path' -> KEY GetPath(GetObjectKey)
+SplitDoc() OUT -> IN GetPath()
+Source() OUT -> PATTERN NewPath(Replace)
+Destination(Split) OUT -> REPLACEMENT NewPath()
+GetPath() OUT -> IN NewPath() OUT -> FILENAME Save(WriteFile)
+Save() OUT -> IN Generated(Merge)
+Save() ERROR -> IN Display(Output)
+
+# Binary files that will be copied as-is
+'/_' -> REGEXP FilterDirs(FilterPacket)
+DetermineType() MISSED -> IN FilterDirs()
+FilterDirs() OUT -> IN DropDir(Drop)
+Source() OUT -> SOURCE CopyFiles(jekyll/CopyFile)
+Destination() OUT -> DESTINATION CopyFiles()
+FilterDirs() MISSED -> IN CopyFiles()
+CopyFiles() OUT -> IN Generated()
