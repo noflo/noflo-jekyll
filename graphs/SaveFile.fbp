@@ -8,7 +8,9 @@ Source(Split) OUT -> PATTERN NewFile(Replace)
 Destination(Split) OUT -> REPLACEMENT NewFile()
 
 # Create folders for the files
-NewFile() OUT -> IN NewFilePath(Split)
+'.md' -> PATTERN MdToHtml(Replace)
+'.html' -> REPLACEMENT MdToHtml()
+NewFile() OUT -> IN MdToHtml() OUT -> IN NewFilePath(Split)
 NewFilePath() OUT -> IN NewDir(DirName)
 NewDir() OUT -> IN UniqueDir(UniquePacket)
 UniqueDir() OUT -> IN MakeDir(MakeDir)
