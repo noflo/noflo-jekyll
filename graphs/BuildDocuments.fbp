@@ -1,0 +1,26 @@
+EXPORT=BUILD.LAYOUTS:LAYOUTS
+EXPORT=BUILD.INCLUDES:INCLUDES
+EXPORT=BUILD.IN:IN
+EXPORT=KICKVAR.DATA:CONFIG
+EXPORT=LIQUID.OUT:GENERATED
+
+Build(jekyll/DocumentBuilder) TEMPLATE -> IN Buffer(MergeGroups)
+Build() VARIABLES -> IN SplitDoc(Split)
+
+'page' -> PROPERTY SetPageVar(SetPropertyValue)
+SplitDoc() OUT -> VALUE SetPageVar()
+CreateVars(CreateObject) OUT -> IN SetPageVar() OUT -> IN SetSiteVar(SetPropertyValue)
+SetSiteVar() OUT -> IN Buffer()
+
+'site' -> PROPERTY SetSiteVar(SetPropertyValue)
+KickVar(Kick) OUT -> VALUE SetSiteVar()
+SplitDoc() OUT -> IN KickVar()
+SplitDoc() OUT -> START CreateVars(CreateObject)
+
+Buffer() OUT -> IN SplitBufferResult(Split)
+'0' -> KEY GetTemplate(GetObjectKey)
+SplitBufferResult() OUT -> IN GetTemplate() OUT -> IN FirstOnly(FirstGroup)
+FirstOnly() OUT -> TEMPLATE Liquid(liquid/Template)
+'1' -> KEY GetVariables(GetObjectKey)
+SplitBufferResult() OUT -> IN GetVariables()
+GetVariables() OUT -> IN SplitVariables(Split) OUT -> VARIABLES Liquid()

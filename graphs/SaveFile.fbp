@@ -1,0 +1,20 @@
+EXPORT=SOURCE.IN:SOURCE
+EXPORT=DESTINATION.IN:DESTINATION
+EXPORT=READPATH.IN:IN
+EXPORT=SAVE.OUT:OUT
+EXPORT=SAVE.ERROR:ERROR
+
+Source(Split) OUT -> PATTERN NewFile(Replace)
+Destination(Split) OUT -> REPLACEMENT NewFile()
+
+# Create folders for the files
+NewFile() OUT -> IN NewFilePath(Split)
+NewFilePath() OUT -> IN NewDir(DirName)
+NewDir() OUT -> IN UniqueDir(UniquePacket)
+UniqueDir() OUT -> IN MakeDir(MakeDir)
+
+ReadPath(ReadGroup) OUT -> IN Save(WriteFile)
+ReadPath() GROUP -> IN NewFile()
+NewFilePath() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
+MakeDir() OUT -> RELEASE NewFiles()
+NewFiles() OUT -> FILENAME Save(WriteFile)

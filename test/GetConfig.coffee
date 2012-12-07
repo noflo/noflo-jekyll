@@ -1,6 +1,6 @@
 noflo = require 'noflo'
 
-setupNetwork = ->
+getGraph = ->
   graph = new noflo.Graph 'GetConfig'
   graph.addNode 'ConfigReader', 'jekyll/GetConfig'
   graph.addNode 'Callback', 'Callback'
@@ -8,8 +8,8 @@ setupNetwork = ->
   graph
 
 exports['test reading config'] = (test) ->
-  configFile = "#{__dirname}/fixtures/site_source"
-  graph = setupNetwork()
+  sourceDir = "#{__dirname}/fixtures/site_source"
+  graph = getGraph()
 
   checkConfig = (config) ->
     test.ok config
@@ -21,4 +21,4 @@ exports['test reading config'] = (test) ->
     # Connect our function to the Callback node
     graph.addInitial checkConfig, 'Callback', 'callback'
     # Send config file to the DIRECTORY port
-    graph.addInitial configFile, 'ConfigReader', 'directory'
+    graph.addInitial sourceDir, 'ConfigReader', 'directory'

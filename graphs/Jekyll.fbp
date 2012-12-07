@@ -24,31 +24,17 @@ LoadDocuments() DOCUMENT -> IN DetermineType()
 
 # Text files parsed for Front Matter
 DetermineType() OUT -> IN GroupDocs(jekyll/GroupDocuments)
-GroupDocs() LAYOUT -> LAYOUTS Build(jekyll/DocumentBuilder)
+GroupDocs() LAYOUT -> LAYOUTS Build(jekyll/BuildDocuments)
 GroupDocs() INCLUDE -> INCLUDES Build()
 GroupDocs() POST -> IN DropPosts(Drop)
 GroupDocs() STATIC -> IN Build()
+SplitConfig() OUT -> CONFIG Build()
 
-Build() TEMPLATE -> TEMPLATE Liquid(liquid/Template)
-Build() VARIABLES -> IN SplitDoc(Split)
-SplitDoc() OUT -> START CreateVars(CreateObject)
-'page' -> PROPERTY SetPageVar(SetPropertyValue)
-SplitDoc() OUT -> VALUE SetPageVar()
-
-'site' -> PROPERTY SetSiteVar(SetPropertyValue)
-SplitConfig() OUT -> VALUE SetSiteVar()
-CreateVars() OUT -> IN SetPageVar() OUT -> IN SetSiteVar()
-SetSiteVar() OUT -> VARIABLES Liquid()
-Liquid() OUT -> IN Save(WriteFile)
-Liquid() ERROR -> IN Errors(Merge)
-
-'path' -> KEY GetPath(GetObjectKey)
-SplitDoc() OUT -> IN GetPath()
-Source() OUT -> PATTERN NewPath(Replace)
-Destination(Split) OUT -> REPLACEMENT NewPath()
-GetPath() OUT -> IN NewPath() OUT -> FILENAME Save(WriteFile)
-Save() OUT -> IN Generated(Merge)
-Save() ERROR -> IN Display(Output)
+Source() OUT -> SOURCE SaveBuilt(jekyll/SaveFile)
+Destination(Split) OUT -> DESTINATION SaveBuilt()
+Build() GENERATED -> IN SaveBuilt()
+SaveBuilt() OUT -> IN Generated(Merge)
+SaveBuilt() ERROR -> IN Errors(Merge)
 
 # Binary files that will be copied as-is
 '/_' -> REGEXP FilterDirs(FilterPacket)
