@@ -6,7 +6,7 @@ mimetype.set '.markdown', 'text/x-markdown'
 mimetype.set '.md', 'text/x-markdown'
 mimetype.set '.xml', 'text/xml'
 
-class MimeRouter extends noflo.Component
+class DocumentMimeRouter extends noflo.Component
   constructor: ->
     @routes = []
 
@@ -23,7 +23,9 @@ class MimeRouter extends noflo.Component
       @routes = data
 
     @inPorts.in.on 'data', (data) =>
-      mime = mimetype.lookup data
+      return @missed data unless data.path
+
+      mime = mimetype.lookup data.path
       return @missed data unless mime
 
       selected = null
@@ -41,4 +43,4 @@ class MimeRouter extends noflo.Component
     return unless @outPorts.missed.isAttached()
     @outPorts.missed.send data
 
-exports.getComponent = -> new MimeRouter
+exports.getComponent = -> new DocumentMimeRouter

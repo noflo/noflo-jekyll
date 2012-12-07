@@ -5,6 +5,7 @@
     "noflo": "0.2.x",
     "noflo-yaml": "0.0.x",
     "noflo-liquid": "0.0.x",
+    "noflo-markdown": "0.0.x",
     "mimetype": "0.0.x"
   },
   "devDependencies": {
@@ -24,10 +25,12 @@
       "GroupDocuments": "./graphs/GroupDocuments.fbp",
       "BuildDocuments": "./graphs/BuildDocuments.fbp",
       "CopyFile": "./graphs/CopyFile.fbp",
-      "SaveFile": "./graphs/SaveFile.fbp"
+      "SaveFile": "./graphs/SaveFile.fbp",
+      "ConvertMarkdown": "./graphs/ConvertMarkdown.fbp"
     },
     "components": {
       "MimeRouter": "./components/MimeRouter.coffee",
+      "DocumentMimeRouter": "./components/DocumentMimeRouter.coffee",
       "DocumentBuilder": "./components/DocumentBuilder.coffee",
       "DirectoryBuffer": "./components/DirectoryBuffer.coffee"
     }

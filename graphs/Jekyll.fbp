@@ -26,8 +26,17 @@ LoadDocuments() DOCUMENT -> IN DetermineType()
 DetermineType() OUT -> IN GroupDocs(jekyll/GroupDocuments)
 GroupDocs() LAYOUT -> LAYOUTS Build(jekyll/BuildDocuments)
 GroupDocs() INCLUDE -> INCLUDES Build()
+
+# Check content format for conversions
+'text/x-markdown' -> ROUTES ContentType(jekyll/DocumentMimeRouter)
+# Markdown conversion
+ContentType() OUT -> IN ConvertMarkdown(jekyll/ConvertMarkdown)
+ConvertMarkdown() OUT -> IN Build()
+# Other content formats (CSS, HTML, JavaScript, ...)
+ContentType() MISSED -> IN Build()
+
 GroupDocs() POST -> IN DropPosts(Drop)
-GroupDocs() STATIC -> IN Build()
+GroupDocs() STATIC -> IN ContentType()
 SplitConfig() OUT -> CONFIG Build()
 
 Source() OUT -> SOURCE SaveBuilt(jekyll/SaveFile)

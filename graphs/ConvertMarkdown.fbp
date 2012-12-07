@@ -1,0 +1,10 @@
+EXPORT=SPLIT.IN:IN
+EXPORT=SETBODY.OUT:OUT
+
+'body' -> KEY GetBody(GetObjectKey)
+Split(Split) OUT -> IN GetBody()
+
+GetBody() OUT -> IN Convert(markdown/ParseMarkdown)
+'body' -> PROPERTY SetBody(SetPropertyValue)
+Convert() OUT -> VALUE SetBody()
+Split() OUT -> IN SetBody()

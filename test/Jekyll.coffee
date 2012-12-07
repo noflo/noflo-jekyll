@@ -51,7 +51,7 @@ checkFile = (subPath, test) ->
     return
 
   # We should check contents without whitespace
-  replacer = /\n\s*/
+  replacer = /\n\s*/g
   nofloContents = fs.readFileSync "#{nofloDir}/#{subPath}", 'utf-8'
   jekyllContents = fs.readFileSync "#{jekyllDir}/#{subPath}", 'utf-8'
   nofloClean = nofloContents.replace replacer, ''
