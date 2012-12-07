@@ -32,7 +32,9 @@
       "MimeRouter": "./components/MimeRouter.coffee",
       "DocumentMimeRouter": "./components/DocumentMimeRouter.coffee",
       "DocumentBuilder": "./components/DocumentBuilder.coffee",
-      "DirectoryBuffer": "./components/DirectoryBuffer.coffee"
+      "DirectoryBuffer": "./components/DirectoryBuffer.coffee",
+      "PathMetadata": "./components/PathMetadata.coffee",
+      "BuildPostPath": "./components/BuildPostPath.coffee"
     }
   },
   "scripts": {

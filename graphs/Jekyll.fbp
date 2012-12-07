@@ -26,18 +26,25 @@ LoadDocuments() DOCUMENT -> IN DetermineType()
 DetermineType() OUT -> IN GroupDocs(jekyll/GroupDocuments)
 GroupDocs() LAYOUT -> LAYOUTS Build(jekyll/BuildDocuments)
 GroupDocs() INCLUDE -> INCLUDES Build()
+SplitConfig() OUT -> CONFIG Build()
 
 # Check content format for conversions
-'text/x-markdown' -> ROUTES ContentType(jekyll/DocumentMimeRouter)
+'text/x-markdown' -> ROUTES ContentConversions(jekyll/DocumentMimeRouter)
 # Markdown conversion
-ContentType() OUT -> IN ConvertMarkdown(jekyll/ConvertMarkdown)
+ContentConversions() OUT -> IN ConvertMarkdown(jekyll/ConvertMarkdown)
 ConvertMarkdown() OUT -> IN Build()
 # Other content formats (CSS, HTML, JavaScript, ...)
-ContentType() MISSED -> IN Build()
+ContentConversions() MISSED -> IN Build()
 
-GroupDocs() POST -> IN DropPosts(Drop)
-GroupDocs() STATIC -> IN ContentType()
-SplitConfig() OUT -> CONFIG Build()
+# For posts we need to extract metadata and build path
+# before processing
+GroupDocs() POST -> IN Metadata(jekyll/PathMetadata)
+Source() OUT -> SOURCE BuildPath(jekyll/BuildPostPath)
+SplitConfig() OUT -> CONFIG BuildPath()
+Metadata() OUT -> IN BuildPath() OUT -> IN ContentConversions()
+
+# Statics we can send out as-is
+GroupDocs() STATIC -> IN ContentConversions()
 
 Source() OUT -> SOURCE SaveBuilt(jekyll/SaveFile)
 Destination(Split) OUT -> DESTINATION SaveBuilt()
