@@ -41,7 +41,7 @@ class DocumentBuilder extends noflo.Component
     @outPorts.template.beginGroup data.path
     @outPorts.template.send @handleInheritance data
     @outPorts.template.endGroup()
-    @outPorts.variables.disconnect()
+    @outPorts.template.disconnect()
     @outPorts.variables.beginGroup data.path
     @outPorts.variables.send data
     @outPorts.variables.endGroup()
