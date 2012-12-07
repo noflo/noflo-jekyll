@@ -23,34 +23,13 @@ getGraph = ->
   graph.addInitial nofloDir, 'Jekyll', 'destination'
   graph
 
-nofloTime = 0
-
 exports.setUp = (callback) ->
   startTime = new Date
 
-  finished = ->
-    endTime = new Date
-    nofloTime = endTime.getTime() - startTime.getTime()
-    console.log "NoFlo run finished, took #{nofloTime/1000} seconds"
-
-    do callback
-
   graph = getGraph()
   noflo.createNetwork graph, (network) ->
-    # NoFlo doesn't currently have a "finished" event
-    timeOut = null
-    handleActivity = ->
-      clearTimeout timeOut if timeOut
-      timeOut = setTimeout finished, 10
-
-    network.on 'connect', (data) ->
-      do handleActivity
-    network.on 'data', (data) ->
-      do handleActivity
-    network.on 'disconnect', (data) ->
-      do handleActivity
-
-    timeOut = setTimeout finished, 10
+    network.on 'end', (data) ->
+      do callback
 
 checkBinaryFile = (subPath, test) ->
   # With binary files we could do content matching like MD5, but for
