@@ -12,6 +12,7 @@ CompileReplacement() OUT -> REGEXP MapFileName(MapGroup)
 # Convert some filename endings
 # TODO: Move to main control
 '.md=.html' -> REGEXP MapFileName()
+'.markdown=.html' -> REGEXP MapFileName()
 
 # Get the new filename
 MapFileName() OUT -> IN ReadPath(ReadGroup)

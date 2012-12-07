@@ -49,6 +49,12 @@ class BuildPostPath extends noflo.Component
     return permalink unless categories
     permalink.replace ':categories', categories.join '/'
 
+  handleDate: (permalink, date) ->
+    return permalink unless date
+    permalink = permalink.replace ':year', date.getFullYear()
+    permalink = permalink.replace ':month', date.getMonth() + 1
+    permalink = permalink.replace ':day', date.getDate()
+
   handleTitle: (permalink, name) ->
     permaExt = path.extname permalink
     nameExt = path.extname name
@@ -59,10 +65,20 @@ class BuildPostPath extends noflo.Component
       permalink = "#{dirName}/#{baseName}"
     permalink.replace ':title', name
 
+  handleIndex: (permalink) ->
+    return permalink unless permalink[permalink.length - 1] is '/'
+    filePath = permalink.slice 0, -1
+    permaExt = path.extname filePath
+    dirName = path.dirname filePath
+    baseName = path.basename filePath, permaExt
+    "#{dirName}/#{baseName}/index#{permaExt}"
+
   buildPath: (post, groups) ->
     newpath = "#{@source}#{@config.permalink}"
     newpath = @handleCategories newpath, post.categories
+    newpath = @handleDate newpath, post.date
     newpath = @handleTitle newpath, post.name
+    newpath = @handleIndex newpath
     post.path = newpath
     for group in groups
       @outPorts.out.beginGroup group
