@@ -1,0 +1,38 @@
+#!/usr/bin/env coffee
+# vim: set filetype=coffee:
+path = require 'path'
+fs = require 'fs'
+noflo = require 'noflo'
+
+unless process.argv.length is 4
+  console.log "Usage: $ noflo-jekyll source_dir target_dir"
+  process.exit 0
+
+# Resolve paths
+sourceDir = path.resolve process.argv[2]
+targetDir = path.resolve process.argv[3]
+
+# Check that source directory exists
+try
+  fs.statSync sourceDir
+catch e
+  console.error "Source directory #{sourceDir} doesn't exist"
+  process.exit 1
+
+handleGenerated = (generated) ->
+  console.log "Created file #{generated}"
+handleError = console.error
+
+graph = new noflo.Graph 'Jekyll'
+graph.addNode 'Jekyll', 'jekyll/Jekyll'
+graph.addNode 'Generated', 'Callback'
+graph.addNode 'Errors', 'Callback'
+graph.addEdge 'Jekyll', 'generated', 'Generated', 'in'
+graph.addEdge 'Jekyll', 'errors', 'Errors', 'in'
+graph.addInitial handleGenerated, 'Generated', 'callback'
+graph.addInitial handleError, 'Errors', 'callback'
+graph.addInitial sourceDir, 'Jekyll', 'source'
+graph.addInitial targetDir, 'Jekyll', 'destination'
+
+noflo.createNetwork graph, (network) ->
+  console.log "Generating site from #{sourceDir} to #{targetDir}"

@@ -13,13 +13,18 @@
     "coffee-script": "1.4.x",
     "rimraf": "2.x.x"
   },
+  "bin": {
+    "noflo-jekyll": "./bin/noflo-jekyll"
+  },
   "noflo": {
     "graphs": {
       "Jekyll": "./graphs/Jekyll.fbp",
       "GetConfig": "./graphs/GetConfig.fbp",
       "LoadDocuments": "./graphs/LoadDocuments.fbp",
       "GroupDocuments": "./graphs/GroupDocuments.fbp",
-      "CopyFile": "./graphs/CopyFile.fbp"
+      "BuildDocuments": "./graphs/BuildDocuments.fbp",
+      "CopyFile": "./graphs/CopyFile.fbp",
+      "SaveFile": "./graphs/SaveFile.fbp"
     },
     "components": {
       "MimeRouter": "./components/MimeRouter.coffee",
