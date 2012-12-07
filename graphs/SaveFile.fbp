@@ -1,22 +1,29 @@
 EXPORT=SOURCE.IN:SOURCE
 EXPORT=DESTINATION.IN:DESTINATION
-EXPORT=READPATH.IN:IN
+EXPORT=MAPFILENAME.IN:IN
 EXPORT=SAVE.OUT:OUT
 EXPORT=SAVE.ERROR:ERROR
 
-Source(Split) OUT -> PATTERN NewFile(Replace)
-Destination(Split) OUT -> REPLACEMENT NewFile()
+'=' -> DELIMITER CompileReplacement(CompileString)
+Source(Split) OUT -> IN CompileReplacement()
+Destination(Split) OUT -> IN CompileReplacement()
+CompileReplacement() OUT -> REGEXP MapFileName(MapGroup)
+
+# Convert some filename endings
+# TODO: Move to main control
+'.md=.html' -> REGEXP MapFileName()
+
+# Get the new filename
+MapFileName() OUT -> IN ReadPath(ReadGroup)
 
 # Create folders for the files
-'.md' -> PATTERN MdToHtml(Replace)
-'.html' -> REPLACEMENT MdToHtml()
-NewFile() OUT -> IN MdToHtml() OUT -> IN NewFilePath(Split)
-NewFilePath() OUT -> IN NewDir(DirName)
-NewDir() OUT -> IN UniqueDir(UniquePacket)
-UniqueDir() OUT -> IN MakeDir(MakeDir)
+ReadPath() GROUP -> IN NewDir(DirName)
+NewDir() OUT -> IN MakeDir(MakeDir)
 
-ReadPath(ReadGroup) OUT -> IN Save(WriteFile)
-ReadPath() GROUP -> IN NewFile()
-NewFilePath() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
-MakeDir() OUT -> RELEASE NewFiles()
-NewFiles() OUT -> FILENAME Save(WriteFile)
+# Save files
+# First connection is filename, second is file contents
+MakeDir() OUT -> IN Merge(MergeGroups)
+ReadPath() OUT -> IN Merge(MergeGroups)
+Merge() OUT -> IN ReadWithDir(ReadGroup) GROUP -> FILENAME Save(WriteFile)
+'1' -> KEY GetContents(GetObjectKey)
+Merge() OUT -> IN GetContents() OUT -> IN Save(WriteFile)
