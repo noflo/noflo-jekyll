@@ -8,7 +8,7 @@ getGraph = ->
   graph
 
 exports['test reading config'] = (test) ->
-  sourceDir = "#{__dirname}/fixtures/site_source"
+  sourceDir = "#{__dirname}/fixtures/source"
   graph = getGraph()
 
   checkConfig = (config) ->

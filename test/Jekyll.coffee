@@ -8,7 +8,7 @@ mimetype.set '.markdown', 'text/x-markdown'
 mimetype.set '.md', 'text/x-markdown'
 mimetype.set '.xml', 'text/xml'
 
-sourceDir = "#{__dirname}/fixtures/site_source"
+sourceDir = "#{__dirname}/fixtures/source"
 jekyllDir = "#{__dirname}/fixtures/jekyll"
 nofloDir = "#{__dirname}/fixtures/noflo"
 
@@ -63,7 +63,7 @@ checkFile = (subPath, test) ->
   try
     fileStats = fs.statSync "#{nofloDir}/#{subPath}"
   catch e
-    test.fail null, subPath, "NoFlo didn't generate dir #{subPath}"
+    test.fail null, subPath, "NoFlo didn't generate file #{subPath}"
     return
 
   mime = mimetype.lookup subPath
