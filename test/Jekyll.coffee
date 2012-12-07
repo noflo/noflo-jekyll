@@ -1,6 +1,12 @@
 noflo = require 'noflo'
 rimraf = require 'rimraf'
 fs = require 'fs'
+mimetype = require 'mimetype'
+
+# Extra MIME types config
+mimetype.set '.markdown', 'text/x-markdown'
+mimetype.set '.md', 'text/x-markdown'
+mimetype.set '.xml', 'text/xml'
 
 sourceDir = "#{__dirname}/fixtures/site_source"
 jekyllDir = "#{__dirname}/fixtures/jekyll"
@@ -46,6 +52,33 @@ exports.setUp = (callback) ->
 
     timeOut = setTimeout finished, 10
 
+checkBinaryFile = (subPath, test) ->
+  # With binary files we could do content matching like MD5, but for
+  # no size comparison should be enough
+  nofloStats = fs.statSync "#{nofloDir}/#{subPath}"
+  jekyllStats = fs.statSync "#{jekyllDir}/#{subPath}"
+  test.equal nofloStats.size, jekyllStats.size, "#{subPath} size must match"
+
+checkFile = (subPath, test) ->
+  try
+    fileStats = fs.statSync "#{nofloDir}/#{subPath}"
+  catch e
+    test.fail null, subPath, "NoFlo didn't generate dir #{subPath}"
+    return
+
+  mime = mimetype.lookup subPath
+  if mime.indexOf('text/') is -1
+    checkBinaryFile subPath, test
+    return
+
+  # We should check contents without whitespace
+  replacer = /\n\s*/
+  nofloContents = fs.readFileSync "#{nofloDir}/#{subPath}", 'utf-8'
+  jekyllContents = fs.readFileSync "#{jekyllDir}/#{subPath}", 'utf-8'
+  nofloClean = nofloContents.replace replacer, ''
+  jekyllClean = jekyllContents.replace replacer, ''
+  test.equal nofloClean, jekyllClean, "Contents of #{subPath} must match"
+
 checkDirectory = (subPath, test) ->
   try
     dirStats = fs.statSync "#{nofloDir}/#{subPath}"
@@ -62,6 +95,7 @@ checkDirectory = (subPath, test) ->
     if jekyllStats.isDirectory()
       checkDirectory "#{subPath}/#{file}", test
       continue
+    checkFile "#{subPath}/#{file}", test
 
 exports['test file equivalence'] = (test) ->
   checkDirectory '', test
