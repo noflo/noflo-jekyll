@@ -76,8 +76,32 @@ checkDirectory = (subPath, test) ->
       continue
     checkFile "#{subPath}/#{file}", test
 
-exports['test file equivalence'] = (test) ->
+exports['test that NoFlo generates same files as Jekyll'] = (test) ->
   checkDirectory '', test
+  test.done()
+
+checkDirectoryMatch = (subPath, test) ->
+  try
+    dirStats = fs.statSync "#{jekyllDir}/#{subPath}"
+    test.equal dirStats.isDirectory(), true
+  catch e
+    test.fail null, subPath, "Jekyll didn't generate dir #{subPath} but NoFlo did"
+    return
+
+  jekyllFiles = fs.readdirSync "#{jekyllDir}/#{subPath}"
+  nofloFiles = fs.readdirSync "#{nofloDir}/#{subPath}"
+
+  for file in nofloFiles
+    try
+      jekyllStats = fs.statSync "#{jekyllDir}/#{subPath}/#{file}"
+      if jekyllStats.isDirectory()
+        checkDirectoryMatch "#{subPath}/#{file}", test
+      continue
+    catch e
+      test.fail null, subPath, "Jekyll didn't generate #{subPath} but NoFlo did"
+
+exports['test that NoFlo generates only the files Jekyll does'] = (test) ->
+  checkDirectoryMatch '', test
   test.done()
 
 exports.tearDown = (callback) ->
