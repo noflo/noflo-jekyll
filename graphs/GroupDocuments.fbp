@@ -17,6 +17,9 @@ EXPORT=POST.OUT:POST
 # Other Front Matter documents, to be copied as-is after templating
 EXPORT=DOCROUTER.MISSED:STATIC
 
+# Error handling
+EXPORT=READ.ERROR:ERRORS
+
 # Parse Front Matter from files
 Read(ReadFile) OUT -> CONTENT Parse(yaml/ParseFrontmatter)
 Parse() RESULTS -> IN Parsed(Split)

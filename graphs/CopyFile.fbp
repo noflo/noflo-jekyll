@@ -13,6 +13,9 @@ EXPORT=FILE.IN:IN
 # Full path of a successfully copied file
 EXPORT=COPY.OUT:OUT
 
+# Error handling
+EXPORT=ERRORS.OUT:ERRORS
+
 Source(Split) OUT -> PATTERN NewPath(Replace)
 Destination(Split) OUT -> REPLACEMENT NewPath()
 File(Split) OUT -> IN NewPath()
@@ -31,3 +34,7 @@ PrepareCopy() OUT -> DESTINATION Copy(CopyFile)
 Destination() OUT -> PATTERN OrigPath(Replace)
 Source() OUT -> REPLACEMENT OrigPath()
 PrepareCopy() OUT -> IN OrigPath() OUT -> SOURCE Copy()
+
+# Error handling
+MakeDir() ERROR -> IN Errors(Merge)
+Copy() ERROR -> IN Errors(Merge)
