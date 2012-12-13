@@ -1,2 +1,3 @@
 name: noflo-jekyll test
-permalink: /:categories/:title.html
+permalink: /blog/:year/:categories/:title/
+markdown: rdiscount
