@@ -1,8 +1,11 @@
 EXPORT=BUILD.LAYOUTS:LAYOUTS
-EXPORT=BUILD.INCLUDES:INCLUDES
+EXPORT=INCLUDES.IN:INCLUDES
 EXPORT=MERGE.IN:IN
 EXPORT=KICKVAR.DATA:CONFIG
 EXPORT=LIQUID.OUT:GENERATED
+
+Includes(Split) OUT -> INCLUDES Build(jekyll/DocumentBuilder)
+Includes() OUT -> INCLUDES Liquid(liquid/Template)
 
 Build(jekyll/DocumentBuilder) TEMPLATE -> IN Buffer(MergeGroups)
 Merge(Merge) OUT -> IN Build()

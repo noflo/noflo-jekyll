@@ -32,12 +32,18 @@ class DocumentBuilder extends noflo.Component
       do @checkPending
 
   checkPending: ->
-    @documents.forEach (document) =>
+    pending = []
+    while @documents.length
+      document = @documents.shift()
       unless @checkReady document
-        return
+        pending.push document
+        continue
       @sendDocument document
+    @documents.push doc for doc in pending
 
   sendDocument: (data) ->
+    @documents.splice @documents.indexOf(data), 1
+
     @outPorts.template.beginGroup data.path
     @outPorts.template.send @handleInheritance data
     @outPorts.template.endGroup()
@@ -46,8 +52,6 @@ class DocumentBuilder extends noflo.Component
     @outPorts.variables.send data
     @outPorts.variables.endGroup()
     @outPorts.variables.disconnect()
-
-    @documents.splice @documents.indexOf(data), 1
 
   templateName: (templatePath) ->
     path.basename templatePath, path.extname templatePath
@@ -62,10 +66,19 @@ class DocumentBuilder extends noflo.Component
       return
     @handleInheritance @includes[templateName]
 
+  checkIncludes: (body) ->
+    matcher = new RegExp '\{\% include (.*)\.html \%\}'
+    match = matcher.exec body
+    return true unless match
+    return true if @includes[match[1]]
+    false
+
   checkReady: (templateData) ->
+    if templateData.body
+      return false unless @checkIncludes templateData.body
     return true unless templateData.layout
     return false unless @includes[templateData.layout]
-    @checkReady @getTemplate templateData.layout
+    @checkReady @includes[templateData.layout]
 
   handleInheritance: (templateData) ->
     template = templateData.body
