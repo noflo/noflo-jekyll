@@ -46,7 +46,7 @@ checkFile = (subPath, test) ->
     return
 
   mime = mimetype.lookup subPath
-  if mime.indexOf('text/') is -1
+  if not mime or mime.indexOf('text/') is -1
     checkBinaryFile subPath, test
     return
 
@@ -110,6 +110,7 @@ exports['test that NoFlo generates only the files Jekyll does'] = (test) ->
   test.done()
 
 exports.tearDown = (callback) ->
+
   rimraf nofloDir, (err) ->
     console.log err if err
     do callback
