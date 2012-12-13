@@ -46,8 +46,13 @@ class BuildPostPath extends noflo.Component
       @buildPath data.post, data.groups
 
   handleCategories: (permalink, categories) ->
-    return permalink unless categories
-    permalink.replace ':categories', categories.join '/'
+    return permalink.replace '/:categories', ''  unless categories
+
+    clean = []
+    for category in categories
+      clean.push category if category
+
+    permalink.replace ':categories', clean.join '/'
 
   handleDate: (permalink, date) ->
     return permalink unless date

@@ -39,7 +39,9 @@ class DocumentBuilder extends noflo.Component
         pending.push document
         continue
       @sendDocument document
-    @documents.push doc for doc in pending
+    for doc in pending
+      continue unless @documents.indexOf(doc) is -1
+      @documents.push doc
 
   sendDocument: (data) ->
     @documents.splice @documents.indexOf(data), 1

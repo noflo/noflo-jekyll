@@ -39,7 +39,7 @@ class PathMetadata extends noflo.Component
 
     match = @pathMatcher.exec postName
     return new Date unless match
-    return new Date match[1], match[2], match[3]
+    return new Date "#{match[1]}-#{match[2]}-#{match[3]}"
 
   getName: (postName, data) ->
     match = @pathMatcher.exec postName
@@ -52,6 +52,8 @@ class PathMetadata extends noflo.Component
     postName = path.basename post.path
     post.date = @getDate postName, post
     post.name = @getName postName, post
+    if post.category and not post.categories
+      post.categories = post.category
     # TODO: Path may contain additional categories
     post
 
