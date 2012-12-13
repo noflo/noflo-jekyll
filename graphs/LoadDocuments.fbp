@@ -8,13 +8,19 @@ EXPORT=SUBDIRECTORY.OUT:SUBDIRECTORY
 # The document outport is where the path of each regular file is sent
 EXPORT=FILENAME.OUT:DOCUMENT
 
-Directory(Split) OUT -> SOURCE Dir(ReadDir)
-Dir() OUT -> IN Stat(Stat)
+'100' -> MAX ThrottleDir(Throttle)
+Directory(Split) OUT -> IN ThrottleDir() OUT -> SOURCE Dir(ReadDir)
+Dir() LOAD -> IN CountOpen(CountSum) OUT -> LOAD ThrottleDir()
+
+'100' -> MAX ThrottleStat(Throttle)
+Dir() OUT -> IN ThrottleStat(Throttle) OUT -> IN Stat(Stat)
+Stat() LOAD -> IN CountOpen() OUT -> LOAD ThrottleStat()
 
 # Routing rules
 'isDirectory' -> ROUTES FileRouter(GroupRouter)
 'isDirectory' -> KEY Group(GroupByObjectKey)
-Stat() OUT -> IN Group() OUT -> IN FileRouter()
+Stat() OUT -> IN DropGroups(RemoveGroups)
+DropGroups() OUT -> IN Group() OUT -> IN FileRouter()
 
 # First route: subfolder
 'path=^(?:(?!\.git).)*$' -> REGEXP FilterDirs(FilterPropertyValue)

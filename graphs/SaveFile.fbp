@@ -19,7 +19,8 @@ MapFileName() OUT -> IN ReadPath(ReadGroup)
 
 # Create folders for the files
 ReadPath() GROUP -> IN NewDir(DirName)
-NewDir() OUT -> IN MakeDir(MakeDir)
+NewDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MakeDir(MakeDir)
+MakeDir() LOAD -> LOAD ThrottleDir()
 
 # Save files
 # First connection is filename, second is file contents

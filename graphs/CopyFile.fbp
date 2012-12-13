@@ -24,7 +24,8 @@ NewPath() OUT -> IN NewFile(Split)
 # Create folders for the files
 NewFile() OUT -> IN NewDir(DirName)
 NewDir() OUT -> IN UniqueDir(UniquePacket)
-UniqueDir() OUT -> IN MakeDir(MakeDir)
+UniqueDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MakeDir(MakeDir)
+MakeDir() LOAD -> LOAD ThrottleDir()
 
 # Copy files over once directories have been created
 NewFile() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
