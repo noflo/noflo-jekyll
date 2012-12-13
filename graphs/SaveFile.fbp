@@ -2,7 +2,7 @@ EXPORT=SOURCE.IN:SOURCE
 EXPORT=DESTINATION.IN:DESTINATION
 EXPORT=MAPFILENAME.IN:IN
 EXPORT=SAVE.OUT:OUT
-EXPORT=SAVE.ERROR:ERROR
+EXPORT=ERRORS.OUT:ERROR
 
 '=' -> DELIMITER CompileReplacement(CompileString)
 Source(Split) OUT -> IN CompileReplacement()
@@ -28,3 +28,7 @@ ReadPath() OUT -> IN Merge(MergeGroups)
 Merge() OUT -> IN ReadWithDir(ReadGroup) GROUP -> FILENAME Save(WriteFile)
 '1' -> KEY GetContents(GetObjectKey)
 Merge() OUT -> IN GetContents() OUT -> IN Save(WriteFile)
+
+# Error handling
+MakeDir() ERROR -> IN Errors(Merge)
+Save() ERROR -> IN Errors(Merge)
