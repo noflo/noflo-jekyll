@@ -85,10 +85,21 @@ class BuildPostPath extends noflo.Component
     newpath = @handleTitle newpath, post.name
     newpath = @handleIndex newpath
     post.path = newpath
+    post.url = @buildUrl post
     for group in groups
       @outPorts.out.beginGroup group
     @outPorts.out.send post
     for group in groups
       @outPorts.out.endGroup()
+
+  buildUrl: (post) ->
+    url = post.path.replace @source, ''
+
+    fileExt = path.extname url
+    baseName = path.basename url, fileExt
+    if baseName is 'index'
+      return "#{path.dirname(url)}/"
+
+    url
 
 exports.getComponent = -> new BuildPostPath
