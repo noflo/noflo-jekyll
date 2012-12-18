@@ -18,7 +18,7 @@ class PostCollector extends noflo.Component
 
     @inPorts.in.on 'disconnect', =>
       return unless @outPorts.out.isAttached()
-      @outPorts.out.send @config
+      @outPorts.out.send @sortPosts @config
       @outPorts.out.disconnect()
 
   normalizeConfig: (config) ->
@@ -27,7 +27,13 @@ class PostCollector extends noflo.Component
       posts: []
     @config.categories = {}
 
+  sortPosts: (config) ->
+    config.paginator.posts = config.paginator.posts.reverse()
+    for category, posts of config.categories
+      config.categories[category] = posts.reverse()
+
   processPost: (post) ->
+    post.content = post.body
     for category in post.categories
       unless @config.categories[category]
         @config.categories[category] = []
