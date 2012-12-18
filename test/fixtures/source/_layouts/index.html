@@ -1,0 +1,10 @@
+---
+layout: default
+---
+{{ content }}
+{% for post in paginator.posts %}
+<article>
+  <h1>{{ post.title }}</h1>
+  <div>{{ post.content }}</div>
+</article>
+{% endfor %}
