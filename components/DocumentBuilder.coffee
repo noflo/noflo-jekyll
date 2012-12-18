@@ -5,11 +5,13 @@ class DocumentBuilder extends noflo.Component
   constructor: ->
     @includes = {}
     @documents = []
+    @config = null
 
     @inPorts =
       layouts: new noflo.Port()
       includes: new noflo.Port()
       in: new noflo.Port()
+      config: new noflo.Port()
     @outPorts =
       template: new noflo.Port()
       variables: new noflo.Port()
@@ -31,6 +33,10 @@ class DocumentBuilder extends noflo.Component
       @documents.push data
       do @checkPending
 
+    @inPorts.config.on 'data', (data) =>
+      @config = data
+      do @checkPending
+
   checkPending: ->
     pending = []
     while @documents.length
@@ -44,8 +50,6 @@ class DocumentBuilder extends noflo.Component
       @documents.push doc
 
   sendDocument: (data) ->
-    @documents.splice @documents.indexOf(data), 1
-
     @outPorts.template.beginGroup data.path
     @outPorts.template.send @handleInheritance data
     @outPorts.template.endGroup()
@@ -75,9 +79,21 @@ class DocumentBuilder extends noflo.Component
     return true if @includes[match[1]]
     false
 
+  checkPaginator: (body, document) ->
+    return true if body.indexOf('paginator.posts') is -1
+    return false unless @config
+    true
+
+  checkCategories: (body, document) ->
+    return true if body.indexOf('site.categories') is -1
+    return false unless @config
+    true
+
   checkReady: (templateData) ->
     if templateData.body
       return false unless @checkIncludes templateData.body
+      return false unless @checkPaginator templateData.body, templateData
+      return false unless @checkCategories templateData.body, templateData
     return true unless templateData.layout
     return false unless @includes[templateData.layout]
     @checkReady @includes[templateData.layout]

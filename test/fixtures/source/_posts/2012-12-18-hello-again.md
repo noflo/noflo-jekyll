@@ -1,10 +1,8 @@
 ---
 layout: post
-title: Hello, world!
+title: Hello again!
 categories:
-  - foo
   - bar
-published: true
 ---
 Hello there!
 

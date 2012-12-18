@@ -43,7 +43,14 @@ ContentConversions() MISSED -> IN Build()
 GroupDocs() POST -> IN Metadata(jekyll/PathMetadata)
 Source() OUT -> SOURCE BuildPath(jekyll/BuildPostPath)
 SplitConfig() OUT -> CONFIG BuildPath()
-Metadata() OUT -> IN BuildPath() OUT -> IN ContentConversions()
+Metadata() OUT -> IN SplitPosts(Split)
+SplitPosts() OUT -> IN BuildPath() OUT -> IN ContentConversions()
+
+'1000' -> TIMEOUT Collect(CollectUntilIdle)
+SplitPosts() OUT -> IN Collect(CollectUntilIdle)
+SplitConfig() OUT -> CONFIG BuildPostCollections(jekyll/PostCollector)
+Collect() OUT -> IN BuildPostCollections()
+BuildPostCollections() OUT -> READYCONFIG Build()
 
 # Statics we can send out as-is
 GroupDocs() STATIC -> IN ContentConversions()

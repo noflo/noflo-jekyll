@@ -34,7 +34,8 @@
       "DocumentBuilder": "./components/DocumentBuilder.coffee",
       "DirectoryBuffer": "./components/DirectoryBuffer.coffee",
       "PathMetadata": "./components/PathMetadata.coffee",
-      "BuildPostPath": "./components/BuildPostPath.coffee"
+      "BuildPostPath": "./components/BuildPostPath.coffee",
+      "PostCollector": "./components/PostCollector.coffee"
     }
   },
   "scripts": {
