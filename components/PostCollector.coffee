@@ -34,10 +34,13 @@ class PostCollector extends noflo.Component
 
   processPost: (post) ->
     post.content = post.body
+    @config.paginator.posts.push post
+
+    return unless post.categories
+
     for category in post.categories
       unless @config.categories[category]
         @config.categories[category] = []
       @config.categories[category].push post
-    @config.paginator.posts.push post
 
 exports.getComponent = -> new PostCollector
