@@ -2,7 +2,7 @@
 # vim: set filetype=coffee:
 path = require 'path'
 fs = require 'fs'
-noflo = require 'noflo'
+jekyll = require "#{__dirname}/../index"
 
 unless process.argv.length is 4
   console.log "Usage: $ noflo-jekyll source_dir target_dir"
@@ -19,20 +19,20 @@ catch e
   console.error "Source directory #{sourceDir} doesn't exist"
   process.exit 1
 
-handleGenerated = (generated) ->
+generator = new jekyll.Jekyll sourceDir, targetDir
+
+generator.on 'start', ->
+  console.log "NoFlo Jekyll #{sourceDir} -> #{targetDir}"
+
+###
+generator.on 'generated', (generated) ->
   console.log "Created file #{generated}"
-handleError = console.error
+###
 
-graph = new noflo.Graph 'Jekyll'
-graph.addNode 'Jekyll', 'jekyll/Jekyll'
-graph.addNode 'Generated', 'Callback'
-graph.addNode 'Errors', 'Callback'
-graph.addEdge 'Jekyll', 'generated', 'Generated', 'in'
-graph.addEdge 'Jekyll', 'errors', 'Errors', 'in'
-graph.addInitial handleGenerated, 'Generated', 'callback'
-graph.addInitial handleError, 'Errors', 'callback'
-graph.addInitial sourceDir, 'Jekyll', 'source'
-graph.addInitial targetDir, 'Jekyll', 'destination'
+generator.on 'error', console.error
 
-noflo.createNetwork graph, (network) ->
-  console.log "Generating site from #{sourceDir} to #{targetDir}"
+generator.on 'end', (end) ->
+  seconds = end.uptime / 1000
+  console.log "Build finished in #{seconds} sec."
+
+generator.run()

@@ -17,6 +17,7 @@
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
   },
+  "main": "./index.js",
   "noflo": {
     "graphs": {
       "Jekyll": "./graphs/Jekyll.fbp",
@@ -39,7 +40,7 @@
     }
   },
   "scripts": {
-    "pretest": "./node_modules/.bin/coffeelint -r components",
+    "pretest": "./node_modules/.bin/coffeelint -r components lib",
     "test": "./node_modules/.bin/nodeunit test"
   }
 }
