@@ -21,7 +21,7 @@ catch e
 
 generator = new jekyll.Jekyll sourceDir, targetDir
 
-generator.on 'start', ->
+generator.once 'start', ->
   console.log "NoFlo Jekyll #{sourceDir} -> #{targetDir}"
 
 ###
@@ -31,7 +31,7 @@ generator.on 'generated', (generated) ->
 
 generator.on 'error', console.error
 
-generator.on 'end', (end) ->
+generator.once 'end', (end) ->
   seconds = end.uptime / 1000
   console.log "Build finished in #{seconds} sec."
 

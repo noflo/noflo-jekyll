@@ -41,6 +41,7 @@ ContentConversions() MISSED -> IN Build()
 # For posts we need to extract metadata and build path
 # before processing
 GroupDocs() POST -> IN Metadata(jekyll/PathMetadata)
+Source() OUT -> SOURCE Metadata()
 Source() OUT -> SOURCE BuildPath(jekyll/BuildPostPath)
 SplitConfig() OUT -> CONFIG BuildPath()
 Metadata() OUT -> IN SplitPosts(Split)

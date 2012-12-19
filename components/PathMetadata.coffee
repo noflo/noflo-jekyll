@@ -14,11 +14,16 @@ class PathMetadata extends noflo.Component
   ///
 
   constructor: ->
+    @source = ''
+
     @inPorts =
       in: new noflo.Port()
       source: new noflo.Port()
     @outPorts =
       out: new noflo.Port()
+
+    @inPorts.source.on 'data', (data) =>
+      @source = data
 
     @inPorts.in.on 'begingroup', (group) =>
       @outPorts.out.beginGroup group
@@ -48,13 +53,27 @@ class PathMetadata extends noflo.Component
     return '' unless match
     return match[4]
 
+  getCategories: (data) ->
+    if data.category
+      return data.category
+    if data.categories
+      return data.categories
+
+    postPath = data.path.replace @source, ''
+    dirName = path.dirname postPath
+    categories = []
+    dirs = dirName.split '/'
+    for dir in dirs
+      continue unless dir
+      continue if dir is '_posts'
+      categories.push dir
+    return categories
+
   metadata: (post) ->
     postName = path.basename post.path
     post.date = @getDate postName, post
     post.name = @getName postName, post
-    if post.category and not post.categories
-      post.categories = post.category
-    # TODO: Path may contain additional categories
+    post.categories = @getCategories post
     post
 
 exports.getComponent = -> new PathMetadata
