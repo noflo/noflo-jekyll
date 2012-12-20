@@ -28,19 +28,17 @@ class PostCollector extends noflo.Component
     @config.categories = {}
 
   sortPosts: (config) ->
-    config.paginator.posts = config.paginator.posts.reverse()
-    for category, posts of config.categories
-      config.categories[category] = posts.reverse()
+    config
 
   processPost: (post) ->
     post.content = post.body
-    @config.paginator.posts.push post
+    @config.paginator.posts.unshift post
 
     return unless post.categories
 
     for category in post.categories
       unless @config.categories[category]
         @config.categories[category] = []
-      @config.categories[category].push post
+      @config.categories[category].unshift post
 
 exports.getComponent = -> new PostCollector
