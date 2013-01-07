@@ -35,7 +35,7 @@ class Jekyll extends events.EventEmitter
     graph.addEdge 'Jekyll', 'errors', 'Errors', 'in'
 
     generated = (file) => @generated file
-    errors = (error) => @error file
+    errors = (error) => @error error
 
     graph.addInitial generated, 'Generated', 'callback'
     graph.addInitial errors, 'Errors', 'callback'
