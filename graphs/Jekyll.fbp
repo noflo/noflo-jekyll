@@ -12,13 +12,17 @@ EXPORT=GENERATED.OUT:GENERATED
 # The errors outport outputs any errors
 EXPORT=ERRORS.OUT:ERRORS
 
+# Read Jekyll config file. It is needed in many parts of the flow
 Source(Split) OUT -> DIRECTORY GetConfig(jekyll/GetConfig)
 GetConfig() CONFIG -> IN SplitConfig(Split)
 
+# Load the list of source files recursing subdirectories
 Source() OUT -> IN FindFiles(Merge)
 FindFiles() OUT -> DIRECTORY LoadDocuments(jekyll/LoadDocuments)
 LoadDocuments() SUBDIRECTORY -> IN FindFiles()
 
+# We have separate handling for text files (front matter, templating)
+# and regular files (copy as-is)
 'text' -> ROUTES DetermineType(jekyll/MimeRouter)
 LoadDocuments() DOCUMENT -> IN DetermineType()
 

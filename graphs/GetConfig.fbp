@@ -7,12 +7,15 @@ EXPORT=DIRECTORY.IN:DIRECTORY
 # values is sent
 EXPORT=PARSE.OUT:CONFIG
 
+# Build filename, /path/to/source/_config.yml
 Directory(Split) OUT -> IN FilenameParts(Concat)
 '_config.yml' -> DATA BuildName(Kick)
 Directory() OUT -> IN BuildName()
 BuildName() OUT -> IN FilenameParts()
 '/' -> DELIMITER Filename(CompileString)
 FilenameParts() OUT -> IN Filename(CompileString)
+
+# Read and parse
 Filename() OUT -> IN Read(ReadFile)
 Read(ReadFile) OUT -> IN Parse(yaml/ParseYaml)
 
