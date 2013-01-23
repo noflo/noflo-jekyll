@@ -29,7 +29,9 @@ exports.setUp = (callback) ->
   graph = getGraph()
   noflo.createNetwork graph, (network) ->
     network.on 'end', (data) ->
-      do callback
+      setTimeout ->
+        do callback
+      , 3000
 
 checkBinaryFile = (subPath, test) ->
   # With binary files we could do content matching like MD5, but for
