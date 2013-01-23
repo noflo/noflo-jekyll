@@ -6,12 +6,12 @@
     "noflo-yaml": "0.0.x",
     "noflo-liquid": "0.0.x",
     "noflo-markdown": "0.0.x",
-    "mimetype": "0.0.x"
+    "mimetype": "0.0.x",
+    "coffee-script": "1.4.x"
   },
   "devDependencies": {
     "nodeunit": ">=0.6.0",
     "coffeelint": "*",
-    "coffee-script": "1.4.x",
     "rimraf": "2.x.x"
   },
   "bin": {
