@@ -20,7 +20,7 @@
   "main": "./index.js",
   "noflo": {
     "graphs": {
-      "Jekyll": "./graphs/Jekyll.fbp",
+      "Jekyll": "./graphs/Jekyll.json",
       "GetConfig": "./graphs/GetConfig.fbp",
       "LoadDocuments": "./graphs/LoadDocuments.fbp",
       "GroupDocuments": "./graphs/GroupDocuments.fbp",

@@ -1,0 +1,587 @@
+{
+  "properties": {},
+  "exports": [
+    {
+      "private": "source.in",
+      "public": "source"
+    },
+    {
+      "private": "destination.in",
+      "public": "destination"
+    },
+    {
+      "private": "generated.out",
+      "public": "generated"
+    },
+    {
+      "private": "errors.out",
+      "public": "errors"
+    }
+  ],
+  "processes": {
+    "Source": {
+      "component": "Split",
+      "metadata": {
+        "x": 208,
+        "y": 281
+      }
+    },
+    "GetConfig": {
+      "component": "jekyll/GetConfig",
+      "metadata": {
+        "x": 619,
+        "y": 1200
+      }
+    },
+    "SplitConfig": {
+      "component": "Split",
+      "metadata": {
+        "x": 1109,
+        "y": 1226
+      }
+    },
+    "FindFiles": {
+      "component": "Merge",
+      "metadata": {
+        "x": 825,
+        "y": 220
+      }
+    },
+    "LoadDocuments": {
+      "component": "jekyll/LoadDocuments",
+      "metadata": {
+        "x": 1183,
+        "y": 223
+      }
+    },
+    "DetermineType": {
+      "component": "jekyll/MimeRouter",
+      "metadata": {
+        "x": 1696,
+        "y": 221
+      }
+    },
+    "GroupDocs": {
+      "component": "jekyll/GroupDocuments",
+      "metadata": {
+        "x": 721,
+        "y": 448
+      }
+    },
+    "Build": {
+      "component": "jekyll/BuildDocuments",
+      "metadata": {
+        "x": 2324,
+        "y": 1133
+      }
+    },
+    "Errors": {
+      "component": "Merge",
+      "metadata": {
+        "x": 2899,
+        "y": 567
+      }
+    },
+    "ContentConversions": {
+      "component": "jekyll/DocumentMimeRouter",
+      "metadata": {
+        "x": 1259,
+        "y": 625
+      }
+    },
+    "ConvertMarkdown": {
+      "component": "jekyll/ConvertMarkdown",
+      "metadata": {
+        "x": 1532,
+        "y": 639
+      }
+    },
+    "Metadata": {
+      "component": "jekyll/PathMetadata",
+      "metadata": {
+        "x": 1166,
+        "y": 461
+      }
+    },
+    "BuildPath": {
+      "component": "jekyll/BuildPostPath",
+      "metadata": {
+        "x": 1016,
+        "y": 906
+      }
+    },
+    "SplitPosts": {
+      "component": "Split",
+      "metadata": {
+        "x": 1494,
+        "y": 478
+      }
+    },
+    "Collect": {
+      "component": "CollectUntilIdle",
+      "metadata": {
+        "x": 2078,
+        "y": 688
+      }
+    },
+    "BuildPostCollections": {
+      "component": "jekyll/PostCollector",
+      "metadata": {
+        "x": 1382,
+        "y": 916
+      }
+    },
+    "SaveBuilt": {
+      "component": "jekyll/SaveFile",
+      "metadata": {
+        "x": 2642,
+        "y": 1075
+      }
+    },
+    "Destination": {
+      "component": "Split",
+      "metadata": {
+        "x": 1919,
+        "y": 1386
+      }
+    },
+    "Generated": {
+      "component": "Merge",
+      "metadata": {
+        "x": 2899,
+        "y": 830
+      }
+    },
+    "FilterDirs": {
+      "component": "FilterPacket",
+      "metadata": {
+        "x": 2096,
+        "y": 455
+      }
+    },
+    "DropDir": {
+      "component": "Drop",
+      "metadata": {
+        "x": 2528,
+        "y": 455
+      }
+    },
+    "CopyFiles": {
+      "component": "jekyll/CopyFile",
+      "metadata": {
+        "x": 2347,
+        "y": 900
+      }
+    }
+  },
+  "connections": [
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "GetConfig",
+        "port": "directory"
+      }
+    },
+    {
+      "src": {
+        "process": "GetConfig",
+        "port": "config"
+      },
+      "tgt": {
+        "process": "SplitConfig",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "FindFiles",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "FindFiles",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "LoadDocuments",
+        "port": "directory"
+      }
+    },
+    {
+      "src": {
+        "process": "LoadDocuments",
+        "port": "subdirectory"
+      },
+      "tgt": {
+        "process": "FindFiles",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "LoadDocuments",
+        "port": "document"
+      },
+      "tgt": {
+        "process": "DetermineType",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DetermineType",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "GroupDocs",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GroupDocs",
+        "port": "layout"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "layouts"
+      }
+    },
+    {
+      "src": {
+        "process": "GroupDocs",
+        "port": "include"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "includes"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitConfig",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "config"
+      }
+    },
+    {
+      "src": {
+        "process": "GroupDocs",
+        "port": "errors"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ContentConversions",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "ConvertMarkdown",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ConvertMarkdown",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ContentConversions",
+        "port": "missed"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GroupDocs",
+        "port": "post"
+      },
+      "tgt": {
+        "process": "Metadata",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Metadata",
+        "port": "source"
+      }
+    },
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "BuildPath",
+        "port": "source"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitConfig",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "BuildPath",
+        "port": "config"
+      }
+    },
+    {
+      "src": {
+        "process": "Metadata",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SplitPosts",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitPosts",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "BuildPath",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "BuildPath",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "ContentConversions",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitPosts",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Collect",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitConfig",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "BuildPostCollections",
+        "port": "config"
+      }
+    },
+    {
+      "src": {
+        "process": "Collect",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "BuildPostCollections",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "BuildPostCollections",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "readyconfig"
+      }
+    },
+    {
+      "src": {
+        "process": "GroupDocs",
+        "port": "static"
+      },
+      "tgt": {
+        "process": "ContentConversions",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SaveBuilt",
+        "port": "source"
+      }
+    },
+    {
+      "src": {
+        "process": "Destination",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SaveBuilt",
+        "port": "destination"
+      }
+    },
+    {
+      "src": {
+        "process": "Build",
+        "port": "generated"
+      },
+      "tgt": {
+        "process": "SaveBuilt",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SaveBuilt",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Generated",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SaveBuilt",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DetermineType",
+        "port": "missed"
+      },
+      "tgt": {
+        "process": "FilterDirs",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "FilterDirs",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "DropDir",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "CopyFiles",
+        "port": "source"
+      }
+    },
+    {
+      "src": {
+        "process": "Destination",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "CopyFiles",
+        "port": "destination"
+      }
+    },
+    {
+      "src": {
+        "process": "FilterDirs",
+        "port": "missed"
+      },
+      "tgt": {
+        "process": "CopyFiles",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "CopyFiles",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Generated",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "CopyFiles",
+        "port": "errors"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "data": "text",
+      "tgt": {
+        "process": "DetermineType",
+        "port": "routes"
+      }
+    },
+    {
+      "data": "text/x-markdown",
+      "tgt": {
+        "process": "ContentConversions",
+        "port": "routes"
+      }
+    },
+    {
+      "data": "1000",
+      "tgt": {
+        "process": "Collect",
+        "port": "timeout"
+      }
+    },
+    {
+      "data": "/_",
+      "tgt": {
+        "process": "FilterDirs",
+        "port": "regexp"
+      }
+    }
+  ]
+}
