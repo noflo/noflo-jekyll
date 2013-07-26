@@ -29,15 +29,15 @@
     "GetConfig": {
       "component": "jekyll/GetConfig",
       "metadata": {
-        "x": 619,
-        "y": 1200
+        "x": 519,
+        "y": 1196
       }
     },
     "SplitConfig": {
       "component": "Split",
       "metadata": {
-        "x": 1109,
-        "y": 1226
+        "x": 801,
+        "y": 1196
       }
     },
     "FindFiles": {
@@ -183,6 +183,9 @@
       "tgt": {
         "process": "GetConfig",
         "port": "directory"
+      },
+      "metadata": {
+        "route": 1
       }
     },
     {
@@ -193,6 +196,9 @@
       "tgt": {
         "process": "SplitConfig",
         "port": "in"
+      },
+      "metadata": {
+        "route": 1
       }
     },
     {
@@ -203,6 +209,9 @@
       "tgt": {
         "process": "FindFiles",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -213,6 +222,9 @@
       "tgt": {
         "process": "LoadDocuments",
         "port": "directory"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -223,6 +235,9 @@
       "tgt": {
         "process": "FindFiles",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -233,6 +248,9 @@
       "tgt": {
         "process": "DetermineType",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -243,6 +261,9 @@
       "tgt": {
         "process": "GroupDocs",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -253,6 +274,9 @@
       "tgt": {
         "process": "Build",
         "port": "layouts"
+      },
+      "metadata": {
+        "route": 6
       }
     },
     {
@@ -263,6 +287,9 @@
       "tgt": {
         "process": "Build",
         "port": "includes"
+      },
+      "metadata": {
+        "route": 6
       }
     },
     {
@@ -273,6 +300,9 @@
       "tgt": {
         "process": "Build",
         "port": "config"
+      },
+      "metadata": {
+        "route": 1
       }
     },
     {
@@ -293,6 +323,9 @@
       "tgt": {
         "process": "ConvertMarkdown",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -303,6 +336,9 @@
       "tgt": {
         "process": "Build",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -313,6 +349,9 @@
       "tgt": {
         "process": "Build",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -323,6 +362,9 @@
       "tgt": {
         "process": "Metadata",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -333,6 +375,9 @@
       "tgt": {
         "process": "Metadata",
         "port": "source"
+      },
+      "metadata": {
+        "route": 2
       }
     },
     {
@@ -343,6 +388,9 @@
       "tgt": {
         "process": "BuildPath",
         "port": "source"
+      },
+      "metadata": {
+        "route": 2
       }
     },
     {
@@ -353,6 +401,9 @@
       "tgt": {
         "process": "BuildPath",
         "port": "config"
+      },
+      "metadata": {
+        "route": 1
       }
     },
     {
@@ -363,6 +414,9 @@
       "tgt": {
         "process": "SplitPosts",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -373,6 +427,9 @@
       "tgt": {
         "process": "BuildPath",
         "port": "in"
+      },
+      "metadata": {
+        "route": 7
       }
     },
     {
@@ -383,6 +440,9 @@
       "tgt": {
         "process": "ContentConversions",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -393,6 +453,9 @@
       "tgt": {
         "process": "Collect",
         "port": "in"
+      },
+      "metadata": {
+        "route": 10
       }
     },
     {
@@ -403,6 +466,9 @@
       "tgt": {
         "process": "BuildPostCollections",
         "port": "config"
+      },
+      "metadata": {
+        "route": 1
       }
     },
     {
@@ -413,6 +479,9 @@
       "tgt": {
         "process": "BuildPostCollections",
         "port": "in"
+      },
+      "metadata": {
+        "route": 10
       }
     },
     {
@@ -423,6 +492,9 @@
       "tgt": {
         "process": "Build",
         "port": "readyconfig"
+      },
+      "metadata": {
+        "route": 10
       }
     },
     {
@@ -433,6 +505,9 @@
       "tgt": {
         "process": "ContentConversions",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -443,6 +518,9 @@
       "tgt": {
         "process": "SaveBuilt",
         "port": "source"
+      },
+      "metadata": {
+        "route": 2
       }
     },
     {
@@ -453,6 +531,9 @@
       "tgt": {
         "process": "SaveBuilt",
         "port": "destination"
+      },
+      "metadata": {
+        "route": 8
       }
     },
     {
@@ -463,6 +544,9 @@
       "tgt": {
         "process": "SaveBuilt",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -473,6 +557,9 @@
       "tgt": {
         "process": "Generated",
         "port": "in"
+      },
+      "metadata": {
+        "route": 9
       }
     },
     {
@@ -493,6 +580,9 @@
       "tgt": {
         "process": "FilterDirs",
         "port": "in"
+      },
+      "metadata": {
+        "route": 3
       }
     },
     {
@@ -503,6 +593,9 @@
       "tgt": {
         "process": "DropDir",
         "port": "in"
+      },
+      "metadata": {
+        "route": 3
       }
     },
     {
@@ -513,6 +606,9 @@
       "tgt": {
         "process": "CopyFiles",
         "port": "source"
+      },
+      "metadata": {
+        "route": 2
       }
     },
     {
@@ -523,6 +619,9 @@
       "tgt": {
         "process": "CopyFiles",
         "port": "destination"
+      },
+      "metadata": {
+        "route": 8
       }
     },
     {
@@ -533,6 +632,9 @@
       "tgt": {
         "process": "CopyFiles",
         "port": "in"
+      },
+      "metadata": {
+        "route": 3
       }
     },
     {
@@ -543,6 +645,9 @@
       "tgt": {
         "process": "Generated",
         "port": "in"
+      },
+      "metadata": {
+        "route": 3
       }
     },
     {
