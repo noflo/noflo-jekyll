@@ -7,7 +7,8 @@
     "noflo-liquid": "0.0.x",
     "noflo-markdown": "0.0.x",
     "mimetype": "0.0.x",
-    "coffee-script": "1.4.x"
+    "coffee-script": "1.4.x",
+    "noflo-filesystem": "~1.0.0"
   },
   "devDependencies": {
     "nodeunit": ">=0.6.0",
