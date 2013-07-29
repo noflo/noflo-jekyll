@@ -22,155 +22,155 @@
     "Source": {
       "component": "Split",
       "metadata": {
-        "x": 648,
-        "y": 440
+        "x": 690,
+        "y": 486
       }
     },
     "GetConfig": {
       "component": "jekyll/GetConfig",
       "metadata": {
-        "x": 855,
-        "y": 729
+        "x": 893,
+        "y": 841
       }
     },
     "SplitConfig": {
       "component": "Split",
       "metadata": {
-        "x": 1170,
-        "y": 862
+        "x": 1115,
+        "y": 839
       }
     },
     "FindFiles": {
       "component": "Merge",
       "metadata": {
-        "x": 1132,
-        "y": 138
+        "x": 1189,
+        "y": 171
       }
     },
     "LoadDocuments": {
       "component": "jekyll/LoadDocuments",
       "metadata": {
-        "x": 1129,
-        "y": 283
+        "x": 1185,
+        "y": 318
       }
     },
     "DetermineType": {
       "component": "jekyll/MimeRouter",
       "metadata": {
-        "x": 1340,
-        "y": 285
+        "x": 1397,
+        "y": 318
       }
     },
     "GroupDocs": {
       "component": "jekyll/GroupDocuments",
       "metadata": {
-        "x": 1796,
-        "y": 284
+        "x": 1613,
+        "y": 318
       }
     },
     "Build": {
       "component": "jekyll/BuildDocuments",
       "metadata": {
-        "x": 2563,
-        "y": 1092
+        "x": 2306,
+        "y": 816
       }
     },
     "Errors": {
       "component": "Merge",
       "metadata": {
-        "x": 3101,
-        "y": 561
+        "x": 2388,
+        "y": 319
       }
     },
     "ContentConversions": {
       "component": "jekyll/DocumentMimeRouter",
       "metadata": {
-        "x": 2049,
-        "y": 795.3909565227635
+        "x": 1871,
+        "y": 778.3909565227635
       }
     },
     "ConvertMarkdown": {
       "component": "jekyll/ConvertMarkdown",
       "metadata": {
-        "x": 2341,
-        "y": 800
+        "x": 2066,
+        "y": 934
       }
     },
     "Metadata": {
       "component": "jekyll/PathMetadata",
       "metadata": {
-        "x": 1127,
-        "y": 507
+        "x": 977,
+        "y": 526
       }
     },
     "BuildPath": {
       "component": "jekyll/BuildPostPath",
       "metadata": {
-        "x": 1580,
-        "y": 820
+        "x": 1641,
+        "y": 796
       }
     },
     "SplitPosts": {
       "component": "Split",
       "metadata": {
-        "x": 1350,
-        "y": 509
+        "x": 1187,
+        "y": 525
       }
     },
     "Collect": {
       "component": "CollectUntilIdle",
       "metadata": {
-        "x": 1570,
-        "y": 507
+        "x": 1399,
+        "y": 524
       }
     },
     "BuildPostCollections": {
       "component": "jekyll/PostCollector",
       "metadata": {
-        "x": 1797,
-        "y": 504
+        "x": 1614,
+        "y": 522
       }
     },
     "SaveBuilt": {
       "component": "jekyll/SaveFile",
       "metadata": {
-        "x": 3011,
-        "y": 1064
+        "x": 2522,
+        "y": 773
       }
     },
     "Destination": {
       "component": "Split",
       "metadata": {
-        "x": 2576,
-        "y": 939
+        "x": 2138,
+        "y": 591
       }
     },
     "Generated": {
       "component": "Merge",
       "metadata": {
-        "x": 3101,
-        "y": 824
+        "x": 2715,
+        "y": 496
       }
     },
     "FilterDirs": {
       "component": "FilterPacket",
       "metadata": {
-        "x": 2045,
-        "y": 282
+        "x": 1855,
+        "y": 317
       }
     },
     "DropDir": {
       "component": "Drop",
       "metadata": {
-        "x": 2308,
-        "y": 284
+        "x": 2128,
+        "y": 317
       }
     },
     "CopyFiles": {
       "component": "jekyll/CopyFile",
       "metadata": {
-        "x": 2866,
-        "y": 859
+        "x": 2399,
+        "y": 492
       }
     }
   },
