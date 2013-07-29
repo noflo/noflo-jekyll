@@ -8,7 +8,14 @@
     "noflo-markdown": "0.0.x",
     "mimetype": "0.0.x",
     "coffee-script": "1.4.x",
-    "noflo-filesystem": "~1.0.0"
+    "noflo-filesystem": "~1.0.0",
+    "noflo-core": "~0.1.0",
+    "noflo-groups": "~0.1.0",
+    "noflo-objects": "~0.1.0",
+    "noflo-strings": "~0.1.0",
+    "noflo-flow": "~0.1.0",
+    "noflo-math": "0.0.1",
+    "noflo-routers": "~0.1.0"
   },
   "devDependencies": {
     "nodeunit": ">=0.6.0",

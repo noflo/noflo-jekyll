@@ -16,10 +16,10 @@ EXPORT=COPY.OUT:OUT
 # Error handling
 EXPORT=ERRORS.OUT:ERRORS
 
-Source(Split) OUT -> PATTERN NewPath(Replace)
-Destination(Split) OUT -> REPLACEMENT NewPath()
-File(Split) OUT -> IN NewPath()
-NewPath() OUT -> IN NewFile(Split)
+Source(core/Split) OUT -> PATTERN NewPath(Replace)
+Destination(core/Split) OUT -> REPLACEMENT NewPath()
+File(core/Split) OUT -> IN NewPath()
+NewPath() OUT -> IN NewFile(core/Split)
 
 # Create folders for the files
 NewFile() OUT -> IN NewDir(DirName)
@@ -30,7 +30,7 @@ MakeDir() LOAD -> LOAD ThrottleDir()
 # Copy files over once directories have been created
 NewFile() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
 MakeDir() OUT -> RELEASE NewFiles()
-NewFiles() OUT -> IN PrepareCopy(Split)
+NewFiles() OUT -> IN PrepareCopy(core/Split)
 PrepareCopy() OUT -> DESTINATION Copy(CopyFile)
 Destination() OUT -> PATTERN OrigPath(Replace)
 Source() OUT -> REPLACEMENT OrigPath()
