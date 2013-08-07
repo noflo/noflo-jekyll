@@ -5,7 +5,8 @@ EXPORT=SAVE.OUT:OUT
 EXPORT=ERRORS.OUT:ERROR
 
 '=' -> DELIMITER CompileReplacement(CompileString)
-Source(Split) OUT -> IN CompileReplacement()
+Source(Split) OUT -> STRING HoldSource(SendString) OUT -> IN CompileReplacement()
+Destination(Split) OUT -> IN HoldSource()
 Destination(Split) OUT -> IN CompileReplacement()
 CompileReplacement() OUT -> REGEXP MapFileName(MapGroup)
 
