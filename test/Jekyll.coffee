@@ -104,9 +104,9 @@ checkDirectoryMatch = (subPath, test) ->
         checkDirectoryMatch "#{subPath}/#{file}", test
         continue
       jekyllStats = fs.statSync "#{jekyllDir}/#{subPath}/#{file}"
-      test.equal jekyllStats.isDirectory(), false, "NoFlo generated file #{subPath}, Jekyll a directory"
+      test.equal jekyllStats.isDirectory(), false, "NoFlo generated file #{subPath}/#{file}, Jekyll a directory"
     catch e
-      test.fail null, subPath, "Jekyll didn't generate #{subPath} but NoFlo did"
+      test.fail null, subPath, "Jekyll didn't generate #{subPath}/#{file} but NoFlo did"
 
 exports['test that NoFlo generates only the files Jekyll does'] = (test) ->
   checkDirectoryMatch '', test
