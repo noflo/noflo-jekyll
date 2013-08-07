@@ -76,7 +76,9 @@ class DocumentBuilder extends noflo.Component
     matcher = new RegExp '\{\% include (.*)\.html \%\}'
     match = matcher.exec body
     return true unless match
-    return true if @includes[match[1]]
+    if @includes[match[1]]
+      include = @includes[match[1]]
+      return @checkCategories include.body, include
     false
 
   checkPaginator: (body, document) ->
