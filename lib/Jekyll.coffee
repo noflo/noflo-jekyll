@@ -1,5 +1,6 @@
 noflo = require 'noflo'
 events = require 'events'
+path = require 'path'
 
 class Jekyll extends events.EventEmitter
   constructor: (source, target) ->
@@ -16,6 +17,7 @@ class Jekyll extends events.EventEmitter
         @emit 'end', start
 
   createNetwork: (graph, callback) ->
+    graph.baseDir = path.resolve __dirname, '../'
     noflo.createNetwork graph, callback
 
   generated: (file) ->
