@@ -2,7 +2,7 @@
   "name": "noflo-jekyll",
   "version": "0.0.1",
   "dependencies": {
-    "noflo": "0.3.x",
+    "noflo": "0.4.x",
     "noflo-yaml": "0.0.x",
     "noflo-liquid": "0.0.x",
     "noflo-markdown": "0.0.x",
