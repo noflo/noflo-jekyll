@@ -14,8 +14,9 @@
     "noflo-objects": "~0.1.0",
     "noflo-strings": "~0.1.0",
     "noflo-flow": "~0.1.0",
-    "noflo-math": "0.0.1",
-    "noflo-routers": "~0.1.0"
+    "noflo-math": "~0.0.2",
+    "noflo-routers": "~0.1.0",
+    "noflo-packets": "~0.1.0"
   },
   "devDependencies": {
     "nodeunit": ">=0.6.0",
