@@ -23,7 +23,7 @@ Stat() OUT -> IN DropGroups(RemoveGroups)
 DropGroups() OUT -> IN Group() OUT -> IN FileRouter()
 
 # First route: subfolder
-'path=^(?:(?!\.git|_(?!(includes|layouts|posts))).)*$' -> REGEXP FilterDirs(FilterPropertyValue)
+'path=^(?:(?!\.git|_(?!(includes|layouts|posts))|node_modules).)*$' -> REGEXP FilterDirs(FilterPropertyValue)
 'path' -> KEY SubDirectory(GetObjectKey)
 FileRouter() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
 
