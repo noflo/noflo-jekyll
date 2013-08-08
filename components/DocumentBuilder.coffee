@@ -81,6 +81,11 @@ class DocumentBuilder extends noflo.Component
       return @checkCategories include.body, include
     false
 
+  checkPosts: (body, document) ->
+    return true if body.indexOf('site.posts') is -1
+    return false unless @config
+    true
+
   checkPaginator: (body, document) ->
     return true if body.indexOf('paginator.posts') is -1
     return false unless @config
@@ -94,6 +99,7 @@ class DocumentBuilder extends noflo.Component
   checkReady: (templateData) ->
     if templateData.body
       return false unless @checkIncludes templateData.body
+      return false unless @checkPosts templateData.body, templateData
       return false unless @checkPaginator templateData.body, templateData
       return false unless @checkCategories templateData.body, templateData
     return true unless templateData.layout
