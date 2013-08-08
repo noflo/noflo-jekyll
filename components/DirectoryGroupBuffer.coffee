@@ -1,22 +1,22 @@
 noflo = require 'noflo'
 path = require 'path'
 
-class DirectoryBuffer extends noflo.Component
+class DirectoryGroupBuffer extends noflo.Component
   constructor: ->
     @buffers = {}
     @released = []
 
     @inPorts =
-      collect: new noflo.Port 'string'
+      collect: new noflo.Port 'all'
       release: new noflo.Port 'string'
     @outPorts =
-      out: new noflo.Port 'string'
+      out: new noflo.Port 'all'
 
     @groups = []
     @inPorts.collect.on 'begingroup', (group) =>
       @groups.push group
     @inPorts.collect.on 'data', (data) =>
-      bufName = path.dirname data
+      bufName = path.dirname @groups.join '/'
       unless @released.indexOf(bufName) is -1
         @release
           data: data
@@ -53,4 +53,4 @@ class DirectoryBuffer extends noflo.Component
     for group in packet.groups
       @outPorts.out.endGroup()
 
-exports.getComponent = -> new DirectoryBuffer
+exports.getComponent = -> new DirectoryGroupBuffer

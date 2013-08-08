@@ -43,6 +43,7 @@
       "DocumentMimeRouter": "./components/DocumentMimeRouter.coffee",
       "DocumentBuilder": "./components/DocumentBuilder.coffee",
       "DirectoryBuffer": "./components/DirectoryBuffer.coffee",
+      "DirectoryGroupBuffer": "./components/DirectoryGroupBuffer.coffee",
       "PathMetadata": "./components/PathMetadata.coffee",
       "BuildPostPath": "./components/BuildPostPath.coffee",
       "PostCollector": "./components/PostCollector.coffee"

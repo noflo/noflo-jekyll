@@ -20,17 +20,16 @@ MapFileName() OUT -> IN ReadPath(ReadGroup)
 
 # Create folders for the files
 ReadPath() GROUP -> IN NewDir(DirName)
-NewDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MakeDir(MakeDir)
-MakeDir() LOAD -> LOAD ThrottleDir()
+NewDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MkDir(MakeDir)
+MkDir() LOAD -> LOAD ThrottleDir()
 
-# Save files
-# First connection is filename, second is file contents
-MakeDir() OUT -> IN Merge(MergeGroups)
-ReadPath() OUT -> IN Merge(MergeGroups)
-Merge() OUT -> IN ReadWithDir(ReadGroup) GROUP -> FILENAME Save(WriteFile)
-'1' -> KEY GetContents(GetObjectKey)
-Merge() OUT -> IN GetContents() OUT -> IN Save(WriteFile)
+# Save files when their directories are ready
+ReadPath() OUT -> COLLECT NewFiles(jekyll/DirectoryGroupBuffer)
+MkDir() OUT -> RELEASE NewFiles()
+NewFiles() OUT -> IN SplitFile(Split)
+SplitFile() OUT -> IN ReadName(ReadGroup) GROUP -> FILENAME Save(WriteFile)
+SplitFile() OUT -> IN Save()
 
 # Error handling
-MakeDir() ERROR -> IN Errors(Merge)
+MkDir() ERROR -> IN Errors(Merge)
 Save() ERROR -> IN Errors(Merge)
