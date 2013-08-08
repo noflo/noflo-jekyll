@@ -7,7 +7,7 @@
     "noflo-liquid": "0.0.x",
     "noflo-markdown": "0.0.x",
     "coffee-script": "1.4.x",
-    "noflo-filesystem": "~1.0.0",
+    "noflo-filesystem": "~1.0.2",
     "noflo-core": "~0.1.0",
     "noflo-groups": "~0.1.0",
     "noflo-objects": "~0.1.0",
@@ -20,7 +20,8 @@
   "devDependencies": {
     "nodeunit": ">=0.6.0",
     "coffeelint": "*",
-    "rimraf": "2.x.x"
+    "rimraf": "2.x.x",
+    "mimetype": "0.0.5"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
