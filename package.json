@@ -6,7 +6,6 @@
     "noflo-yaml": "0.0.x",
     "noflo-liquid": "0.0.x",
     "noflo-markdown": "0.0.x",
-    "mimetype": "0.0.x",
     "coffee-script": "1.4.x",
     "noflo-filesystem": "~1.0.0",
     "noflo-core": "~0.1.0",
@@ -39,11 +38,7 @@
       "ConvertMarkdown": "./graphs/ConvertMarkdown.fbp"
     },
     "components": {
-      "MimeRouter": "./components/MimeRouter.coffee",
-      "DocumentMimeRouter": "./components/DocumentMimeRouter.coffee",
       "DocumentBuilder": "./components/DocumentBuilder.coffee",
-      "DirectoryBuffer": "./components/DirectoryBuffer.coffee",
-      "DirectoryGroupBuffer": "./components/DirectoryGroupBuffer.coffee",
       "PathMetadata": "./components/PathMetadata.coffee",
       "BuildPostPath": "./components/BuildPostPath.coffee",
       "PostCollector": "./components/PostCollector.coffee"

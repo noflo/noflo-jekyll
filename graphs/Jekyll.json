@@ -20,7 +20,7 @@
   ],
   "processes": {
     "Source": {
-      "component": "Split",
+      "component": "core/Split",
       "metadata": {
         "x": 690,
         "y": 486
@@ -34,14 +34,14 @@
       }
     },
     "SplitConfig": {
-      "component": "Split",
+      "component": "core/Split",
       "metadata": {
         "x": 1115,
         "y": 839
       }
     },
     "FindFiles": {
-      "component": "Merge",
+      "component": "core/Merge",
       "metadata": {
         "x": 1189,
         "y": 171
@@ -55,7 +55,7 @@
       }
     },
     "DetermineType": {
-      "component": "jekyll/MimeRouter",
+      "component": "filesystem/MimeRouter",
       "metadata": {
         "x": 1397,
         "y": 318
@@ -76,14 +76,14 @@
       }
     },
     "Errors": {
-      "component": "Merge",
+      "component": "core/Merge",
       "metadata": {
         "x": 2388,
         "y": 319
       }
     },
     "ContentConversions": {
-      "component": "jekyll/DocumentMimeRouter",
+      "component": "filesystem/MimeDocumentRouter",
       "metadata": {
         "x": 1871,
         "y": 778.3909565227635
@@ -111,14 +111,14 @@
       }
     },
     "SplitPosts": {
-      "component": "Split",
+      "component": "core/Split",
       "metadata": {
         "x": 1187,
         "y": 525
       }
     },
     "Collect": {
-      "component": "CollectUntilIdle",
+      "component": "flow/CollectUntilIdle",
       "metadata": {
         "x": 1399,
         "y": 524
@@ -139,28 +139,28 @@
       }
     },
     "Destination": {
-      "component": "Split",
+      "component": "core/Split",
       "metadata": {
         "x": 2138,
         "y": 591
       }
     },
     "Generated": {
-      "component": "Merge",
+      "component": "core/Merge",
       "metadata": {
         "x": 2715,
         "y": 496
       }
     },
     "FilterDirs": {
-      "component": "FilterPacket",
+      "component": "packets/FilterPacket",
       "metadata": {
         "x": 1855,
         "y": 317
       }
     },
     "DropDir": {
-      "component": "Drop",
+      "component": "core/Drop",
       "metadata": {
         "x": 2128,
         "y": 317

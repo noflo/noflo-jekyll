@@ -28,7 +28,7 @@ UniqueDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MakeDir(MakeDir)
 MakeDir() LOAD -> LOAD ThrottleDir()
 
 # Copy files over once directories have been created
-NewFile() OUT -> COLLECT NewFiles(jekyll/DirectoryBuffer)
+NewFile() OUT -> COLLECT NewFiles(filesystem/DirectoryBuffer)
 MakeDir() OUT -> RELEASE NewFiles()
 NewFiles() OUT -> IN PrepareCopy(core/Split)
 PrepareCopy() OUT -> DESTINATION Copy(CopyFile)

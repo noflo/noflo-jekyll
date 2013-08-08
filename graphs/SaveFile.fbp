@@ -24,7 +24,7 @@ NewDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MkDir(MakeDir)
 MkDir() LOAD -> LOAD ThrottleDir()
 
 # Save files when their directories are ready
-ReadPath() OUT -> COLLECT NewFiles(jekyll/DirectoryGroupBuffer)
+ReadPath() OUT -> COLLECT NewFiles(filesystem/DirectoryGroupBuffer)
 MkDir() OUT -> RELEASE NewFiles()
 NewFiles() OUT -> IN SplitFile(Split)
 SplitFile() OUT -> IN ReadName(ReadGroup) GROUP -> FILENAME Save(WriteFile)
