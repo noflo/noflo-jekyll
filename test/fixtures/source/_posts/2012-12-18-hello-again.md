@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Hello again!
+date: "2012-12-15 06:00:08"
 categories:
   - bar
 ---
