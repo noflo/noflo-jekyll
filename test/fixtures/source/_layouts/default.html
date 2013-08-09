@@ -3,7 +3,7 @@
   <head>
     <title>{{ site.name }} - {{ page.title }}</title>
   </head>
-  <body>
+  <body{% if page.class %} class="{{ page.class }}"{% endif %}>
     {{ content }}
     {% include footer.html %}
   </body>

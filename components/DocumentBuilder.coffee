@@ -55,7 +55,7 @@ class DocumentBuilder extends noflo.Component
     @outPorts.template.endGroup()
     @outPorts.template.disconnect()
     @outPorts.variables.beginGroup data.path
-    @outPorts.variables.send data
+    @outPorts.variables.send @handleVariableInheritance data
     @outPorts.variables.endGroup()
     @outPorts.variables.disconnect()
 
@@ -72,6 +72,13 @@ class DocumentBuilder extends noflo.Component
       return
     @handleInheritance @includes[templateName]
 
+  getTemplateData: (templateName) ->
+    unless @includes[templateName]
+      @error new Error "Template #{templateName} not found"
+      return
+    @handleVariableInheritance @includes[templateName]
+
+
   checkIncludes: (body) ->
     matcher = new RegExp '\{\% include (.*)\.html \%\}'
     match = matcher.exec body
@@ -81,8 +88,12 @@ class DocumentBuilder extends noflo.Component
       return @checkCategories include.body, include
     false
 
+  # If document contents refer to the posts list, we need to
+  # wait until we have posts available
   checkPosts: (body, document) ->
-    return true if body.indexOf('site.posts') is -1
+    if body.indexOf('site.posts') is -1 and
+        body.indexOf('paginator.posts') is -1
+      return true
     return false unless @config
     true
 
@@ -91,16 +102,19 @@ class DocumentBuilder extends noflo.Component
     return false unless @config
     true
 
+  # If document contents refer to the categories list, we need to
+  # wait until we have posts available
   checkCategories: (body, document) ->
     return true if body.indexOf('site.categories') is -1
     return false unless @config
     true
 
+  # Check whether a document is ready to be created, of if it is
+  # still waiting for some parts (includes, posts, layouts)
   checkReady: (templateData) ->
     if templateData.body
       return false unless @checkIncludes templateData.body
       return false unless @checkPosts templateData.body, templateData
-      return false unless @checkPaginator templateData.body, templateData
       return false unless @checkCategories templateData.body, templateData
     return true unless templateData.layout
     return false unless @includes[templateData.layout]
@@ -113,6 +127,16 @@ class DocumentBuilder extends noflo.Component
       if parent
         template = parent.replace '{{ content }}', template
     template
+
+  handleVariableInheritance: (data) ->
+    if data.layout
+      parent = @getTemplateData data.layout
+      if parent
+        for key, val of parent
+          continue if key is 'body'
+          continue if data[key] isnt undefined
+          data[key] = val
+    data
 
   error: (error) ->
     return unless @outPorts.error.isAttached()
