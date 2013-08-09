@@ -95,10 +95,10 @@ class DocumentBuilder extends noflo.Component
   # Create multiple instances of the document, each with separate pagination
   paginate: (document) ->
     pagedDocs = []
-    current = 0
+    current = 1
     start = 0
     pages = Math.ceil @config.posts.length / @config.paginate
-    while current < pages
+    while current <= pages
       # Clone the page
       page = {}
       for key of document
@@ -115,11 +115,26 @@ class DocumentBuilder extends noflo.Component
         total_pages: pages
         previous_page: if current > 0 then current - 1 else null
         next_page: if current == pages then null else current + 1
-      start = end
 
-      # Generate path for the page
-      unless current is 0
+      if current is 1
+        page.paginator.previous_page = null
+        page.paginator.previous_page_path = null
+      else
         page.path = @getPagePath document, current
+        page.paginator.previous_page = current - 1
+        if current is 2
+          page.paginator.previous_page_path = '/index.html'
+        else
+          page.paginator.previous_page_path = "/page#{current - 1}"
+
+      if current == pages
+        page.paginator.next_page = null
+        page.paginator.next_page_path = null
+      else
+        page.paginator.next_page = current + 1
+        page.paginator.next_page_path = "/page#{current + 1}"
+
+      start = end
 
       pagedDocs.push page
       current++
@@ -128,7 +143,7 @@ class DocumentBuilder extends noflo.Component
 
   getPagePath: (document, page) ->
     base = path.dirname document.path
-    return "#{base}/page#{page + 1}/index.html"
+    return "#{base}/page#{page}/index.html"
 
   checkIncludes: (body) ->
     matcher = new RegExp '\{\% include (.*)\.html \%\}'
