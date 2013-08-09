@@ -15,7 +15,7 @@ However, as with any reimplementation of a application being actively developed,
 
 NoFlo Jekyll has been implemented as a [NoFlo graph](http://noflojs.org/documentation/). Most of the logic is handled by various [existing NoFlo components](http://noflojs.org/component/), but there are also some places where implementing things as a [custom component](https://github.com/the-grid/noflo-jekyll/tree/master/components) made sense. Over 85% of the codebase is completely reusable, however.
 
-Here is how the main flow looks like:
+Here is how the main flow looks like when visualized using [NoFlo UI](http://www.kickstarter.com/projects/noflo/noflo-development-environment):
 
 ![Main process flow](http://cdn.thegrid.io.s3.amazonaws.com/noflo/kickstarter/images/cards-v4-kickstarter-up.jpg)
 
