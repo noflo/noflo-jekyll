@@ -1,5 +1,5 @@
 name: noflo-jekyll test
 permalink: /blog/:year/:categories/:title/
 markdown: rdiscount
-paginate: 10
+paginate: 3
 pygments: false

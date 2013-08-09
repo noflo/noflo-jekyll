@@ -42,11 +42,6 @@ class PostCollector extends noflo.Component
 
   sortPosts: (config) ->
     config.posts.sort sortByDate
-
-    # TODO: Handle pagination
-    config.paginator =
-      posts: config.posts
-
     for name,category of config.categories
       category.sort sortByDate
     config

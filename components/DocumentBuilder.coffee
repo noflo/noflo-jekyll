@@ -44,6 +44,15 @@ class DocumentBuilder extends noflo.Component
       unless @checkReady document
         pending.push document
         continue
+
+      # If the page does pagination we need to paginate it first
+      if @hasPaginator document
+        pages = @paginate document
+        pages.forEach (page) =>
+          process.nextTick =>
+            @sendDocument page
+        continue
+
       @sendDocument document
     for doc in pending
       continue unless @documents.indexOf(doc) is -1
@@ -78,6 +87,48 @@ class DocumentBuilder extends noflo.Component
       return
     @handleVariableInheritance @includes[templateName]
 
+  hasPaginator: (document) ->
+    body = @handleInheritance document
+    return false if body.indexOf('paginator.posts') is -1
+    true
+
+  # Create multiple instances of the document, each with separate pagination
+  paginate: (document) ->
+    pagedDocs = []
+    current = 0
+    start = 0
+    pages = Math.ceil @config.posts.length / @config.paginate
+    while current < pages
+      # Clone the page
+      page = {}
+      for key of document
+        page[key] = document[key]
+
+      # Create the paginator object
+      end = start + @config.paginate
+
+      page.paginator =
+        page: current
+        per_page: @config.paginate
+        posts: @config.posts.slice start, end
+        total_posts: @config.posts.length
+        total_pages: pages
+        previous_page: if current > 0 then current - 1 else null
+        next_page: if current == pages then null else current + 1
+      start = end
+
+      # Generate path for the page
+      unless current is 0
+        page.path = @getPagePath document, current
+
+      pagedDocs.push page
+      current++
+
+    pagedDocs
+
+  getPagePath: (document, page) ->
+    base = path.dirname document.path
+    return "#{base}/page#{page + 1}/index.html"
 
   checkIncludes: (body) ->
     matcher = new RegExp '\{\% include (.*)\.html \%\}'
@@ -94,11 +145,6 @@ class DocumentBuilder extends noflo.Component
     if body.indexOf('site.posts') is -1 and
         body.indexOf('paginator.posts') is -1
       return true
-    return false unless @config
-    true
-
-  checkPaginator: (body, document) ->
-    return true if body.indexOf('paginator.posts') is -1
     return false unless @config
     true
 
