@@ -63,11 +63,20 @@ class BuildPostPath extends noflo.Component
   handleTitle: (permalink, name) ->
     permaExt = path.extname permalink
     nameExt = path.extname name
+
+    endSlash = false
+    if permalink[permalink.length - 1] is '/'
+      endSlash = true
+
     if permaExt isnt nameExt
       # Remove extension
       dirName = path.dirname permalink
       baseName = path.basename permalink, permaExt
       permalink = "#{dirName}/#{baseName}"
+
+      if endSlash and permalink[permalink.length - 1] isnt '/'
+        permalink = "#{permalink}/"
+
     permalink.replace ':title', name
 
   handleIndex: (permalink) ->
