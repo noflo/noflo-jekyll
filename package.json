@@ -18,10 +18,12 @@
     "noflo-packets": "~0.1.0"
   },
   "devDependencies": {
-    "nodeunit": ">=0.6.0",
-    "coffeelint": "*",
     "rimraf": "2.x.x",
-    "mimetype": "0.0.5"
+    "mimetype": "0.0.5",
+    "grunt": "~0.4.1",
+    "grunt-coffeelint": "0.0.7",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-cli": "~0.1.9"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
@@ -46,7 +48,6 @@
     }
   },
   "scripts": {
-    "pretest": "./node_modules/.bin/coffeelint -r components lib",
-    "test": "./node_modules/.bin/nodeunit test"
+    "test": "./node_modules/.bin/grunt test"
   }
 }
