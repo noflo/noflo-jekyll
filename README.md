@@ -1,4 +1,4 @@
-noflo-jekyll
+noflo-jekyll [![Build Status](https://travis-ci.org/the-grid/noflo-jekyll.png?branch=master)](https://travis-ci.org/the-grid/noflo-jekyll)
 ============
 
 Flow-based implementation of static site generation.
@@ -7,19 +7,19 @@ Flow-based implementation of static site generation.
 
 ## Installation
 
-Since this is a private GitHub repository, you'll need to make a checkout with your GitHub credentials, and then:
+If you want to use this as a command-line executable, then the easiest option is to install it globally with:
 
-    $ cd noflo-jekyll
-    $ npm install
+    $ npm install -g noflo-jekyll
 
-(with Node.js 0.6 you need to install with `--force` to get the [mimetype](https://npmjs.org/package/mimetype) module)
+If you want to use it as a library inside a bigger application, then just install it as a dependency by:
 
-To use this project in the dependencies of another Node.js application, you can define a [NPM dependency with Basic auth](http://stackoverflow.com/a/13353408/263570).
+    $ npm install noflo-jekyll --save
+
 ## Command-line usage
 
 Since this project aims for feature parity with Jekyll, the command-line usage is similar. To generate a site, run:
 
-    $ ./bin/noflo-jekyll source_dir target_dir
+    $ noflo-jekyll source_dir target_dir
 
 ## Usage in Node.js applications
 
