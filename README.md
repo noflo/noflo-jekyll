@@ -1,9 +1,25 @@
 noflo-jekyll [![Build Status](https://travis-ci.org/the-grid/noflo-jekyll.png?branch=master)](https://travis-ci.org/the-grid/noflo-jekyll)
 ============
 
-Flow-based reimplementation of the [Jekyll](http://jekyllrb.com/) static site generator.
+Flow-based reimplementation of the [Jekyll](http://jekyllrb.com/) static site generator. This provides several advantages for [Node.js](http://nodejs.org/) and especially [NoFlo](http://noflojs.org/) developers:
+
+* **Pure JavaScript**, no need for Ruby or other runtimes in your environment. Especially handy if you're using [Grunt](http://gruntjs.com/) for site generation
+* **Other data sources**, in NoFlo everything is just a flow of data. You could easily plug in other data sources that the file system. For example, database query results
+* **Different converters**, don't want to use Markdown? Just plug in your own mark-up processor component
+* **Different template engines**, don't want to use Liquid? Just plug in your own template processor component
+* **Use as library or executable**, this Jekyll implementation is just a NoFlo graph. You can use it in other NoFlo applications, as a Node.js module, or as a command-line executable
+
+However, as with any reimplementation of a application being actively developed, there are also some [potential caveats](#known-issues-and-differences-with-ruby-jekyll) to observe.
+
+## Structure
+
+NoFlo Jekyll has been implemented as a [NoFlo graph](http://noflojs.org/documentation/). Most of the logic is handled by various [existing NoFlo components](http://noflojs.org/component/), but there are also some places where implementing things as a [custom component](https://github.com/the-grid/noflo-jekyll/tree/master/components) made sense. Over 85% of the codebase is completely reusable, however.
+
+Here is how the main flow looks like:
 
 ![Main process flow](http://cdn.thegrid.io.s3.amazonaws.com/noflo/kickstarter/images/cards-v4-kickstarter-up.jpg)
+
+You can find the main flow and the different subgraphs from the [graphs folder](https://github.com/the-grid/noflo-jekyll/tree/master/graphs).
 
 ## Installation
 
