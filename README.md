@@ -1,7 +1,7 @@
 noflo-jekyll [![Build Status](https://travis-ci.org/the-grid/noflo-jekyll.png?branch=master)](https://travis-ci.org/the-grid/noflo-jekyll)
 ============
 
-Flow-based implementation of static site generation.
+Flow-based reimplementation of the [Jekyll](http://jekyllrb.com/) static site generator.
 
 ![Main process flow](http://cdn.thegrid.io.s3.amazonaws.com/noflo/kickstarter/images/cards-v4-kickstarter-up.jpg)
 
@@ -83,3 +83,17 @@ Please report any [issues you encounter](https://github.com/the-grid/noflo-jekyl
 ### No web server
 
 The Ruby Jekyll includes a rudimentary web server for testing purposes. As that is outside of the scope of static site generation, this feature was not included into the NoFlo Jekyll implementation. You can serve the generated pages in many ways, including [grunt-contrib-connect](https://npmjs.org/package/grunt-contrib-connect), [simple-server](https://npmjs.org/package/simple-server), or [NoFlo webserver](http://noflojs.org/library/noflo-webserver/).
+
+## Testing and development
+
+Pull requests are welcome for any missing Jekyll features or other issues! If you want to work with the repository, it is best to be able to test it locally.
+
+Our main body of tests consists of a Jekyll website source in `test/fixtures/source` that we have generated to a static site with the Ruby Jekyll. We run NoFlo Jekyll against the same sources, and check that the results are identical (save for some whitespace differences).
+
+If you find things NoFlo Jekyll doesn't handle correctly, add them to that Jekyll site source, and then run Ruby Jekyll fixture regeneration with:
+
+    $ grunt jekyll
+
+After this you should be able to run the tests with:
+
+    $ grunt test
