@@ -1,6 +1,22 @@
 {
   "name": "noflo-jekyll",
+  "description": "Reimplementation of the Jekyll static site generator as a flow-based Node.js program",
   "version": "0.0.1",
+  "keywords": [
+    "noflo",
+    "jekyll",
+    "blog"
+  ],
+  "author": "Henri Bergius <henri.bergius@iki.fi>",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/noflo/noflo/raw/master/LICENSE"
+    }
+  ],
+  "engines": {
+    "node": ">=0.6.0"
+  },
   "dependencies": {
     "noflo": "0.4.x",
     "noflo-yaml": "0.0.x",
