@@ -4,7 +4,7 @@ noflo-jekyll [![Build Status](https://travis-ci.org/the-grid/noflo-jekyll.png?br
 Flow-based reimplementation of the [Jekyll](http://jekyllrb.com/) static site generator. This provides several advantages for [Node.js](http://nodejs.org/) and especially [NoFlo](http://noflojs.org/) developers:
 
 * **Pure JavaScript**, no need for Ruby or other runtimes in your environment. Especially handy if you're using [Grunt](http://gruntjs.com/) for site generation
-* **Other data sources**, in NoFlo everything is just a flow of data. You could easily plug in other data sources that the file system. For example, database query results
+* **Other data sources**, in NoFlo everything is just a flow of data. You could easily plug in other data sources than the file system. For example, database query results
 * **Different converters**, don't want to use Markdown? Just plug in your own mark-up processor component
 * **Different template engines**, don't want to use Liquid? Just plug in your own template processor component
 * **Use as library or executable**, this Jekyll implementation is just a NoFlo graph. You can use it in other NoFlo applications, as a Node.js module, or as a command-line executable
