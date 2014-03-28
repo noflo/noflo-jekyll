@@ -18,20 +18,20 @@
     "node": ">=0.6.0"
   },
   "dependencies": {
-    "noflo": "0.4.x",
+    "noflo": "0.5.x",
     "noflo-yaml": "0.0.x",
     "noflo-liquid": "0.0.x",
     "noflo-markdown": "0.0.x",
     "coffee-script": "1.4.x",
-    "noflo-filesystem": "~1.0.2",
-    "noflo-core": "~0.1.0",
-    "noflo-groups": "~0.1.0",
-    "noflo-objects": "~0.1.0",
-    "noflo-strings": "~0.1.0",
-    "noflo-flow": "~0.1.0",
-    "noflo-math": "~0.0.2",
-    "noflo-routers": "~0.1.0",
-    "noflo-packets": "~0.1.0"
+    "noflo-filesystem": "~1.0.5",
+    "noflo-core": "~0.1.4",
+    "noflo-groups": "~0.1.4",
+    "noflo-objects": "~0.1.9",
+    "noflo-strings": "~0.1.6",
+    "noflo-flow": "0.3.x",
+    "noflo-math": "~0.0.4",
+    "noflo-routers": "0.1.x",
+    "noflo-packets": "~0.1.5"
   },
   "devDependencies": {
     "rimraf": "2.x.x",
