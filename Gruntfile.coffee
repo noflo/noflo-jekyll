@@ -13,7 +13,7 @@ module.exports = ->
     nodeunit:
       all: ['test/*.coffee']
       options:
-        reporter: 'verbose'
+        reporter: 'default'
 
     # Run Ruby Jekyll against fixtures to provide the baseline to compare with
     jekyll:

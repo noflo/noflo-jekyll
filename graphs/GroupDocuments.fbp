@@ -35,9 +35,13 @@ FileDir() OUT -> VALUE SetGroup()
 
 Parsed() OUT -> IN SetGroup()
 'collection' -> KEY Group(GroupByObjectKey)
-SetGroup() OUT -> IN Group()
+SetGroup() OUT -> IN RemoveGroups(RemoveGroups) OUT -> IN Group()
 
-'_layouts,_includes,_posts,_' -> ROUTES DocRouter(GroupRouter)
+'_layouts' -> ROUTE DocRouter(routers/GroupRouter)
+'_includes' -> ROUTE DocRouter
+'_posts' -> ROUTE DocRouter
+'_' -> ROUTE DocRouter
+DocRouter ROUTE -> IN Drop(Drop)
 
 # Layout templates
 DocRouter() OUT -> IN Layout(Repeat)
