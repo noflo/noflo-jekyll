@@ -30,6 +30,8 @@ NewFiles() OUT -> IN SplitFile(Split)
 SplitFile() OUT -> IN ReadName(ReadGroup) GROUP -> FILENAME Save(WriteFile)
 SplitFile() OUT -> IN Save()
 
+ReadName OUT -> IN DropName(core/Drop)
+
 # Error handling
 MkDir() ERROR -> IN Errors(Merge)
 Save() ERROR -> IN Errors(Merge)

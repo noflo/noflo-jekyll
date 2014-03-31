@@ -12,6 +12,8 @@ module.exports = ->
     # Unit tests
     nodeunit:
       all: ['test/*.coffee']
+      options:
+        reporter: 'verbose'
 
     # Run Ruby Jekyll against fixtures to provide the baseline to compare with
     jekyll:

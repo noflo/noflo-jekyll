@@ -31,6 +31,8 @@ FileRouter() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
 'path' -> KEY FileName(GetObjectKey)
 FileRouter() MISSED -> IN FileName()
 
+FileRouter ROUTE -> IN DropRoute(core/Drop)
+
 # Error handling
 Dir() ERROR -> IN Display(Output)
 Stat() ERROR -> IN Display(Output)

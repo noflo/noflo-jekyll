@@ -28,11 +28,15 @@ exports.setUp = (callback) ->
   startTime = new Date
 
   graph = getGraph()
+  ended = false
   noflo.createNetwork graph, (network) ->
     timeout = null
     network.on 'end', (data) ->
+      return if ended
       timeout = setTimeout ->
+        return if ended
         do callback
+        ended = true
       , 3000
 
 checkBinaryFile = (subPath, test) ->

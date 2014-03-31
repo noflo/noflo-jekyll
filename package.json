@@ -30,7 +30,7 @@
     "noflo-strings": "~0.1.6",
     "noflo-flow": "0.3.x",
     "noflo-math": "~0.0.4",
-    "noflo-routers": "0.1.x",
+    "noflo-routers": "0.2.x",
     "noflo-packets": "~0.1.5"
   },
   "devDependencies": {
@@ -38,7 +38,7 @@
     "mimetype": "0.0.5",
     "grunt": "~0.4.1",
     "grunt-coffeelint": "0.0.7",
-    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-nodeunit": "~0.3.3",
     "grunt-cli": "~0.1.9",
     "grunt-jekyll": "~0.3.8"
   },
