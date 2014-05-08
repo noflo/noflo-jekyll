@@ -40,7 +40,8 @@
     "grunt-coffeelint": "0.0.7",
     "grunt-contrib-nodeunit": "~0.3.3",
     "grunt-cli": "~0.1.9",
-    "grunt-jekyll": "~0.3.8"
+    "grunt-jekyll": "~0.3.8",
+    "grunt-noflo-manifest": "^0.1.4"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"

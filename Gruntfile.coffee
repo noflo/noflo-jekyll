@@ -3,6 +3,12 @@ module.exports = ->
   @initConfig
     pkg: @file.readJSON 'package.json'
 
+    # Updating the package manifest files
+    noflo_manifest:
+      update:
+        files:
+          'package.json': ['graphs/*', 'components/*']
+
     # Coding standards
     coffeelint:
       all:
@@ -23,8 +29,9 @@ module.exports = ->
           dest: 'test/fixtures/jekyll'
           config: 'test/fixtures/source/_config.yml'
 
+  @loadNpmTasks 'grunt-noflo-manifest'
   @loadNpmTasks 'grunt-coffeelint'
   @loadNpmTasks 'grunt-contrib-nodeunit'
   @loadNpmTasks 'grunt-jekyll'
 
-  @registerTask 'test', ['coffeelint', 'nodeunit']
+  @registerTask 'test', ['coffeelint', 'noflo_manifest', 'nodeunit']
