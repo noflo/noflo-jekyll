@@ -49,20 +49,20 @@
   "main": "./index.js",
   "noflo": {
     "graphs": {
-      "Jekyll": "./graphs/Jekyll.json",
-      "GetConfig": "./graphs/GetConfig.fbp",
-      "LoadDocuments": "./graphs/LoadDocuments.fbp",
-      "GroupDocuments": "./graphs/GroupDocuments.fbp",
-      "BuildDocuments": "./graphs/BuildDocuments.fbp",
-      "CopyFile": "./graphs/CopyFile.fbp",
-      "SaveFile": "./graphs/SaveFile.fbp",
-      "ConvertMarkdown": "./graphs/ConvertMarkdown.fbp"
+      "BuildDocuments": "graphs/BuildDocuments.fbp",
+      "ConvertMarkdown": "graphs/ConvertMarkdown.fbp",
+      "CopyFile": "graphs/CopyFile.fbp",
+      "GetConfig": "graphs/GetConfig.fbp",
+      "GroupDocuments": "graphs/GroupDocuments.fbp",
+      "Jekyll": "graphs/Jekyll.json",
+      "LoadDocuments": "graphs/LoadDocuments.fbp",
+      "SaveFile": "graphs/SaveFile.fbp"
     },
     "components": {
-      "DocumentBuilder": "./components/DocumentBuilder.coffee",
-      "PathMetadata": "./components/PathMetadata.coffee",
-      "BuildPostPath": "./components/BuildPostPath.coffee",
-      "PostCollector": "./components/PostCollector.coffee"
+      "BuildPostPath": "components/BuildPostPath.coffee",
+      "DocumentBuilder": "components/DocumentBuilder.coffee",
+      "PathMetadata": "components/PathMetadata.coffee",
+      "PostCollector": "components/PostCollector.coffee"
     }
   },
   "scripts": {
