@@ -6,6 +6,7 @@ INPORT=Directory.IN:DIRECTORY
 # The config output is where the object containing configuration keys and
 # values is sent
 OUTPORT=Parse.OUT:CONFIG
+OUTPORT=Errors.OUT:ERROR
 
 # Build filename, /path/to/source/_config.yml
 '_config.yml' -> STRING BuildName(strings/SendString)
@@ -17,4 +18,5 @@ MakePath OUT -> IN Read(filesystem/ReadFile)
 Read OUT -> IN Parse(yaml/ParseYaml)
 
 # Error handling
-Read ERROR -> IN Display(core/Output)
+Read ERROR -> IN Errors(core/Merge)
+Parse ERROR -> IN Errors

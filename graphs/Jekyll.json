@@ -197,6 +197,16 @@
     {
       "src": {
         "process": "GetConfig",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GetConfig",
         "port": "config"
       },
       "tgt": {
