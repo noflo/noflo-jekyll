@@ -13,21 +13,21 @@ Directory(Split) OUT -> SOURCE Dir(ReadDir)
 Dir() OUT -> IN Stat(Stat)
 
 # Routing rules
-'isDirectory' -> ROUTES FileRouter(GroupRouter)
+'isDirectory' -> ROUTES MatchOnlyDirectories(GroupRouter)
 'isDirectory' -> KEY GroupWithIsDirectory(GroupByObjectKey)
 Stat() OUT -> IN DropGroups(RemoveGroups)
-DropGroups() OUT -> IN GroupWithIsDirectory() OUT -> IN FileRouter()
+DropGroups() OUT -> IN GroupWithIsDirectory() OUT -> IN MatchOnlyDirectories()
 
 # First route: subfolder
 'path=^(?:(?!\.git|_(?!(includes|layouts|posts))|node_modules).)*$' -> REGEXP FilterDirs(objects/FilterPropertyValue)
 'path' -> KEY SubDirectory(objects/GetObjectKey)
 'false' -> SENDGROUP SubDirectory
-FileRouter() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
+MatchOnlyDirectories() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
 
 # Missed routing: regular file
 'path' -> KEY FileName(objects/GetObjectKey)
 'false' -> SENDGROUP FileName
-FileRouter() MISSED -> IN FileName()
+MatchOnlyDirectories() MISSED -> IN FileName()
 
 # Error handling
 Dir() ERROR -> IN Display(Output)

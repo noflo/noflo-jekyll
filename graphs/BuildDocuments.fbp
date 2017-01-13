@@ -22,6 +22,7 @@ KickVar(Kick) OUT -> VALUE SetSiteVar()
 SplitDoc() OUT -> IN KickVar()
 
 'paginator' -> KEY GetPaginator(GetObjectKey)
+'false' -> SENDGROUP GetPaginator
 'paginator' -> PROPERTY SetPaginatorVar(SetPropertyValue)
 SplitDoc() OUT -> IN GetPaginator()
 SplitDoc() OUT -> START CreateVars(CreateObject)
@@ -32,8 +33,10 @@ MergePaginator() OUT -> VALUE SetPaginatorVar()
 
 Buffer() OUT -> IN SplitBufferResult(Split)
 '0' -> KEY GetTemplate(GetObjectKey)
+'false' -> SENDGROUP GetTemplate
 SplitBufferResult() OUT -> IN GetTemplate() OUT -> IN FirstOnly(FirstGroup)
 FirstOnly() OUT -> TEMPLATE Liquid(liquid/Template)
 '1' -> KEY GetVariables(GetObjectKey)
+'false' -> SENDGROUP GetVariables
 SplitBufferResult() OUT -> IN GetVariables()
 GetVariables() OUT -> IN SplitVariables(Split) OUT -> VARIABLES Liquid()

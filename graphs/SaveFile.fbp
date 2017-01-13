@@ -4,10 +4,9 @@ INPORT=MapFileName.IN:IN
 OUTPORT=Save.OUT:OUT
 OUTPORT=Errors.OUT:ERROR
 
-'=' -> DELIMITER CompileReplacement(CompileString)
-Source(Split) OUT -> STRING HoldSource(SendString) OUT -> IN CompileReplacement()
+Source(core/Split) OUT -> STRING HoldSource(SendString) OUT -> FROM CompileReplacement(jekyll/PrepareDirectoryMap)
 Destination(Split) OUT -> IN HoldSource()
-Destination(Split) OUT -> IN CompileReplacement()
+Destination(Split) OUT -> TO CompileReplacement()
 CompileReplacement() OUT -> REGEXP MapFileName(MapGroup)
 
 # Convert some filename endings

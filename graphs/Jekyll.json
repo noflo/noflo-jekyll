@@ -1,5 +1,10 @@
 {
-  "properties": {},
+  "properties": {
+    "name": "Jekyll",
+    "environment": {
+      "type": "noflo-nodejs"
+    }
+  },
   "inports": {
     "source": {
       "process": "Source",
