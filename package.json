@@ -33,12 +33,15 @@
     "noflo-packets": "^0.1.8"
   },
   "devDependencies": {
-    "rimraf": "^2.5.4",
-    "mimetype": "^0.0.8",
+    "chai": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-coffeelint": "^0.0.16",
     "grunt-jekyll": "^0.4.4",
-    "grunt-noflo-manifest": "^0.1.12"
+    "grunt-mocha-test": "^0.13.2",
+    "grunt-noflo-manifest": "^0.1.12",
+    "mimetype": "^0.0.8",
+    "mocha": "^3.2.0",
+    "rimraf": "^2.5.4"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
