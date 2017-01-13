@@ -2,21 +2,21 @@
 # directory to under a corresponding folder in a destination directory.
 
 # The source basedir
-EXPORT=SOURCE.IN:SOURCE
+INPORT=Source.IN:SOURCE
 
 # The destination basedir
-EXPORT=DESTINATION.IN:DESTINATION
+INPORT=Destination.IN:DESTINATION
 
 # File paths to be copied
-EXPORT=FILE.IN:IN
+INPORT=File.IN:IN
 
 # Full path of a successfully copied file
-EXPORT=COPY.OUT:OUT
+OUTPORT=Copy.OUT:OUT
 
 # Error handling
-EXPORT=ERRORS.OUT:ERRORS
+OUTPORT=Errors.OUT:ERRORS
 
-Source(core/Split) OUT -> PATTERN NewPath(Replace)
+Source(core/Split) OUT -> PATTERN NewPath(strings/Replace)
 Destination(core/Split) OUT -> REPLACEMENT NewPath()
 File(core/Split) OUT -> IN NewPath()
 NewPath() OUT -> IN NewFile(core/Split)
@@ -24,15 +24,14 @@ NewPath() OUT -> IN NewFile(core/Split)
 # Create folders for the files
 NewFile() OUT -> IN NewDir(DirName)
 NewDir() OUT -> IN UniqueDir(UniquePacket)
-UniqueDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MakeDir(MakeDir)
-MakeDir() LOAD -> LOAD ThrottleDir()
+UniqueDir() OUT -> IN MakeDir(MakeDir)
 
 # Copy files over once directories have been created
 NewFile() OUT -> COLLECT NewFiles(filesystem/DirectoryBuffer)
 MakeDir() OUT -> RELEASE NewFiles()
 NewFiles() OUT -> IN PrepareCopy(core/Split)
 PrepareCopy() OUT -> DESTINATION Copy(CopyFile)
-Destination() OUT -> PATTERN OrigPath(Replace)
+Destination() OUT -> PATTERN OrigPath(strings/Replace)
 Source() OUT -> REPLACEMENT OrigPath()
 PrepareCopy() OUT -> IN OrigPath() OUT -> SOURCE Copy()
 

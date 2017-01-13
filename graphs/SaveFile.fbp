@@ -1,8 +1,8 @@
-EXPORT=SOURCE.IN:SOURCE
-EXPORT=DESTINATION.IN:DESTINATION
-EXPORT=MAPFILENAME.IN:IN
-EXPORT=SAVE.OUT:OUT
-EXPORT=ERRORS.OUT:ERROR
+INPORT=Source.IN:SOURCE
+INPORT=Destination.IN:DESTINATION
+INPORT=MapFileName.IN:IN
+OUTPORT=Save.OUT:OUT
+OUTPORT=Errors.OUT:ERROR
 
 '=' -> DELIMITER CompileReplacement(CompileString)
 Source(Split) OUT -> STRING HoldSource(SendString) OUT -> IN CompileReplacement()
@@ -20,8 +20,7 @@ MapFileName() OUT -> IN ReadPath(ReadGroup)
 
 # Create folders for the files
 ReadPath() GROUP -> IN NewDir(DirName)
-NewDir() OUT -> IN ThrottleDir(Throttle) OUT -> IN MkDir(MakeDir)
-MkDir() LOAD -> LOAD ThrottleDir()
+NewDir() OUT -> IN MkDir(MakeDir)
 
 # Save files when their directories are ready
 ReadPath() OUT -> COLLECT NewFiles(filesystem/DirectoryGroupBuffer)

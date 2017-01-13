@@ -2,19 +2,15 @@
 # for processing.
 #
 # The directory inport accepts a path for a folder where to start loading
-EXPORT=DIRECTORY.IN:DIRECTORY
+INPORT=Directory.IN:DIRECTORY
 # The subdirectory outport is where the path each subfolder is sent
-EXPORT=SUBDIRECTORY.OUT:SUBDIRECTORY
+OUTPORT=SubDirectory.OUT:SUBDIRECTORY
 # The document outport is where the path of each regular file is sent
-EXPORT=FILENAME.OUT:DOCUMENT
+OUTPORT=FileName.OUT:DOCUMENT
 
-'10' -> MAX ThrottleDir(Throttle)
-Directory(Split) OUT -> IN ThrottleDir() OUT -> SOURCE Dir(ReadDir)
-Dir() LOAD -> IN CountOpen(CountSum) OUT -> LOAD ThrottleDir()
+Directory(Split) OUT -> SOURCE Dir(ReadDir)
 
-'10' -> MAX ThrottleStat(Throttle)
-Dir() OUT -> IN ThrottleStat(Throttle) OUT -> IN Stat(Stat)
-Stat() LOAD -> IN CountOpen() OUT -> LOAD ThrottleStat()
+Dir() OUT -> IN Stat(Stat)
 
 # Routing rules
 'isDirectory' -> ROUTES FileRouter(GroupRouter)

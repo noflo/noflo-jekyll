@@ -1,5 +1,5 @@
-EXPORT=SPLIT.IN:IN
-EXPORT=SETBODY.OUT:OUT
+INPORT=Split.IN:IN
+OUTPORT=SetBody.OUT:OUT
 
 'body' -> KEY GetBody(GetObjectKey)
 Split(Split) OUT -> IN GetBody()
