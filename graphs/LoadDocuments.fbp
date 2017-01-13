@@ -14,20 +14,20 @@ Dir() OUT -> IN Stat(Stat)
 
 # Routing rules
 'isDirectory' -> ROUTES FileRouter(GroupRouter)
-'isDirectory' -> KEY Group(GroupByObjectKey)
+'isDirectory' -> KEY GroupWithIsDirectory(GroupByObjectKey)
 Stat() OUT -> IN DropGroups(RemoveGroups)
-DropGroups() OUT -> IN Group() OUT -> IN FileRouter()
+DropGroups() OUT -> IN GroupWithIsDirectory() OUT -> IN FileRouter()
 
 # First route: subfolder
 'path=^(?:(?!\.git|_(?!(includes|layouts|posts))|node_modules).)*$' -> REGEXP FilterDirs(objects/FilterPropertyValue)
-'path' -> KEY SubDirectory(GetObjectKey)
+'path' -> KEY SubDirectory(objects/GetObjectKey)
+'false' -> SENDGROUP SubDirectory
 FileRouter() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
 
 # Missed routing: regular file
-'path' -> KEY FileName(GetObjectKey)
+'path' -> KEY FileName(objects/GetObjectKey)
+'false' -> SENDGROUP FileName
 FileRouter() MISSED -> IN FileName()
-
-FileRouter ROUTE -> IN DropRoute(core/Drop)
 
 # Error handling
 Dir() ERROR -> IN Display(Output)
