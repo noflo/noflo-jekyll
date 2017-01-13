@@ -22,19 +22,19 @@ File(core/Split) OUT -> IN NewPath()
 NewPath() OUT -> IN NewFile(core/Split)
 
 # Create folders for the files
-NewFile() OUT -> IN NewDir(DirName)
-NewDir() OUT -> IN UniqueDir(UniquePacket)
-UniqueDir() OUT -> IN MakeDir(MakeDir)
+NewFile() OUT -> IN NewDir(filesystem/DirName)
+NewDir() OUT -> IN UniqueDir(packets/UniquePacket)
+UniqueDir() OUT -> IN MakeDir(filesystem/MakeDir)
 
 # Copy files over once directories have been created
 NewFile() OUT -> COLLECT NewFiles(filesystem/DirectoryBuffer)
 MakeDir() OUT -> RELEASE NewFiles()
 NewFiles() OUT -> IN PrepareCopy(core/Split)
-PrepareCopy() OUT -> DESTINATION Copy(CopyFile)
+PrepareCopy() OUT -> DESTINATION Copy(filesystem/CopyFile)
 Destination() OUT -> PATTERN OrigPath(strings/Replace)
 Source() OUT -> REPLACEMENT OrigPath()
 PrepareCopy() OUT -> IN OrigPath() OUT -> SOURCE Copy()
 
 # Error handling
-MakeDir() ERROR -> IN Errors(Merge)
-Copy() ERROR -> IN Errors(Merge)
+MakeDir() ERROR -> IN Errors(core/Merge)
+Copy() ERROR -> IN Errors(core/Merge)
