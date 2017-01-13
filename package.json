@@ -12,31 +12,33 @@
   "engines": {
     "node": ">=0.6.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noflo/noflo-jekyll.git"
+  },
   "dependencies": {
-    "noflo": "0.5.x",
-    "noflo-yaml": "0.0.x",
-    "noflo-liquid": "0.0.x",
-    "noflo-markdown": "0.0.x",
-    "coffee-script": "1.4.x",
-    "noflo-filesystem": "~1.0.5",
-    "noflo-core": "~0.1.4",
-    "noflo-groups": "~0.1.4",
-    "noflo-objects": "~0.1.9",
-    "noflo-strings": "~0.1.6",
-    "noflo-flow": "0.3.x",
-    "noflo-math": "~0.0.4",
-    "noflo-routers": "0.2.x",
-    "noflo-packets": "~0.1.5"
+    "noflo": "^0.7.9",
+    "noflo-yaml": "^0.1.2",
+    "noflo-liquid": "^0.1.0",
+    "noflo-markdown": "^0.2.0",
+    "coffee-script": "^1.11.1",
+    "noflo-filesystem": "^1.0.9",
+    "noflo-core": "^0.2.3",
+    "noflo-groups": "^0.1.12",
+    "noflo-objects": "^0.1.9",
+    "noflo-strings": "^0.2.0",
+    "noflo-flow": "^0.4.0",
+    "noflo-math": "^0.0.9",
+    "noflo-routers": "^0.2.2",
+    "noflo-packets": "^0.1.8"
   },
   "devDependencies": {
-    "rimraf": "2.x.x",
-    "mimetype": "0.0.5",
-    "grunt": "~0.4.1",
-    "grunt-coffeelint": "0.0.7",
-    "grunt-contrib-nodeunit": "~0.3.3",
-    "grunt-cli": "~0.1.9",
-    "grunt-jekyll": "~0.3.8",
-    "grunt-noflo-manifest": "^0.1.4"
+    "rimraf": "^2.5.4",
+    "mimetype": "^0.0.8",
+    "grunt": "^1.0.1",
+    "grunt-coffeelint": "^0.0.16",
+    "grunt-jekyll": "^0.4.4",
+    "grunt-noflo-manifest": "^0.1.12"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
