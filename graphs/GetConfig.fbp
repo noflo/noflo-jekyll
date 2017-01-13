@@ -9,8 +9,8 @@ OUTPORT=Parse.OUT:CONFIG
 
 # Build filename, /path/to/source/_config.yml
 '_config.yml' -> STRING BuildName(strings/SendString)
-Directory(core/Split) OUT -> DIRECTORY MakePath(jekyll/MakePath)
-Directory OUT -> IN BuildName OUT -> PATH MakePath
+Directory(core/Split) OUT -> DIRECTORY MakePath(filesystem/JoinPath)
+Directory OUT -> IN BuildName OUT -> FILE MakePath
 
 # Read and parse
 MakePath OUT -> IN Read(filesystem/ReadFile)

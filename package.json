@@ -22,7 +22,7 @@
     "noflo-liquid": "^0.1.0",
     "noflo-markdown": "^0.2.0",
     "coffee-script": "^1.11.1",
-    "noflo-filesystem": "^1.0.9",
+    "noflo-filesystem": "^1.1.0",
     "noflo-core": "^0.2.3",
     "noflo-groups": "^0.1.12",
     "noflo-objects": "^0.1.9",
@@ -61,7 +61,6 @@
     "components": {
       "BuildPostPath": "components/BuildPostPath.coffee",
       "DocumentBuilder": "components/DocumentBuilder.coffee",
-      "MakePath": "components/MakePath.coffee",
       "PathMetadata": "components/PathMetadata.coffee",
       "PostCollector": "components/PostCollector.coffee"
     }
