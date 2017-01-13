@@ -25,8 +25,8 @@
     "noflo-filesystem": "^1.1.0",
     "noflo-core": "^0.2.3",
     "noflo-groups": "^0.1.12",
-    "noflo-objects": "^0.1.9",
-    "noflo-strings": "^0.2.0",
+    "noflo-objects": "^0.2.0",
+    "noflo-strings": "^0.1.14",
     "noflo-flow": "^0.4.0",
     "noflo-math": "^0.0.9",
     "noflo-routers": "^0.2.2",
@@ -62,7 +62,8 @@
       "BuildPostPath": "components/BuildPostPath.coffee",
       "DocumentBuilder": "components/DocumentBuilder.coffee",
       "PathMetadata": "components/PathMetadata.coffee",
-      "PostCollector": "components/PostCollector.coffee"
+      "PostCollector": "components/PostCollector.coffee",
+      "PrepareDirectoryMap": "components/PrepareDirectoryMap.coffee"
     }
   },
   "scripts": {
