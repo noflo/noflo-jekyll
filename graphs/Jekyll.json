@@ -1,23 +1,29 @@
 {
   "properties": {},
-  "exports": [
-    {
-      "private": "source.in",
-      "public": "source"
+  "inports": {
+    "source": {
+      "process": "Source",
+      "port": "in",
+      "metadata": {}
     },
-    {
-      "private": "destination.in",
-      "public": "destination"
-    },
-    {
-      "private": "generated.out",
-      "public": "generated"
-    },
-    {
-      "private": "errors.out",
-      "public": "errors"
+    "destination": {
+      "process": "Destination",
+      "port": "in",
+      "metadata": {}
     }
-  ],
+  },
+  "outports": {
+    "generated": {
+      "process": "Generated",
+      "port": "out",
+      "metadata": {}
+    },
+    "errors": {
+      "process": "Errors",
+      "port": "out",
+      "metadata": {}
+    }
+  },
   "processes": {
     "Source": {
       "component": "core/Split",
