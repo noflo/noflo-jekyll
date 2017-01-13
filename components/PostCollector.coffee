@@ -17,6 +17,8 @@ sortByDate = (post1, post2) ->
 class PostCollector extends noflo.Component
   constructor: ->
     @config = null
+    @buffer = []
+    @wasDone = false
 
     @inPorts =
       config: new noflo.Port
@@ -28,9 +30,15 @@ class PostCollector extends noflo.Component
       @normalizeConfig data
 
     @inPorts.in.on 'data', (data) =>
+      unless @config
+        @buffer.push data
+        return
       @processPost data
 
     @inPorts.in.on 'disconnect', =>
+      unless @config
+        @wasDone is true
+        return
       return unless @outPorts.out.isAttached()
       @outPorts.out.send @sortPosts @config
       @outPorts.out.disconnect()
@@ -39,6 +47,13 @@ class PostCollector extends noflo.Component
     @config = config
     @config.posts = []
     @config.categories = {}
+
+    if @buffer.length
+      @processPost post for post in @buffer
+      @buffer = []
+      return unless @wasDone
+      @outPorts.out.send @sortPorts @config
+      @outPorts.out.disconnect()
 
   sortPosts: (config) ->
     config.posts.sort sortByDate
