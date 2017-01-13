@@ -3,3 +3,4 @@ node_modules/
 bergie/
 npm-debug.log
 fbp.json
+spec/fixtures/noflo
