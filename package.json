@@ -61,11 +61,13 @@
     "components": {
       "BuildPostPath": "components/BuildPostPath.coffee",
       "DocumentBuilder": "components/DocumentBuilder.coffee",
+      "MakePath": "components/MakePath.coffee",
       "PathMetadata": "components/PathMetadata.coffee",
       "PostCollector": "components/PostCollector.coffee"
     }
   },
   "scripts": {
-    "test": "./node_modules/.bin/grunt test"
+    "test": "grunt test",
+    "postinstall": "./node_modules/.bin/noflo-cache-preheat"
   }
 }
