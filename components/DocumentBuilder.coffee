@@ -173,6 +173,7 @@ class DocumentBuilder extends noflo.Component
   # Check whether a document is ready to be created, of if it is
   # still waiting for some parts (includes, posts, layouts)
   checkReady: (templateData) ->
+    return false unless @config
     if templateData.body
       return false unless @checkIncludes templateData.body
       return false unless @checkPosts templateData.body, templateData
