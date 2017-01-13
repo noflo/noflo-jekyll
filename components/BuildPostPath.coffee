@@ -27,7 +27,7 @@ class BuildPostPath extends noflo.Component
         groups: @groups.slice 0
 
     @inPorts.in.on 'endgroup', =>
-      groups.pop()
+      @groups.pop()
 
     @inPorts.in.on 'disconnect', =>
       @outPorts.out.disconnect()
