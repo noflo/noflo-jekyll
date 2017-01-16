@@ -43,4 +43,9 @@ generator.once('end', function(end) {
   process.exit(0);
 });
 
-generator.run();
+generator.run(function (err) {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  })
+});

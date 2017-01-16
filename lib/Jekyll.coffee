@@ -6,8 +6,9 @@ class Jekyll extends events.EventEmitter
   constructor: (source, target) ->
     @graph = @prepareGraph source, target
 
-  run: ->
-    @createNetwork @graph, (network) =>
+  run: (callback) ->
+    @createNetwork @graph, (err, network) =>
+      return callback err if err
       @emit 'network', network
 
       network.on 'start', (start) =>
@@ -15,6 +16,7 @@ class Jekyll extends events.EventEmitter
 
       network.on 'end', (start) =>
         @emit 'end', start
+        callback null
 
   createNetwork: (graph, callback) ->
     graph.baseDir = path.resolve __dirname, '../'
