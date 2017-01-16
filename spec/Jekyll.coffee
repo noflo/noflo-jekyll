@@ -1,4 +1,4 @@
-noflo = require 'noflo'
+jekyll = require '../index'
 rimraf = require 'rimraf'
 chai = require 'chai'
 fs = require 'fs'
@@ -65,68 +65,24 @@ checkDirectory = (subPath) ->
       continue
     checkFile path.join subPath, file
 
-describe 'Jekyll graph', ->
+describe 'Jekyll program', ->
   c = null
   source = null
   destination = null
   generated = null
   errors = null
-  before (done) ->
-    @timeout 10000
-    loader = new noflo.ComponentLoader baseDir
-    loader.load 'jekyll/Jekyll', (err, instance) ->
-      return done err if err
-      instance.once 'ready', ->
-        groupsById = {}
-        prepId = (data) ->
-          id = data.id
-          if data.subgraph
-            id = "#{data.subgraph} #{id}"
-          id
-        ###
-        instance.network.on 'connect', (data) ->
-          console.log prepId(data), 'CONN'
-        instance.network.on 'begingroup', (data) ->
-          groupsById[data.id] = [] unless groupsById[data.id]
-          groupsById[data.id].push data.group
-          console.log prepId(data), '< ' + groupsById[data.id].join ' < '
-        instance.network.on 'data', (data) ->
-          console.log prepId(data), 'DATA'
-        instance.network.on 'endgroup', (data) ->
-          console.log prepId(data), '> ' + groupsById[data.id].join ' > '
-          groupsById[data.id].pop()
-        instance.network.on 'disconnect', (data) ->
-          console.log prepId(data), 'DISC'
-        instance.network.on 'start', ->
-          console.log "START"
-        instance.network.on 'end', ->
-          console.log "END"
-        ###
-        c = instance
-        source = noflo.internalSocket.createSocket()
-        c.inPorts.source.attach source
-        destination = noflo.internalSocket.createSocket()
-        c.inPorts.destination.attach destination
-        c.start done
-  beforeEach ->
-    generated = noflo.internalSocket.createSocket()
-    c.outPorts.generated.attach generated
-    errors = noflo.internalSocket.createSocket()
-    c.outPorts.errors.attach errors
-  afterEach ->
-    c.outPorts.generated.detach generated
-    c.outPorts.errors.detach errors
   after (done) ->
     rimraf nofloDir, done
 
   describe 'generating a site', ->
     it 'should complete', (done) ->
       @timeout 10000
-      c.network.once 'end', (data) ->
+      generator = new jekyll.Jekyll sourceDir, nofloDir
+      generator.on 'error', (data) ->
+        done err
+      generator.on 'end', (data) ->
         done()
-      errors.on 'data', (data) ->
-        done data
-      source.send sourceDir
-      destination.send nofloDir
+      generator.run (err) ->
+        return done err if err
     it 'should have created the same files as Jekyll', (done) ->
       checkDirectory ''
