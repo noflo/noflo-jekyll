@@ -2,6 +2,8 @@
 # parses them, and outputs them to the corresponding output
 # port.
 
+# @runtime noflo-nodejs
+
 # Filenames to be processed. These should only contain text/* files
 INPORT=Read.IN:IN
 
@@ -21,38 +23,38 @@ OUTPORT=DocRouter.MISSED:STATIC
 OUTPORT=Read.ERROR:ERRORS
 
 # Parse Front Matter from files
-Read(ReadFile) OUT -> CONTENT Parse(yaml/ParseFrontmatter)
-Parse() RESULTS -> IN Parsed(Split)
+Read(filesystem/ReadFile) OUT -> CONTENT Parse(yaml/ParseFrontmatter)
+Parse RESULTS -> IN Parsed(core/Split)
 
-'path' -> KEY FileName(GetObjectKey)
-Parsed() OUT -> IN FileName()
-'/' -> DELIMITER SplitPath(SplitStr)
-FileName() OUT -> IN DirName(DirName)
-DirName() OUT -> IN SplitPath()
-SplitPath() OUT -> IN FileDir(LastPacket)
-'collection' -> PROPERTY SetGroup(SetPropertyValue)
-FileDir() OUT -> VALUE SetGroup()
+'path' -> KEY FileName(objects/GetObjectKey)
+Parsed OUT -> IN FileName
+'/' -> DELIMITER SplitPath(strings/SplitStr)
+FileName OUT -> IN DirName(filesystem/DirName)
+DirName OUT -> IN SplitPath
+SplitPath OUT -> IN FileDir(packets/LastPacket)
+'collection' -> PROPERTY SetGroup(objects/SetPropertyValue)
+FileDir OUT -> VALUE SetGroup
 
-Parsed() OUT -> IN SetGroup()
-'collection' -> KEY Group(GroupByObjectKey)
-SetGroup() OUT -> IN RemoveGroups(RemoveGroups) OUT -> IN Group()
+Parsed OUT -> IN SetGroup
+'collection' -> KEY Group(groups/GroupByObjectKey)
+SetGroup OUT -> IN RemoveGroups(groups/RemoveGroups) OUT -> IN Group
 
 '_layouts' -> ROUTE DocRouter(routers/GroupRouter)
 '_includes' -> ROUTE DocRouter
 '_posts' -> ROUTE DocRouter
 '_' -> ROUTE DocRouter
-DocRouter ROUTE -> IN Drop(Drop)
+DocRouter ROUTE -> IN Drop(core/Drop)
 
 # Layout templates
-DocRouter() OUT -> IN Layout(Repeat)
+DocRouter OUT -> IN Layout(core/Repeat)
 
 # Includes
-DocRouter() OUT -> IN Include(Repeat)
+DocRouter OUT -> IN Include(core/Repeat)
 
 # Posts
-DocRouter() OUT -> IN Post(Repeat)
+DocRouter OUT -> IN Post(core/Repeat)
 
 # Other _ directories
-DocRouter() OUT -> IN DropUnderscores(Drop)
+DocRouter OUT -> IN DropUnderscores(core/Drop)
 
-Group() OUT -> IN DocRouter()
+Group OUT -> IN DocRouter

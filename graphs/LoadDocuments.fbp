@@ -7,28 +7,32 @@ INPORT=Directory.IN:DIRECTORY
 OUTPORT=SubDirectory.OUT:SUBDIRECTORY
 # The document outport is where the path of each regular file is sent
 OUTPORT=FileName.OUT:DOCUMENT
+# The error outport is where errors get sent
+OUTPORT=Errors.OUT:ERROR
 
-Directory(Split) OUT -> SOURCE Dir(ReadDir)
+# @runtime noflo-nodejs
 
-Dir() OUT -> IN Stat(Stat)
+Directory(core/Split) OUT -> SOURCE Dir(filesystem/ReadDir)
+
+Dir OUT -> IN Stat(filesystem/Stat)
 
 # Routing rules
-'isDirectory' -> ROUTES MatchOnlyDirectories(GroupRouter)
-'isDirectory' -> KEY GroupWithIsDirectory(GroupByObjectKey)
-Stat() OUT -> IN DropGroups(RemoveGroups)
-DropGroups() OUT -> IN GroupWithIsDirectory() OUT -> IN MatchOnlyDirectories()
+'isDirectory' -> ROUTES MatchOnlyDirectories(routers/GroupRouter)
+'isDirectory' -> KEY GroupWithIsDirectory(groups/GroupByObjectKey)
+Stat OUT -> IN DropGroups(groups/RemoveGroups)
+DropGroups OUT -> IN GroupWithIsDirectory OUT -> IN MatchOnlyDirectories
 
 # First route: subfolder
 'path=^(?:(?!\.git|_(?!(includes|layouts|posts))|node_modules).)*$' -> REGEXP FilterDirs(objects/FilterPropertyValue)
 'path' -> KEY SubDirectory(objects/GetObjectKey)
 'false' -> SENDGROUP SubDirectory
-MatchOnlyDirectories() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
+MatchOnlyDirectories OUT -> IN FilterDirs OUT -> IN SubDirectory
 
 # Missed routing: regular file
 'path' -> KEY FileName(objects/GetObjectKey)
 'false' -> SENDGROUP FileName
-MatchOnlyDirectories() MISSED -> IN FileName()
+MatchOnlyDirectories MISSED -> IN FileName
 
 # Error handling
-Dir() ERROR -> IN Display(Output)
-Stat() ERROR -> IN Display(Output)
+Dir ERROR -> IN Errors(core/Merge)
+Stat ERROR -> IN Errors

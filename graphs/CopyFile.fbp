@@ -1,6 +1,8 @@
 # This graph copies files based on a given path from a source base
 # directory to under a corresponding folder in a destination directory.
 
+# @runtime noflo-nodejs
+
 # The source basedir
 INPORT=Source.IN:SOURCE
 
@@ -17,24 +19,24 @@ OUTPORT=Copy.OUT:OUT
 OUTPORT=Errors.OUT:ERRORS
 
 Source(core/Split) OUT -> PATTERN NewPath(strings/Replace)
-Destination(core/Split) OUT -> REPLACEMENT NewPath()
-File(core/Split) OUT -> IN NewPath()
-NewPath() OUT -> IN NewFile(core/Split)
+Destination(core/Split) OUT -> REPLACEMENT NewPath
+File(core/Split) OUT -> IN NewPath
+NewPath OUT -> IN NewFile(core/Split)
 
 # Create folders for the files
-NewFile() OUT -> IN NewDir(filesystem/DirName)
-NewDir() OUT -> IN UniqueDir(packets/UniquePacket)
-UniqueDir() OUT -> IN MakeDir(filesystem/MakeDir)
+NewFile OUT -> IN NewDir(filesystem/DirName)
+NewDir OUT -> IN UniqueDir(packets/UniquePacket)
+UniqueDir OUT -> IN MakeDir(filesystem/MakeDir)
 
 # Copy files over once directories have been created
-NewFile() OUT -> COLLECT NewFiles(filesystem/DirectoryBuffer)
-MakeDir() OUT -> RELEASE NewFiles()
-NewFiles() OUT -> IN PrepareCopy(core/Split)
-PrepareCopy() OUT -> DESTINATION Copy(filesystem/CopyFile)
-Destination() OUT -> PATTERN OrigPath(strings/Replace)
-Source() OUT -> REPLACEMENT OrigPath()
-PrepareCopy() OUT -> IN OrigPath() OUT -> SOURCE Copy()
+NewFile OUT -> COLLECT NewFiles(filesystem/DirectoryBuffer)
+MakeDir OUT -> RELEASE NewFiles
+NewFiles OUT -> IN PrepareCopy(core/Split)
+PrepareCopy OUT -> DESTINATION Copy(filesystem/CopyFile)
+Destination OUT -> PATTERN OrigPath(strings/Replace)
+Source OUT -> REPLACEMENT OrigPath
+PrepareCopy OUT -> IN OrigPath OUT -> SOURCE Copy
 
 # Error handling
-MakeDir() ERROR -> IN Errors(core/Merge)
-Copy() ERROR -> IN Errors(core/Merge)
+MakeDir ERROR -> IN Errors(core/Merge)
+Copy ERROR -> IN Errors(core/Merge)

@@ -276,6 +276,16 @@
     },
     {
       "src": {
+        "process": "LoadDocuments",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
         "process": "DetermineType",
         "port": "out"
       },

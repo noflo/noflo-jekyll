@@ -1,6 +1,8 @@
 noflo = require 'noflo'
 path = require 'path'
 
+# @runtime noflo-nodejs
+
 class BuildPostPath extends noflo.Component
   constructor: ->
     @inPorts =

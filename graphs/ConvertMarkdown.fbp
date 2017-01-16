@@ -1,10 +1,12 @@
 INPORT=Split.IN:IN
 OUTPORT=SetBody.OUT:OUT
 
-'body' -> KEY GetBody(GetObjectKey)
-Split(Split) OUT -> IN GetBody()
+# @runtime noflo-nodejs
 
-GetBody() OUT -> IN Convert(markdown/ParseMarkdown)
-'body' -> PROPERTY SetBody(SetPropertyValue)
-Convert() OUT -> VALUE SetBody()
-Split() OUT -> IN SetBody()
+'body' -> KEY GetBody(objects/GetObjectKey)
+Split(core/Split) OUT -> IN GetBody
+
+GetBody OUT -> IN Convert(markdown/ParseMarkdown)
+'body' -> PROPERTY SetBody(objects/SetPropertyValue)
+Convert OUT -> VALUE SetBody
+Split OUT -> IN SetBody

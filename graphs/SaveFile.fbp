@@ -4,32 +4,34 @@ INPORT=MapFileName.IN:IN
 OUTPORT=Save.OUT:OUT
 OUTPORT=Errors.OUT:ERROR
 
-Source(core/Split) OUT -> STRING HoldSource(SendString) OUT -> FROM CompileReplacement(jekyll/PrepareDirectoryMap)
-Destination(Split) OUT -> IN HoldSource()
-Destination(Split) OUT -> TO CompileReplacement()
-CompileReplacement() OUT -> REGEXP MapFileName(MapGroup)
+# @runtime noflo-nodejs
+
+Source(core/Split) OUT -> STRING HoldSource(strings/SendString) OUT -> FROM CompileReplacement(jekyll/PrepareDirectoryMap)
+Destination(core/Split) OUT -> IN HoldSource
+Destination(core/Split) OUT -> TO CompileReplacement
+CompileReplacement OUT -> REGEXP MapFileName(groups/MapGroup)
 
 # Convert some filename endings
 # TODO: Move to main control
-'\.md=.html' -> REGEXP MapFileName()
-'\.markdown=.html' -> REGEXP MapFileName()
+'\.md=.html' -> REGEXP MapFileName
+'\.markdown=.html' -> REGEXP MapFileName
 
 # Get the new filename
-MapFileName() OUT -> IN ReadPath(ReadGroup)
+MapFileName OUT -> IN ReadPath(groups/ReadGroup)
 
 # Create folders for the files
-ReadPath() GROUP -> IN NewDir(DirName)
-NewDir() OUT -> IN MkDir(MakeDir)
+ReadPath GROUP -> IN NewDir(filesystem/DirName)
+NewDir OUT -> IN MkDir(filesystem/MakeDir)
 
 # Save files when their directories are ready
-ReadPath() OUT -> COLLECT NewFiles(filesystem/DirectoryGroupBuffer)
-MkDir() OUT -> RELEASE NewFiles()
-NewFiles() OUT -> IN SplitFile(Split)
-SplitFile() OUT -> IN ReadName(ReadGroup) GROUP -> FILENAME Save(WriteFile)
-SplitFile() OUT -> IN Save()
+ReadPath OUT -> COLLECT NewFiles(filesystem/DirectoryGroupBuffer)
+MkDir OUT -> RELEASE NewFiles
+NewFiles OUT -> IN SplitFile(core/Split)
+SplitFile OUT -> IN ReadName(groups/ReadGroup) GROUP -> FILENAME Save(filesystem/WriteFile)
+SplitFile OUT -> IN Save
 
 ReadName OUT -> IN DropName(core/Drop)
 
 # Error handling
-MkDir() ERROR -> IN Errors(Merge)
-Save() ERROR -> IN Errors(Merge)
+MkDir ERROR -> IN Errors(core/Merge)
+Save ERROR -> IN Errors(core/Merge)

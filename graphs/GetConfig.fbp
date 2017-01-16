@@ -1,5 +1,7 @@
 # This graph reads the _config.yml file from the given directory, parses it, and sends the configuration values out
-#
+
+# @runtime noflo-nodejs
+
 # The directory inport accepts a path for a folder where to look for a 
 # configuration file
 INPORT=Directory.IN:DIRECTORY

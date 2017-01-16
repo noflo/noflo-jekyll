@@ -5,38 +5,40 @@ INPORT=KickVar.DATA:CONFIG
 INPORT=Build.CONFIG:READYCONFIG
 OUTPORT=Liquid.OUT:GENERATED
 
+# @runtime noflo-nodejs
+
 Includes(Split) OUT -> INCLUDES Build(jekyll/DocumentBuilder)
-Includes() OUT -> INCLUDES Liquid(liquid/Template)
+Includes OUT -> INCLUDES Liquid(liquid/Template)
 
-Build(jekyll/DocumentBuilder) TEMPLATE -> IN Buffer(MergeGroups)
-Merge(Merge) OUT -> IN Build()
-Build() VARIABLES -> IN SplitDoc(Split)
+Build(jekyll/DocumentBuilder) TEMPLATE -> IN Buffer(groups/MergeGroups)
+Merge(core/Merge) OUT -> IN Build
+Build VARIABLES -> IN SplitDoc(core/Split)
 
-'page' -> PROPERTY SetPageVar(SetPropertyValue)
-SplitDoc() OUT -> VALUE SetPageVar()
-CreateVars(CreateObject) OUT -> IN SetPageVar() OUT -> IN SetSiteVar(SetPropertyValue)
-SetSiteVar() OUT -> IN SetPaginatorVar(SetPropertyValue) OUT -> IN Buffer()
+'page' -> PROPERTY SetPageVar(objects/SetPropertyValue)
+SplitDoc OUT -> VALUE SetPageVar
+CreateVars(CreateObject) OUT -> IN SetPageVar OUT -> IN SetSiteVar(objects/SetPropertyValue)
+SetSiteVar OUT -> IN SetPaginatorVar(objects/SetPropertyValue) OUT -> IN Buffer
 
-'site' -> PROPERTY SetSiteVar(SetPropertyValue)
-KickVar(Kick) OUT -> VALUE SetSiteVar()
-SplitDoc() OUT -> IN KickVar()
+'site' -> PROPERTY SetSiteVar(objects/SetPropertyValue)
+KickVar(Kick) OUT -> VALUE SetSiteVar
+SplitDoc OUT -> IN KickVar
 
-'paginator' -> KEY GetPaginator(GetObjectKey)
+'paginator' -> KEY GetPaginator(objects/GetObjectKey)
 'false' -> SENDGROUP GetPaginator
-'paginator' -> PROPERTY SetPaginatorVar(SetPropertyValue)
-SplitDoc() OUT -> IN GetPaginator()
-SplitDoc() OUT -> START CreateVars(CreateObject)
-GetPaginator() MISSED -> START CreateEmptyPaginator(CreateObject)
-CreateEmptyPaginator() OUT -> IN MergePaginator(Merge)
-GetPaginator() OUT -> IN MergePaginator()
-MergePaginator() OUT -> VALUE SetPaginatorVar()
+'paginator' -> PROPERTY SetPaginatorVar(objects/SetPropertyValue)
+SplitDoc OUT -> IN GetPaginator
+SplitDoc OUT -> START CreateVars(objects/CreateObject)
+GetPaginator MISSED -> START CreateEmptyPaginator(objects/CreateObject)
+CreateEmptyPaginator OUT -> IN MergePaginator(core/Merge)
+GetPaginator OUT -> IN MergePaginator
+MergePaginator OUT -> VALUE SetPaginatorVar
 
-Buffer() OUT -> IN SplitBufferResult(Split)
-'0' -> KEY GetTemplate(GetObjectKey)
+Buffer OUT -> IN SplitBufferResult(core/Split)
+'0' -> KEY GetTemplate(objects/GetObjectKey)
 'false' -> SENDGROUP GetTemplate
-SplitBufferResult() OUT -> IN GetTemplate() OUT -> IN FirstOnly(FirstGroup)
-FirstOnly() OUT -> TEMPLATE Liquid(liquid/Template)
-'1' -> KEY GetVariables(GetObjectKey)
+SplitBufferResult OUT -> IN GetTemplate OUT -> IN FirstOnly(groups/FirstGroup)
+FirstOnly OUT -> TEMPLATE Liquid(liquid/Template)
+'1' -> KEY GetVariables(objects/GetObjectKey)
 'false' -> SENDGROUP GetVariables
-SplitBufferResult() OUT -> IN GetVariables()
-GetVariables() OUT -> IN SplitVariables(Split) OUT -> VARIABLES Liquid()
+SplitBufferResult OUT -> IN GetVariables
+GetVariables OUT -> IN SplitVariables(core/Split) OUT -> VARIABLES Liquid

@@ -1,6 +1,8 @@
 noflo = require 'noflo'
 path = require 'path'
 
+# @runtime noflo-nodejs
+
 class DocumentBuilder extends noflo.Component
   constructor: ->
     @includes = {}
