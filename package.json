@@ -17,20 +17,20 @@
     "url": "https://github.com/noflo/noflo-jekyll.git"
   },
   "dependencies": {
+    "coffee-script": "^1.12.2",
     "noflo": "^0.7.9",
-    "noflo-yaml": "^0.1.2",
+    "noflo-core": "^0.2.3",
+    "noflo-filesystem": "^1.1.0",
+    "noflo-flow": "^0.4.0",
+    "noflo-groups": "^0.1.12",
     "noflo-liquid": "^0.1.0",
     "noflo-markdown": "^0.2.0",
-    "coffee-script": "^1.11.1",
-    "noflo-filesystem": "^1.1.0",
-    "noflo-core": "^0.2.3",
-    "noflo-groups": "^0.1.12",
-    "noflo-objects": "^0.2.0",
-    "noflo-strings": "^0.1.14",
-    "noflo-flow": "^0.4.0",
     "noflo-math": "^0.0.9",
+    "noflo-objects": "^0.2.0",
+    "noflo-packets": "^0.1.8",
     "noflo-routers": "^0.2.2",
-    "noflo-packets": "^0.1.8"
+    "noflo-strings": "^0.1.14",
+    "noflo-yaml": "^0.1.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

@@ -1,38 +1,46 @@
-#!/usr/bin/env coffee
-# vim: set filetype=coffee:
-path = require 'path'
-fs = require 'fs'
-jekyll = require "#{__dirname}/../index"
+#!/usr/bin/env node
+var e, error, fs, generator, jekyll, path, sourceDir, targetDir;
 
-unless process.argv.length is 4
-  console.log "Usage: $ noflo-jekyll source_dir target_dir"
-  process.exit 0
+path = require('path');
 
-# Resolve paths
-sourceDir = path.resolve process.argv[2]
-targetDir = path.resolve process.argv[3]
+fs = require('fs');
 
-# Check that source directory exists
-try
-  fs.statSync sourceDir
-catch e
-  console.error "Source directory #{sourceDir} doesn't exist"
-  process.exit 1
+jekyll = require(__dirname + "/../index");
 
-generator = new jekyll.Jekyll sourceDir, targetDir
+if (process.argv.length !== 4) {
+  console.log("Usage: $ noflo-jekyll source_dir target_dir");
+  process.exit(0);
+}
 
-generator.once 'start', ->
-  console.log "NoFlo Jekyll #{sourceDir} -> #{targetDir}"
+sourceDir = path.resolve(process.argv[2]);
 
-###
-generator.on 'generated', (generated) ->
-  console.log "Created file #{generated}"
-###
+targetDir = path.resolve(process.argv[3]);
 
-generator.on 'error', console.error
+try {
+  fs.statSync(sourceDir);
+} catch (error) {
+  e = error;
+  console.error("Source directory " + sourceDir + " doesn't exist");
+  process.exit(1);
+}
 
-generator.once 'end', (end) ->
-  seconds = end.uptime / 1000
-  console.log "Build finished in #{seconds} sec."
+generator = new jekyll.Jekyll(sourceDir, targetDir);
 
-generator.run()
+generator.once('start', function() {
+  return console.log("NoFlo Jekyll " + sourceDir + " -> " + targetDir);
+});
+
+
+generator.on('error', function (err) {
+  console.error(err);
+  process.exit(1);
+});
+
+generator.once('end', function(end) {
+  var seconds;
+  seconds = end.uptime / 1000;
+  console.log("Build finished in " + seconds + " sec.");
+  process.exit(0);
+});
+
+generator.run();
