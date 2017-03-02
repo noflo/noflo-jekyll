@@ -16,8 +16,7 @@ describe 'GetConfig graph', ->
         c = instance
         ins = noflo.internalSocket.createSocket()
         c.inPorts.directory.attach ins
-        c.start()
-        done()
+        c.start done
   beforeEach ->
     out = noflo.internalSocket.createSocket()
     c.outPorts.config.attach out
