@@ -27,11 +27,11 @@ class PostCollector extends noflo.Component {
     this.wasDone = false;
 
     this.inPorts = {
-      config: new noflo.Port,
-      in: new noflo.Port
+      config: new noflo.InPort,
+      in: new noflo.InPort
     };
     this.outPorts =
-      {out: new noflo.Port};
+      {out: new noflo.OutPort};
 
     this.inPorts.config.on('data', data => {
       return this.normalizeConfig(data);

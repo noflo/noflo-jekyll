@@ -20,11 +20,11 @@ class PathMetadata extends noflo.Component {
     this.source = '';
 
     this.inPorts = {
-      in: new noflo.Port(),
-      source: new noflo.Port()
+      in: new noflo.InPort(),
+      source: new noflo.InPort()
     };
     this.outPorts =
-      {out: new noflo.Port()};
+      {out: new noflo.OutPort()};
 
     this.inPorts.source.on('data', data => {
       return this.source = data;

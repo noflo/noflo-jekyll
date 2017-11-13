@@ -11,15 +11,15 @@ class DocumentBuilder extends noflo.Component {
     this.config = null;
 
     this.inPorts = {
-      layouts: new noflo.Port(),
-      includes: new noflo.Port(),
-      in: new noflo.Port(),
-      config: new noflo.Port()
+      layouts: new noflo.InPort(),
+      includes: new noflo.InPort(),
+      in: new noflo.InPort(),
+      config: new noflo.InPort()
     };
     this.outPorts = {
-      template: new noflo.Port(),
-      variables: new noflo.Port(),
-      error: new noflo.Port()
+      template: new noflo.OutPort(),
+      variables: new noflo.OutPort(),
+      error: new noflo.OutPort()
     };
 
     this.inPorts.layouts.on('data', data => {
