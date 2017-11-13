@@ -1,3 +1,3 @@
-require('coffeescript/register');
-var jekyll = require(__dirname + '/lib/Jekyll.coffee');
+const jekyll = require('./lib/Jekyll');
+
 exports.Jekyll = jekyll.Jekyll;
