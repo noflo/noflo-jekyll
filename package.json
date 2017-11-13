@@ -10,37 +10,36 @@
   "author": "Henri Bergius <henri.bergius@iki.fi>",
   "license": "MIT",
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=6"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/noflo/noflo-jekyll.git"
   },
   "dependencies": {
-    "coffee-script": "^1.12.2",
-    "noflo": "^0.8.1",
-    "noflo-core": "^0.3.1",
-    "noflo-filesystem": "^1.1.1",
-    "noflo-flow": "^0.4.0",
-    "noflo-groups": "^0.1.12",
-    "noflo-liquid": "^0.1.1",
-    "noflo-markdown": "^0.3.0",
-    "noflo-math": "^0.1.0",
-    "noflo-objects": "^0.3.0",
-    "noflo-packets": "^0.1.8",
-    "noflo-routers": "^0.2.2",
-    "noflo-strings": "^0.3.0",
-    "noflo-yaml": "^0.3.0"
+    "noflo": "^1.0.0",
+    "noflo-core": "^0.5.0",
+    "noflo-filesystem": "^2.0.0",
+    "noflo-flow": "^0.6.0",
+    "noflo-groups": "^0.3.0",
+    "noflo-liquid": "^0.3.0",
+    "noflo-markdown": "^0.4.0",
+    "noflo-math": "^0.3.0",
+    "noflo-objects": "^0.4.0",
+    "noflo-packets": "^0.3.0",
+    "noflo-routers": "^0.4.0",
+    "noflo-strings": "^0.4.0",
+    "noflo-yaml": "^0.4.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.01",
     "grunt": "^1.0.1",
     "grunt-coffeelint": "^0.0.16",
     "grunt-jekyll": "^0.4.6",
     "grunt-mocha-test": "^0.13.2",
     "grunt-noflo-manifest": "^0.1.12",
     "mimetype": "^0.0.8",
-    "mocha": "^3.2.0",
+    "mocha": "^4.0.0",
     "rimraf": "^2.5.4"
   },
   "bin": {
