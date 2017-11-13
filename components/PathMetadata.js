@@ -1,99 +1,74 @@
 const noflo = require('noflo');
 const path = require('path');
 
-class PathMetadata extends noflo.Component {
-  static initClass() {
-    this.prototype.pathMatcher = new RegExp(`\
-^\
-(\\d{4})\
--\
-0?(\\d+)\
--\
-0?(\\d+)\
--\
-([A-Za-z0-9-_.]*)\
-`);
+const pathMatcher = new RegExp('^(\\d{4})-0?(\\d+)-0?(\\d+)-([A-Za-z0-9-_.]*)');
+
+function getDate(postName, data) {
+  if (data.date) {
+    // Parse the ISO date
+    return new Date(data.date);
   }
 
-  constructor() {
-    super();
-    this.source = '';
-
-    this.inPorts = {
-      in: new noflo.InPort(),
-      source: new noflo.InPort()
-    };
-    this.outPorts =
-      {out: new noflo.OutPort()};
-
-    this.inPorts.source.on('data', data => {
-      return this.source = data;
-    });
-
-    this.inPorts.in.on('begingroup', group => {
-      return this.outPorts.out.beginGroup(group);
-    });
-
-    this.inPorts.in.on('data', data => {
-      return this.outPorts.out.send(this.metadata(data));
-    });
-
-    this.inPorts.in.on('endgroup', () => {
-      return this.outPorts.out.endGroup(group);
-    });
-
-    this.inPorts.in.on('disconnect', () => {
-      return this.outPorts.out.disconnect();
-    });
+  const match = pathMatcher.exec(postName);
+  if (!match) {
+    return new Date();
   }
-
-  getDate(postName, data) {
-    if (data.date) {
-      // Parse the ISO date
-      return new Date(data.date);
-    }
-
-    const match = this.pathMatcher.exec(postName);
-    if (!match) { return new Date; }
-    return new Date(`${match[1]}-${match[2]}-${match[3]}`);
-  }
-
-  getName(postName, data) {
-    const match = this.pathMatcher.exec(postName);
-    // TODO: use Stringex for generating URL names
-    // in cases where we can't parse one
-    if (!match) { return ''; }
-    return match[4];
-  }
-
-  getCategories(data) {
-    if (data.category) {
-      return data.category;
-    }
-    if (data.categories) {
-      return data.categories;
-    }
-
-    const postPath = data.path.replace(this.source, '');
-    const dirName = path.dirname(postPath);
-    const categories = [];
-    const dirs = dirName.split('/');
-    for (let dir of Array.from(dirs)) {
-      if (!dir) { continue; }
-      if (dir === '_posts') { continue; }
-      categories.push(dir);
-    }
-    return categories;
-  }
-
-  metadata(post) {
-    const postName = path.basename(post.path);
-    post.date = this.getDate(postName, post);
-    post.name = this.getName(postName, post);
-    post.categories = this.getCategories(post);
-    return post;
-  }
+  return new Date(`${match[1]}-${match[2]}-${match[3]}`);
 }
-PathMetadata.initClass();
 
-exports.getComponent = () => new PathMetadata;
+function getName(postName) {
+  const match = pathMatcher.exec(postName);
+  // TODO: use Stringex for generating URL names
+  // in cases where we can't parse one
+  if (!match) { return ''; }
+  return match[4];
+}
+
+function getCategories(data, source) {
+  if (data.category) {
+    return data.category;
+  }
+  if (data.categories) {
+    return data.categories;
+  }
+
+  const postPath = data.path.replace(source, '');
+  const dirName = path.dirname(postPath);
+  const categories = [];
+  const dirs = dirName.split('/');
+  dirs.forEach((dir) => {
+    if (!dir) { return; }
+    if (dir === '_posts') { return; }
+    categories.push(dir);
+  });
+  return categories;
+}
+
+exports.getComponent = () => {
+  const c = new noflo.Component();
+  c.inPorts.add('in', {
+    datatype: 'object',
+  });
+  c.inPorts.add('source', {
+    datatype: 'string',
+    control: true,
+  });
+  c.outPorts.add('out', {
+    datatype: 'object',
+  });
+  c.process((input, output) => {
+    if (!input.hasData('in', 'source')) {
+      return;
+    }
+    const source = input.getData('source');
+    const post = input.getData('in');
+    const postName = path.basename(post.path);
+    post.date = getDate(postName, post);
+    post.name = getName(postName);
+    post.categories = getCategories(post, source);
+    output.sendDone({
+      out: post,
+    });
+  });
+  return c;
+};
