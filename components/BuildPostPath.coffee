@@ -5,6 +5,7 @@ path = require 'path'
 
 class BuildPostPath extends noflo.Component
   constructor: ->
+    super()
     @inPorts =
       in: new noflo.Port()
       source: new noflo.Port()

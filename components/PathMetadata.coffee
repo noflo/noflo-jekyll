@@ -14,6 +14,7 @@ class PathMetadata extends noflo.Component
   ///
 
   constructor: ->
+    super()
     @source = ''
 
     @inPorts =

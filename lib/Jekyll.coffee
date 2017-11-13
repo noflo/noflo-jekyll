@@ -4,6 +4,7 @@ path = require 'path'
 
 class Jekyll extends events.EventEmitter
   constructor: (source, target) ->
+    super()
     @graph = @prepareGraph source, target
 
   run: (callback) ->

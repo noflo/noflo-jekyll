@@ -16,6 +16,7 @@ sortByDate = (post1, post2) ->
 
 class PostCollector extends noflo.Component
   constructor: ->
+    super()
     @config = null
     @buffer = []
     @wasDone = false

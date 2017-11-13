@@ -5,6 +5,7 @@ path = require 'path'
 
 class DocumentBuilder extends noflo.Component
   constructor: ->
+    super()
     @includes = {}
     @documents = []
     @config = null
