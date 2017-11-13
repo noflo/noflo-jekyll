@@ -17,7 +17,6 @@
     "url": "https://github.com/noflo/noflo-jekyll.git"
   },
   "dependencies": {
-    "coffeescript": "^2.0.2",
     "noflo": "^1.0.0",
     "noflo-core": "^0.5.0",
     "noflo-filesystem": "^2.0.0",
@@ -47,7 +46,7 @@
   "main": "./index.js",
   "scripts": {
     "pretest": "eslint lib/*.js components/*.js index.js",
-    "test": "mocha -R spec -t 2000 spec/*.coffee",
+    "test": "mocha -R spec -t 2000 spec/*.js",
     "postinstall": "noflo-cache-preheat",
     "fixtures": "jekyll -s spec/fixtures/source -d spec/fixtures/jekyll"
   }
