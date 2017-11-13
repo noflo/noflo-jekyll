@@ -47,6 +47,7 @@
   "main": "./index.js",
   "scripts": {
     "test": "grunt test",
-    "postinstall": "./node_modules/.bin/noflo-cache-preheat"
+    "postinstall": "noflo-cache-preheat",
+    "fixtures": "jekyll -s spec/fixtures/source -d spec/fixtures/jekyll"
   }
 }
