@@ -1,5 +1,14 @@
 language: node_js
 node_js:
-  - "0.10"
-
+- '6'
+dist: trusty
+sudo: false
 script: npm test
+deploy:
+  provider: npm
+  email: henri.bergius@iki.fi
+  api_key:
+    secure: hDQAOR0GQnl/XMXRe+fXVXgLC9Ua2n3V6un2dsmInndwtNbRekLGUim0HKNtF5yVZVNC7RU4B54Xl4fSIxRZhR7q06GweP44FPBLRAh2A1wc+gwkmw6Mw+ijbW1yArOj9UExwy30k/8CN1fM4ljd2W3JciXVm1Mwa580cQPdK64=
+  on:
+    tags: true
+    repo: noflo/noflo-jekyll

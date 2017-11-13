@@ -1,23 +1,34 @@
 {
-  "properties": {},
-  "exports": [
-    {
-      "private": "source.in",
-      "public": "source"
-    },
-    {
-      "private": "destination.in",
-      "public": "destination"
-    },
-    {
-      "private": "generated.out",
-      "public": "generated"
-    },
-    {
-      "private": "errors.out",
-      "public": "errors"
+  "properties": {
+    "name": "Jekyll",
+    "environment": {
+      "type": "noflo-nodejs"
     }
-  ],
+  },
+  "inports": {
+    "source": {
+      "process": "Source",
+      "port": "in",
+      "metadata": {}
+    },
+    "destination": {
+      "process": "Destination",
+      "port": "in",
+      "metadata": {}
+    }
+  },
+  "outports": {
+    "generated": {
+      "process": "Generated",
+      "port": "out",
+      "metadata": {}
+    },
+    "errors": {
+      "process": "Errors",
+      "port": "out",
+      "metadata": {}
+    }
+  },
   "processes": {
     "Source": {
       "component": "core/Split",
@@ -191,6 +202,16 @@
     {
       "src": {
         "process": "GetConfig",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GetConfig",
         "port": "config"
       },
       "tgt": {
@@ -251,6 +272,16 @@
       },
       "metadata": {
         "route": 7
+      }
+    },
+    {
+      "src": {
+        "process": "LoadDocuments",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
       }
     },
     {

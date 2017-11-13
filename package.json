@@ -8,64 +8,46 @@
     "blog"
   ],
   "author": "Henri Bergius <henri.bergius@iki.fi>",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/noflo/noflo/raw/master/LICENSE"
-    }
-  ],
+  "license": "MIT",
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noflo/noflo-jekyll.git"
   },
   "dependencies": {
-    "noflo": "0.5.x",
-    "noflo-yaml": "0.0.x",
-    "noflo-liquid": "0.0.x",
-    "noflo-markdown": "0.0.x",
-    "coffee-script": "1.4.x",
-    "noflo-filesystem": "~1.0.5",
-    "noflo-core": "~0.1.4",
-    "noflo-groups": "~0.1.4",
-    "noflo-objects": "~0.1.9",
-    "noflo-strings": "~0.1.6",
-    "noflo-flow": "0.3.x",
-    "noflo-math": "~0.0.4",
-    "noflo-routers": "0.2.x",
-    "noflo-packets": "~0.1.5"
+    "noflo": "^1.0.0",
+    "noflo-core": "^0.5.0",
+    "noflo-filesystem": "^2.0.0",
+    "noflo-flow": "^0.6.0",
+    "noflo-groups": "^0.3.0",
+    "noflo-liquid": "^0.3.0",
+    "noflo-markdown": "^0.4.0",
+    "noflo-math": "^0.3.0",
+    "noflo-objects": "^0.4.0",
+    "noflo-packets": "^0.3.0",
+    "noflo-routers": "^0.4.0",
+    "noflo-strings": "^0.4.0",
+    "noflo-yaml": "^0.4.0"
   },
   "devDependencies": {
-    "rimraf": "2.x.x",
-    "mimetype": "0.0.5",
-    "grunt": "~0.4.1",
-    "grunt-coffeelint": "0.0.7",
-    "grunt-contrib-nodeunit": "~0.3.3",
-    "grunt-cli": "~0.1.9",
-    "grunt-jekyll": "~0.3.8",
-    "grunt-noflo-manifest": "^0.1.4"
+    "chai": "^4.01",
+    "eslint": "^4.11.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "mimetype": "^0.0.8",
+    "mocha": "^4.0.0",
+    "rimraf": "^2.5.4"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
   },
   "main": "./index.js",
-  "noflo": {
-    "graphs": {
-      "BuildDocuments": "graphs/BuildDocuments.fbp",
-      "ConvertMarkdown": "graphs/ConvertMarkdown.fbp",
-      "CopyFile": "graphs/CopyFile.fbp",
-      "GetConfig": "graphs/GetConfig.fbp",
-      "GroupDocuments": "graphs/GroupDocuments.fbp",
-      "Jekyll": "graphs/Jekyll.json",
-      "LoadDocuments": "graphs/LoadDocuments.fbp",
-      "SaveFile": "graphs/SaveFile.fbp"
-    },
-    "components": {
-      "BuildPostPath": "components/BuildPostPath.coffee",
-      "DocumentBuilder": "components/DocumentBuilder.coffee",
-      "PathMetadata": "components/PathMetadata.coffee",
-      "PostCollector": "components/PostCollector.coffee"
-    }
-  },
   "scripts": {
-    "test": "./node_modules/.bin/grunt test"
+    "pretest": "eslint lib/*.js components/*.js index.js",
+    "test": "mocha -R spec -t 2000 spec/*.js",
+    "postinstall": "noflo-cache-preheat",
+    "fixtures": "jekyll -s spec/fixtures/source -d spec/fixtures/jekyll"
   }
 }

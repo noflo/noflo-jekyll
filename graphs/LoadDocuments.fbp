@@ -2,37 +2,37 @@
 # for processing.
 #
 # The directory inport accepts a path for a folder where to start loading
-EXPORT=DIRECTORY.IN:DIRECTORY
+INPORT=Directory.IN:DIRECTORY
 # The subdirectory outport is where the path each subfolder is sent
-EXPORT=SUBDIRECTORY.OUT:SUBDIRECTORY
+OUTPORT=SubDirectory.OUT:SUBDIRECTORY
 # The document outport is where the path of each regular file is sent
-EXPORT=FILENAME.OUT:DOCUMENT
+OUTPORT=FileName.OUT:DOCUMENT
+# The error outport is where errors get sent
+OUTPORT=Errors.OUT:ERROR
 
-'10' -> MAX ThrottleDir(Throttle)
-Directory(Split) OUT -> IN ThrottleDir() OUT -> SOURCE Dir(ReadDir)
-Dir() LOAD -> IN CountOpen(CountSum) OUT -> LOAD ThrottleDir()
+# @runtime noflo-nodejs
 
-'10' -> MAX ThrottleStat(Throttle)
-Dir() OUT -> IN ThrottleStat(Throttle) OUT -> IN Stat(Stat)
-Stat() LOAD -> IN CountOpen() OUT -> LOAD ThrottleStat()
+Directory(core/Split) OUT -> SOURCE Dir(filesystem/ReadDir)
+
+Dir OUT -> IN Stat(filesystem/Stat)
 
 # Routing rules
-'isDirectory' -> ROUTES FileRouter(GroupRouter)
-'isDirectory' -> KEY Group(GroupByObjectKey)
-Stat() OUT -> IN DropGroups(RemoveGroups)
-DropGroups() OUT -> IN Group() OUT -> IN FileRouter()
+'isDirectory' -> ROUTES MatchOnlyDirectories(routers/GroupRouter)
+'isDirectory' -> KEY GroupWithIsDirectory(groups/GroupByObjectKey)
+Stat OUT -> IN DropGroups(groups/RemoveGroups)
+DropGroups OUT -> IN GroupWithIsDirectory OUT -> IN MatchOnlyDirectories
 
 # First route: subfolder
-'path=^(?:(?!\.git|_(?!(includes|layouts|posts))|node_modules).)*$' -> REGEXP FilterDirs(FilterPropertyValue)
-'path' -> KEY SubDirectory(GetObjectKey)
-FileRouter() OUT -> IN FilterDirs() OUT -> IN SubDirectory()
+'path=^(?:(?!\.git|_(?!(includes|layouts|posts))|node_modules).)*$' -> REGEXP FilterDirs(objects/FilterPropertyValue)
+'path' -> KEY SubDirectory(objects/GetObjectKey)
+'false' -> SENDGROUP SubDirectory
+MatchOnlyDirectories OUT -> IN FilterDirs OUT -> IN SubDirectory
 
 # Missed routing: regular file
-'path' -> KEY FileName(GetObjectKey)
-FileRouter() MISSED -> IN FileName()
-
-FileRouter ROUTE -> IN DropRoute(core/Drop)
+'path' -> KEY FileName(objects/GetObjectKey)
+'false' -> SENDGROUP FileName
+MatchOnlyDirectories MISSED -> IN FileName
 
 # Error handling
-Dir() ERROR -> IN Display(Output)
-Stat() ERROR -> IN Display(Output)
+Dir ERROR -> IN Errors(core/Merge)
+Stat ERROR -> IN Errors
