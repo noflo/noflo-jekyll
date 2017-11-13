@@ -37,7 +37,6 @@
     "grunt-coffeelint": "^0.0.16",
     "grunt-jekyll": "^0.4.6",
     "grunt-mocha-test": "^0.13.2",
-    "grunt-noflo-manifest": "^0.1.12",
     "mimetype": "^0.0.8",
     "mocha": "^4.0.0",
     "rimraf": "^2.5.4"
@@ -46,25 +45,6 @@
     "noflo-jekyll": "./bin/noflo-jekyll"
   },
   "main": "./index.js",
-  "noflo": {
-    "graphs": {
-      "BuildDocuments": "graphs/BuildDocuments.fbp",
-      "ConvertMarkdown": "graphs/ConvertMarkdown.fbp",
-      "CopyFile": "graphs/CopyFile.fbp",
-      "GetConfig": "graphs/GetConfig.fbp",
-      "GroupDocuments": "graphs/GroupDocuments.fbp",
-      "Jekyll": "graphs/Jekyll.json",
-      "LoadDocuments": "graphs/LoadDocuments.fbp",
-      "SaveFile": "graphs/SaveFile.fbp"
-    },
-    "components": {
-      "BuildPostPath": "components/BuildPostPath.coffee",
-      "DocumentBuilder": "components/DocumentBuilder.coffee",
-      "PathMetadata": "components/PathMetadata.coffee",
-      "PostCollector": "components/PostCollector.coffee",
-      "PrepareDirectoryMap": "components/PrepareDirectoryMap.coffee"
-    }
-  },
   "scripts": {
     "test": "grunt test",
     "postinstall": "./node_modules/.bin/noflo-cache-preheat"

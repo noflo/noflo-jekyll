@@ -3,12 +3,6 @@ module.exports = ->
   @initConfig
     pkg: @file.readJSON 'package.json'
 
-    # Updating the package manifest files
-    noflo_manifest:
-      update:
-        files:
-          'package.json': ['graphs/*', 'components/*']
-
     # Coding standards
     coffeelint:
       all:
@@ -31,9 +25,8 @@ module.exports = ->
           require: 'coffee-script/register'
           grep: process.env.TESTS
 
-  @loadNpmTasks 'grunt-noflo-manifest'
   @loadNpmTasks 'grunt-coffeelint'
   @loadNpmTasks 'grunt-mocha-test'
   @loadNpmTasks 'grunt-jekyll'
 
-  @registerTask 'test', ['coffeelint', 'noflo_manifest', 'mochaTest']
+  @registerTask 'test', ['coffeelint', 'mochaTest']
