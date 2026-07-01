@@ -12,7 +12,7 @@
           "metadata": {}
       }
   },
-  "inports": {
+  "outports": {
       "generated": {
           "process": "Generated",
           "port": "out",
