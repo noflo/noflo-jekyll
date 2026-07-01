@@ -2,19 +2,19 @@
 # directory to under a corresponding folder in a destination directory.
 
 # The source basedir
-EXPORT=SOURCE.IN:SOURCE
+INPORT=Source.IN:SOURCE
 
 # The destination basedir
-EXPORT=DESTINATION.IN:DESTINATION
+INPORT=Destination.IN:DESTINATION
 
 # File paths to be copied
-EXPORT=FILE.IN:IN
+INPORT=File.IN:IN
 
 # Full path of a successfully copied file
-EXPORT=COPY.OUT:OUT
+OUTPORT=Copy.OUT:OUT
 
 # Error handling
-EXPORT=ERRORS.OUT:ERRORS
+OUTPORT=Errors.OUT:ERRORS
 
 Source(core/Split) OUT -> PATTERN NewPath(Replace)
 Destination(core/Split) OUT -> REPLACEMENT NewPath()

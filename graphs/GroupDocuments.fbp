@@ -3,22 +3,22 @@
 # port.
 
 # Filenames to be processed. These should only contain text/* files
-EXPORT=READ.IN:IN
+INPORT=Read.IN:IN
 
 # Layout templates
-EXPORT=LAYOUT.OUT:LAYOUT
+OUTPORT=Layout.OUT:LAYOUT
 
 # Layout include files
-EXPORT=INCLUDE.OUT:INCLUDE
+OUTPORT=Include.OUT:INCLUDE
 
 # Posts
-EXPORT=POST.OUT:POST
+OUTPORT=Post.OUT:POST
 
 # Other Front Matter documents, to be copied as-is after templating
-EXPORT=DOCROUTER.MISSED:STATIC
+OUTPORT=DocRouter.MISSED:STATIC
 
 # Error handling
-EXPORT=READ.ERROR:ERRORS
+OUTPORT=Read.ERROR:ERRORS
 
 # Parse Front Matter from files
 Read(ReadFile) OUT -> CONTENT Parse(yaml/ParseFrontmatter)

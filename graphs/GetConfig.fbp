@@ -2,10 +2,10 @@
 #
 # The directory inport accepts a path for a folder where to look for a 
 # configuration file
-EXPORT=DIRECTORY.IN:DIRECTORY
+INPORT=Directory.IN:DIRECTORY
 # The config output is where the object containing configuration keys and
 # values is sent
-EXPORT=PARSE.OUT:CONFIG
+OUTPORT=Parse.OUT:CONFIG
 
 # Build filename, /path/to/source/_config.yml
 Directory(Split) OUT -> IN FilenameParts(Concat)
