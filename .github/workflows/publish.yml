@@ -1,0 +1,58 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write  # Required for OIDC trusted publishing
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - name: Verify the tag matches the package version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Tag 'v$TAG' does not match package version '$VERSION'"
+            exit 1
+          fi
+
+      - name: Test
+        run: npm test
+
+      - name: Publish
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          # Skip versions already on the registry (the first publish of each
+          # package is done manually before its tag exists)
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "Version $NAME@$VERSION already published, skipping"
+            exit 0
+          fi
+          # npm requires an explicit tag for prerelease versions
+          case "$VERSION" in
+            *-*) npm publish --tag next ;;
+            *) npm publish ;;
+          esac

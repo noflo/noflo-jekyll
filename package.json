@@ -1,71 +1,56 @@
 {
-  "name": "noflo-jekyll",
-  "description": "Reimplementation of the Jekyll static site generator as a flow-based Node.js program",
-  "version": "0.0.1",
-  "keywords": [
-    "noflo",
-    "jekyll",
-    "blog"
-  ],
-  "author": "Henri Bergius <henri.bergius@iki.fi>",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/noflo/noflo/raw/master/LICENSE"
-    }
-  ],
-  "engines": {
-    "node": ">=0.6.0"
+  "name": "@noflo/jekyll",
+  "description": "Reimplementation of the Jekyll static site generator as a flow-based program",
+  "version": "2.0.0-alpha.1",
+  "author": {
+    "name": "Henri Bergius",
+    "email": "henri.bergius@iki.fi"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noflo/noflo-jekyll.git"
+  },
+  "license": "MIT",
   "dependencies": {
-    "noflo": "0.5.x",
-    "noflo-yaml": "0.0.x",
-    "noflo-liquid": "0.0.x",
-    "noflo-markdown": "0.0.x",
-    "coffee-script": "1.4.x",
-    "noflo-filesystem": "~1.0.5",
-    "noflo-core": "~0.1.4",
-    "noflo-groups": "~0.1.4",
-    "noflo-objects": "~0.1.9",
-    "noflo-strings": "~0.1.6",
-    "noflo-flow": "0.3.x",
-    "noflo-math": "~0.0.4",
-    "noflo-routers": "0.2.x",
-    "noflo-packets": "~0.1.5"
+    "@noflo/assembly": "^2.0.0-alpha.2",
+    "@noflo/noflo": "^2.0.0-alpha.3"
   },
   "devDependencies": {
-    "rimraf": "2.x.x",
-    "mimetype": "0.0.5",
-    "grunt": "~0.4.1",
-    "grunt-coffeelint": "0.0.7",
-    "grunt-contrib-nodeunit": "~0.3.3",
-    "grunt-cli": "~0.1.9",
-    "grunt-jekyll": "~0.3.8",
-    "grunt-noflo-manifest": "^0.1.4"
+    "@biomejs/biome": "^2.0.0",
+    "@noflo/fbp-spec-runner": "^2.0.0-alpha.3",
+    "@noflo/loader-node": "^2.0.0-alpha.3",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.0.0"
   },
   "bin": {
     "noflo-jekyll": "./bin/noflo-jekyll"
   },
-  "main": "./index.js",
-  "noflo": {
-    "graphs": {
-      "BuildDocuments": "graphs/BuildDocuments.fbp",
-      "ConvertMarkdown": "graphs/ConvertMarkdown.fbp",
-      "CopyFile": "graphs/CopyFile.fbp",
-      "GetConfig": "graphs/GetConfig.fbp",
-      "GroupDocuments": "graphs/GroupDocuments.fbp",
-      "Jekyll": "graphs/Jekyll.json",
-      "LoadDocuments": "graphs/LoadDocuments.fbp",
-      "SaveFile": "graphs/SaveFile.fbp"
-    },
-    "components": {
-      "BuildPostPath": "components/BuildPostPath.coffee",
-      "DocumentBuilder": "components/DocumentBuilder.coffee",
-      "PathMetadata": "components/PathMetadata.coffee",
-      "PostCollector": "components/PostCollector.coffee"
-    }
-  },
+  "keywords": [
+    "noflo",
+    "jekyll",
+    "static-site"
+  ],
   "scripts": {
-    "test": "./node_modules/.bin/grunt test"
-  }
+    "lint": "npx @biomejs/biome check --use-editorconfig=true components/ lib/ test/",
+    "format": "npx @biomejs/biome check --use-editorconfig=true --write components/ lib/ test/",
+    "types": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run types && npm run lint && npm run test:node",
+    "test:node": "node --test test/*.test.js",
+    "test:bun": "bun test test/*.test.js",
+    "test:deno": "deno test --allow-all --no-check test/*.test.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "components/",
+    "graphs/",
+    "lib/",
+    "bin/",
+    "test/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ]
 }

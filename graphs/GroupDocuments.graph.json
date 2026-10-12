@@ -1,0 +1,408 @@
+{
+  "caseSensitive": false,
+  "properties": {
+    "name": ""
+  },
+  "inports": {
+    "in": {
+      "process": "Read",
+      "port": "in",
+      "metadata": {
+        "x": -80,
+        "y": 80
+      }
+    }
+  },
+  "outports": {
+    "layout": {
+      "process": "Layout",
+      "port": "out",
+      "metadata": {}
+    },
+    "include": {
+      "process": "Include",
+      "port": "out",
+      "metadata": {}
+    },
+    "post": {
+      "process": "Post",
+      "port": "out",
+      "metadata": {}
+    },
+    "static": {
+      "process": "DocRouter",
+      "port": "missed",
+      "metadata": {}
+    },
+    "errors": {
+      "process": "Read",
+      "port": "error",
+      "metadata": {}
+    }
+  },
+  "groups": [],
+  "processes": {
+    "Read": {
+      "component": "ReadFile",
+      "metadata": {
+        "x": 50,
+        "y": 50
+      }
+    },
+    "Parse": {
+      "component": "yaml/ParseFrontmatter",
+      "metadata": {
+        "x": 250,
+        "y": 50
+      }
+    },
+    "Parsed": {
+      "component": "Split",
+      "metadata": {
+        "x": 450,
+        "y": 50
+      }
+    },
+    "FileName": {
+      "component": "GetObjectKey",
+      "metadata": {
+        "x": 650,
+        "y": 50
+      }
+    },
+    "SplitPath": {
+      "component": "SplitStr",
+      "metadata": {
+        "x": 850,
+        "y": 50
+      }
+    },
+    "DirName": {
+      "component": "DirName",
+      "metadata": {
+        "x": 1050,
+        "y": 50
+      }
+    },
+    "FileDir": {
+      "component": "LastPacket",
+      "metadata": {
+        "x": 1250,
+        "y": 50
+      }
+    },
+    "SetGroup": {
+      "component": "SetPropertyValue",
+      "metadata": {
+        "x": 250,
+        "y": 200
+      }
+    },
+    "Group": {
+      "component": "GroupByObjectKey",
+      "metadata": {
+        "x": 450,
+        "y": 200
+      }
+    },
+    "RemoveGroups": {
+      "component": "RemoveGroups",
+      "metadata": {
+        "x": 650,
+        "y": 200
+      }
+    },
+    "DocRouter": {
+      "component": "routers/GroupRouter",
+      "metadata": {
+        "x": 850,
+        "y": 200
+      }
+    },
+    "Drop": {
+      "component": "Drop",
+      "metadata": {
+        "x": 1050,
+        "y": 200
+      }
+    },
+    "Layout": {
+      "component": "Repeat",
+      "metadata": {
+        "x": 1250,
+        "y": 200
+      }
+    },
+    "Include": {
+      "component": "Repeat",
+      "metadata": {
+        "x": 250,
+        "y": 350
+      }
+    },
+    "Post": {
+      "component": "Repeat",
+      "metadata": {
+        "x": 450,
+        "y": 350
+      }
+    },
+    "DropUnderscores": {
+      "component": "Drop",
+      "metadata": {
+        "x": 650,
+        "y": 350
+      }
+    }
+  },
+  "connections": [
+    {
+      "src": {
+        "process": "Read",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Parse",
+        "port": "content"
+      }
+    },
+    {
+      "src": {
+        "process": "Parse",
+        "port": "results"
+      },
+      "tgt": {
+        "process": "Parsed",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Parsed",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "FileName",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "FileName",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "DirName",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DirName",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SplitPath",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitPath",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "FileDir",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "FileDir",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetGroup",
+        "port": "value"
+      }
+    },
+    {
+      "src": {
+        "process": "Parsed",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetGroup",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SetGroup",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "RemoveGroups",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "RemoveGroups",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Group",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DocRouter",
+        "port": "route"
+      },
+      "tgt": {
+        "process": "Drop",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DocRouter",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Layout",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DocRouter",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Include",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DocRouter",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Post",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "DocRouter",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "DropUnderscores",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Group",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "DocRouter",
+        "port": "in"
+      }
+    },
+    {
+      "data": "path",
+      "tgt": {
+        "process": "FileName",
+        "port": "key"
+      },
+      "metadata": {
+        "x": 850,
+        "y": 350
+      }
+    },
+    {
+      "data": "/",
+      "tgt": {
+        "process": "SplitPath",
+        "port": "delimiter"
+      },
+      "metadata": {
+        "x": 1050,
+        "y": 350
+      }
+    },
+    {
+      "data": "collection",
+      "tgt": {
+        "process": "SetGroup",
+        "port": "property"
+      },
+      "metadata": {
+        "x": 1250,
+        "y": 350
+      }
+    },
+    {
+      "data": "collection",
+      "tgt": {
+        "process": "Group",
+        "port": "key"
+      },
+      "metadata": {
+        "x": 250,
+        "y": 500
+      }
+    },
+    {
+      "data": "_layouts",
+      "tgt": {
+        "process": "DocRouter",
+        "port": "route"
+      },
+      "metadata": {
+        "x": 450,
+        "y": 500
+      }
+    },
+    {
+      "data": "_includes",
+      "tgt": {
+        "process": "DocRouter",
+        "port": "route"
+      },
+      "metadata": {
+        "x": 650,
+        "y": 500
+      }
+    },
+    {
+      "data": "_posts",
+      "tgt": {
+        "process": "DocRouter",
+        "port": "route"
+      },
+      "metadata": {
+        "x": 850,
+        "y": 500
+      }
+    },
+    {
+      "data": "_",
+      "tgt": {
+        "process": "DocRouter",
+        "port": "route"
+      },
+      "metadata": {
+        "x": 1050,
+        "y": 500
+      }
+    }
+  ]
+}

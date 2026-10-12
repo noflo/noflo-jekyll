@@ -1,0 +1,166 @@
+{
+  "caseSensitive": false,
+  "properties": {
+    "name": ""
+  },
+  "inports": {
+    "directory": {
+      "process": "Directory",
+      "port": "in",
+      "metadata": {}
+    }
+  },
+  "outports": {
+    "config": {
+      "process": "Parse",
+      "port": "out",
+      "metadata": {}
+    }
+  },
+  "groups": [],
+  "processes": {
+    "Directory": {
+      "component": "Split",
+      "metadata": {
+        "x": 50,
+        "y": 50
+      }
+    },
+    "FilenameParts": {
+      "component": "Concat",
+      "metadata": {
+        "x": 240,
+        "y": 120
+      }
+    },
+    "BuildName": {
+      "component": "Kick",
+      "metadata": {
+        "x": 440,
+        "y": 160
+      }
+    },
+    "Filename": {
+      "component": "CompileString",
+      "metadata": {
+        "x": 650,
+        "y": 50
+      }
+    },
+    "Read": {
+      "component": "ReadFile",
+      "metadata": {
+        "x": 850,
+        "y": 50
+      }
+    },
+    "Parse": {
+      "component": "yaml/ParseYaml",
+      "metadata": {
+        "x": 1050,
+        "y": 50
+      }
+    },
+    "Display": {
+      "component": "Output",
+      "metadata": {
+        "x": 1240,
+        "y": 120
+      }
+    }
+  },
+  "connections": [
+    {
+      "src": {
+        "process": "Directory",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "FilenameParts",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Directory",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "BuildName",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "BuildName",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "FilenameParts",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "FilenameParts",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Filename",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Filename",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Read",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Read",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Parse",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Read",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Display",
+        "port": "in"
+      }
+    },
+    {
+      "data": "_config.yml",
+      "tgt": {
+        "process": "BuildName",
+        "port": "data"
+      },
+      "metadata": {
+        "x": 1300,
+        "y": 50
+      }
+    },
+    {
+      "data": "/",
+      "tgt": {
+        "process": "Filename",
+        "port": "delimiter"
+      },
+      "metadata": {
+        "x": 250,
+        "y": 100
+      }
+    }
+  ]
+}

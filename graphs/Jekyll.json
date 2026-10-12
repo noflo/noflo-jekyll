@@ -12,7 +12,10 @@
     "destination": {
       "process": "Destination",
       "port": "in",
-      "metadata": {}
+      "metadata": {
+        "x": 520,
+        "y": 120
+      }
     }
   },
   "outports": {
@@ -53,8 +56,8 @@
     "FindFiles": {
       "component": "core/Merge",
       "metadata": {
-        "x": 1189,
-        "y": 171
+        "x": 1200,
+        "y": 160
       }
     },
     "LoadDocuments": {
@@ -675,6 +678,10 @@
       "tgt": {
         "process": "DetermineType",
         "port": "routes"
+      },
+      "metadata": {
+        "x": 2765,
+        "y": 50
       }
     },
     {
@@ -682,6 +689,10 @@
       "tgt": {
         "process": "ContentConversions",
         "port": "routes"
+      },
+      "metadata": {
+        "x": 250,
+        "y": 100
       }
     },
     {
@@ -689,6 +700,10 @@
       "tgt": {
         "process": "Collect",
         "port": "timeout"
+      },
+      "metadata": {
+        "x": 450,
+        "y": 100
       }
     },
     {
@@ -696,6 +711,10 @@
       "tgt": {
         "process": "FilterDirs",
         "port": "regexp"
+      },
+      "metadata": {
+        "x": 650,
+        "y": 100
       }
     }
   ]

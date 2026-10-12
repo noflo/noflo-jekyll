@@ -1,0 +1,368 @@
+{
+  "caseSensitive": false,
+  "properties": {
+    "name": ""
+  },
+  "inports": {
+    "source": {
+      "process": "Source",
+      "port": "in",
+      "metadata": {}
+    },
+    "destination": {
+      "process": "Destination",
+      "port": "in",
+      "metadata": {}
+    },
+    "in": {
+      "process": "MapFileName",
+      "port": "in",
+      "metadata": {}
+    }
+  },
+  "outports": {
+    "out": {
+      "process": "Save",
+      "port": "out",
+      "metadata": {}
+    },
+    "error": {
+      "process": "Errors",
+      "port": "out",
+      "metadata": {}
+    }
+  },
+  "groups": [],
+  "processes": {
+    "CompileReplacement": {
+      "component": "CompileString",
+      "metadata": {
+        "x": 50,
+        "y": 50
+      }
+    },
+    "Source": {
+      "component": "Split",
+      "metadata": {
+        "x": 250,
+        "y": 50
+      }
+    },
+    "HoldSource": {
+      "component": "SendString",
+      "metadata": {
+        "x": 450,
+        "y": 50
+      }
+    },
+    "Destination": {
+      "component": "Split",
+      "metadata": {
+        "x": 650,
+        "y": 50
+      }
+    },
+    "MapFileName": {
+      "component": "MapGroup",
+      "metadata": {
+        "x": 850,
+        "y": 50
+      }
+    },
+    "ReadPath": {
+      "component": "ReadGroup",
+      "metadata": {
+        "x": 1050,
+        "y": 50
+      }
+    },
+    "NewDir": {
+      "component": "DirName",
+      "metadata": {
+        "x": 1250,
+        "y": 50
+      }
+    },
+    "ThrottleDir": {
+      "component": "Throttle",
+      "metadata": {
+        "x": 250,
+        "y": 200
+      }
+    },
+    "MkDir": {
+      "component": "MakeDir",
+      "metadata": {
+        "x": 450,
+        "y": 200
+      }
+    },
+    "NewFiles": {
+      "component": "filesystem/DirectoryGroupBuffer",
+      "metadata": {
+        "x": 650,
+        "y": 200
+      }
+    },
+    "SplitFile": {
+      "component": "Split",
+      "metadata": {
+        "x": 850,
+        "y": 200
+      }
+    },
+    "ReadName": {
+      "component": "ReadGroup",
+      "metadata": {
+        "x": 1050,
+        "y": 200
+      }
+    },
+    "Save": {
+      "component": "WriteFile",
+      "metadata": {
+        "x": 1250,
+        "y": 200
+      }
+    },
+    "DropName": {
+      "component": "core/Drop",
+      "metadata": {
+        "x": 250,
+        "y": 350
+      }
+    },
+    "Errors": {
+      "component": "Merge",
+      "metadata": {
+        "x": 450,
+        "y": 350
+      }
+    }
+  },
+  "connections": [
+    {
+      "src": {
+        "process": "Source",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "HoldSource",
+        "port": "string"
+      }
+    },
+    {
+      "src": {
+        "process": "HoldSource",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "CompileReplacement",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Destination",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "HoldSource",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Destination",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "CompileReplacement",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "CompileReplacement",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "MapFileName",
+        "port": "regexp"
+      }
+    },
+    {
+      "src": {
+        "process": "MapFileName",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "ReadPath",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ReadPath",
+        "port": "group"
+      },
+      "tgt": {
+        "process": "NewDir",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "NewDir",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "ThrottleDir",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ThrottleDir",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "MkDir",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "MkDir",
+        "port": "load"
+      },
+      "tgt": {
+        "process": "ThrottleDir",
+        "port": "load"
+      }
+    },
+    {
+      "src": {
+        "process": "ReadPath",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "NewFiles",
+        "port": "collect"
+      }
+    },
+    {
+      "src": {
+        "process": "MkDir",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "NewFiles",
+        "port": "release"
+      }
+    },
+    {
+      "src": {
+        "process": "NewFiles",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SplitFile",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitFile",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "ReadName",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ReadName",
+        "port": "group"
+      },
+      "tgt": {
+        "process": "Save",
+        "port": "filename"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitFile",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Save",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "ReadName",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "DropName",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "MkDir",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Save",
+        "port": "error"
+      },
+      "tgt": {
+        "process": "Errors",
+        "port": "in"
+      }
+    },
+    {
+      "data": "=",
+      "tgt": {
+        "process": "CompileReplacement",
+        "port": "delimiter"
+      },
+      "metadata": {
+        "x": 650,
+        "y": 350
+      }
+    },
+    {
+      "data": "\\.md=.html",
+      "tgt": {
+        "process": "MapFileName",
+        "port": "regexp"
+      },
+      "metadata": {
+        "x": 850,
+        "y": 350
+      }
+    },
+    {
+      "data": "\\.markdown=.html",
+      "tgt": {
+        "process": "MapFileName",
+        "port": "regexp"
+      },
+      "metadata": {
+        "x": 1050,
+        "y": 350
+      }
+    }
+  ]
+}
