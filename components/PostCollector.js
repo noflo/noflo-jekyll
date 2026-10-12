@@ -110,8 +110,11 @@ export class PostCollector extends Component {
     const config = input.hasData("config")
       ? input.getData("config")
       : undefined;
+    // Store the buffered reference itself so a later activation sees
+    // the same object; a NEW config IP is a different object and
+    // triggers the re-initialization
     if (config && config !== this.config) {
-      this.config = { ...config };
+      this.config = config;
       this.posts = [];
       this.categories = {};
     }
