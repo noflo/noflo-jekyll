@@ -134,7 +134,7 @@ describe("PostCollector component", () => {
     try {
       // Collect silently: only the flush produces output
       /** @param {string} port @param {any} value */
-  const post = (port, value) => {
+      const post = (port, value) => {
         const socket = noflo.internalSocket.createSocket();
         c.inPorts[port].attach(socket);
         socket.post(new noflo.IP("data", value));
