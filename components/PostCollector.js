@@ -38,7 +38,7 @@ export class PostCollector extends Component {
         config: {
           datatype: "object",
           description:
-            "Site config; posts and categories are initialized on arrival",
+            "Site config; posts and categories are reset when a new config arrives",
           required: false,
           control: true,
         },
@@ -60,14 +60,12 @@ export class PostCollector extends Component {
     /** @type {Record<string, Record<string, any>[]>} */
     this.categories = {};
     this.config = null;
-    this.initialized = false;
   }
 
   tearDown() {
     this.posts = [];
     this.categories = {};
     this.config = null;
-    this.initialized = false;
     return Promise.resolve();
   }
 
@@ -105,21 +103,23 @@ export class PostCollector extends Component {
    * @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output
    */
   processMessage(input, output) {
-    // The config is a control port: hasData stays true while the IP is
-    // buffered, so the initialization must run only once (a new config
-    // IP replaces the buffered one but the collector treats the first
-    // as authoritative; tearDown resets for component reuse)
-    if (input.hasData("config") && !this.initialized) {
-      this.initialized = true;
-      this.config = { ...input.getData("config") };
-      this.config.posts = [];
+    // The config is a control port: the read is non-consuming, so the
+    // buffered IP can be re-read on every activation. Reference
+    // comparison detects a NEW config IP and re-initializes the
+    // collection then.
+    const config = input.hasData("config")
+      ? input.getData("config")
+      : undefined;
+    if (config && config !== this.config) {
+      this.config = { ...config };
+      this.posts = [];
       this.categories = {};
     }
     if (input.hasData("msg")) {
       this.processPost(input.getData("msg"));
     }
     if (input.hasData("flush")) {
-      if (!this.initialized) {
+      if (!this.config) {
         output.done(
           new Error("PostCollector requires a config before flushing"),
         );
