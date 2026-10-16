@@ -25,7 +25,7 @@
     "typescript": "^5.0.0"
   },
   "bin": {
-    "noflo-jekyll": "./bin/noflo-jekyll"
+    "noflo-jekyll": "./bin/noflo-jekyll.js"
   },
   "keywords": [
     "noflo",
