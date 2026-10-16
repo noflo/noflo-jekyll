@@ -1,0 +1,9 @@
+---
+layout: default
+title: Category Baz
+---
+<ul>
+{% for post in site.categories.baz %}
+  <li>{{ post.title }}</li>
+{% endfor %}
+</ul>

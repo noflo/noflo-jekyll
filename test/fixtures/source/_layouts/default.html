@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ site.name }} - {{ page.title }}</title>
+  </head>
+  <body{% if page.class %} class="{{ page.class }}"{% endif %}>
+    {{ content }}
+    {% include footer.html %}
+  </body>
+</html>
