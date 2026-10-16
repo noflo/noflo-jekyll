@@ -5,3 +5,4 @@ node_modules/
 # Debug run artifacts
 /.flowtrace*.json
 /test/fixtures/target-*/
+.flowtrace/

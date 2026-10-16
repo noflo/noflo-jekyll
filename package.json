@@ -16,14 +16,16 @@
     "@noflo/assembly-utils": "^2.0.0-alpha.7",
     "@noflo/core": "^2.0.0-alpha.1",
     "@noflo/filesystem": "^2.0.0-alpha.1",
+    "@noflo/graph": "file:../../../../private/tmp/noflo-graph-pr1092",
     "@noflo/groups": "^2.0.0-alpha.1",
     "@noflo/liquid": "^2.0.0-alpha.2",
     "@noflo/markdown": "^2.0.0-alpha.1",
-    "@noflo/noflo": "^2.0.0-alpha.7",
+    "@noflo/noflo": "file:../../../../private/tmp/noflo-pr1092",
     "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
+    "@noflo/fbp-protocol": "^2.0.0-alpha.7",
     "@noflo/fbp-spec-runner": "^2.0.0-alpha.6",
     "@noflo/loader-node": "^2.0.0-alpha.6",
     "@noflo/manifest": "^2.0.0-alpha.5",
