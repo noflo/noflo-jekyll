@@ -78,13 +78,14 @@ describe("DocumentBuilder component", () => {
     const c = getDocumentBuilder();
     try {
       const values = await run(c, "out", {
-        config: { posts: [], paginate: 2 },
+        config: { posts: [], paginate: 2, name: "The Site" },
         templates: layout,
         msg: post,
       });
       assert.equal(values.length, 1);
       assert.equal(values[0].template, "<h1>{{ page.title }}</h1>post body");
-      assert.equal(values[0].variables.title, "Hello");
+      assert.equal(values[0].page.title, "Hello");
+      assert.equal(values[0].site.name, "The Site");
     } finally {
       await c.shutdown();
     }
@@ -173,9 +174,21 @@ describe("DocumentBuilder component", () => {
     const c = getDocumentBuilder();
     const config = {
       posts: [
-        { path: "/site/_posts/2014-01-01-a.md", title: "A" },
-        { path: "/site/_posts/2014-02-01-b.md", title: "B" },
-        { path: "/site/_posts/2014-03-01-c.md", title: "C" },
+        {
+          path: "/site/_posts/2014-01-01-a.md",
+          title: "A",
+          content: "<p>A</p>",
+        },
+        {
+          path: "/site/_posts/2014-02-01-b.md",
+          title: "B",
+          content: "<p>B</p>",
+        },
+        {
+          path: "/site/_posts/2014-03-01-c.md",
+          title: "C",
+          content: "<p>C</p>",
+        },
       ],
       paginate: 2,
     };

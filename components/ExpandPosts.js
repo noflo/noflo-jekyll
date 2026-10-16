@@ -5,6 +5,13 @@ import { Component } from "@noflo/assembly";
  * the config for pagination (work document #35: the phase-2 head of the
  * build pipeline — posts are processed for output only after the whole
  * collection is known).
+ *
+ * Per-message scopes (work document #35 update #15) are NOT stamped
+ * yet: scoped messages currently race the wrapped subgraphs' lifecycle
+ * — an inner network with a buffered unconsumed scoped IP and no active
+ * components ends after its quiet window, stranding the message. Scope
+ * stamping returns once the subgraph liveness rules account for
+ * buffered IPs (work document #38 §3.4 territory).
  */
 export class ExpandPosts extends Component {
   constructor() {

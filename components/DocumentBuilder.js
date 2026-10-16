@@ -40,6 +40,10 @@ export class DocumentBuilder extends Component {
           description:
             "Site config with posts; consumed on arrival and stored — it may arrive after the documents",
           required: false,
+          // The documents carry per-message scopes; the edge-delivered
+          // standing config is unscoped and must stay readable from
+          // scoped activations
+          scoped: false,
         },
       },
       outPorts: {
@@ -53,34 +57,44 @@ export class DocumentBuilder extends Component {
         },
       },
     });
-    /** @type {Record<string, { path: string, body: string }>} */
+    /** @type {Record<string, { path: string, body: string, data: Record<string, any> }>} */
     this.templates = {};
     /** @type {Record<string, any> | null} */
     this.config = null;
-    /** Guards the drain loop against the concurrent activations that new arrivals fire while it is in flight */
-    this.draining = false;
+    /** Guards the drain loop against the concurrent activations that new arrivals fire while it is in flight, per scope */
+    this.draining = new Set();
   }
 
   tearDown() {
     this.templates = {};
     this.config = null;
-    this.draining = false;
+    this.draining.clear();
     return Promise.resolve();
   }
 
   /**
-   * @param {{ path: string, body: string }} template
+   * @param {Record<string, any>} template - A template message already
+   *   run through `jekyll/FrontMatter`: the body is the template source
+   *   and the front-matter fields (e.g. its own `layout`) sit at the
+   *   top level
    * @returns {void}
    */
   addTemplate(template) {
     const name = path.basename(template.path, path.extname(template.path));
-    this.templates[name] = template;
+    const {
+      body,
+      path: _path,
+      errors: _errors,
+      source: _source,
+      ...data
+    } = template;
+    this.templates[name] = { path: template.path, body, data };
   }
 
   /**
    * @param {string} templateName
    * @param {Error[]} errors
-   * @returns {{ path: string, body: string } | undefined}
+   * @returns {{ path: string, body: string, data: Record<string, any> } | undefined}
    */
   getTemplate(templateName, errors) {
     const template = this.templates[templateName];
@@ -143,6 +157,44 @@ export class DocumentBuilder extends Component {
   }
 
   /**
+   * Enriches the site context with every converted document currently
+   * buffered: posts flowing through the builder carry their rendered
+   * body, and the matching `config.posts` entry gains it as `content`
+   * — the two-pass shape (collection first, conversion second) without
+   * a second collect. Non-consuming: the scan touches every buffered
+   * data IP via a `has` validator.
+   * @param {{ has(...args: unknown[]): boolean, scope: string | null }} input
+   * @returns {void}
+   */
+  enrichBuffered(input) {
+    input.has("msg", (/** @type {{ type: string, data: any }} */ ip) => {
+      if (ip.type === "data") {
+        this.enrichSite(ip.data);
+      }
+      return false;
+    });
+  }
+
+  /**
+   * Enriches the site context with a converted document: posts flowing
+   * through the builder carry their rendered body, and the matching
+   * `config.posts` entry gains it as `content` — the two-pass shape
+   * (collection first, conversion second) without a second collect.
+   * @param {Record<string, any>} msg
+   * @returns {void}
+   */
+  enrichSite(msg) {
+    if (!this.config?.posts || !msg.path) {
+      return;
+    }
+    for (const post of this.config.posts) {
+      if (post.path === msg.path) {
+        post.content = msg.body;
+      }
+    }
+  }
+
+  /**
    * Whether the current config and template store can resolve this
    * document. Missing templates, includes, or posts are "not yet",
    * never "never": without an end-of-stream signal there is no point
@@ -160,51 +212,87 @@ export class DocumentBuilder extends Component {
     if (!this.checkDataReferences(msg.body ?? "", errors)) {
       return false;
     }
-    if (msg.layout && !this.templates[msg.layout]) {
+    if (msg.layout && !this.chainPresent(msg.layout)) {
       return false;
     }
     if (this.hasPaginator(msg.body ?? "") && !this.config?.posts) {
+      return false;
+    }
+    // Pages listing posts or paginating need every collected post
+    // converted first: the rendered content flows through this builder
+    // and enriches the collection as it passes
+    if (
+      (this.hasPaginator(msg.body ?? "") ||
+        (msg.body ?? "").includes("site.posts")) &&
+      this.config?.posts &&
+      !this.config.posts.every(
+        (/** @type {Record<string, any>} */ p) => p.content,
+      )
+    ) {
       return false;
     }
     return true;
   }
 
   /**
-   * Resolves the `{% layout %}`/`layout` chain: the parent template body
-   * replaces `{{ content }}` with the child body.
-   * @param {Record<string, any>} templateData
-   * @param {Error[]} errors
-   * @returns {string}
+   * Whether every layout in the inheritance chain starting at
+   * `templateName` is available. A cycle counts as present — the
+   * resolution reports it as a processing error instead of holding.
+   * @param {string} templateName
+   * @returns {boolean}
    */
-  handleInheritance(templateData, errors) {
-    let template = templateData.body;
-    if (templateData.layout) {
-      const parent = this.getTemplate(templateData.layout, errors);
-      if (parent) {
-        template = parent.body.replace("{{ content }}", template);
+  chainPresent(templateName) {
+    let current = /** @type {string | undefined} */ (templateName);
+    const seen = new Set();
+    while (current) {
+      if (seen.has(current)) {
+        return true;
       }
+      seen.add(current);
+      const template = this.templates[current];
+      if (!template) {
+        return false;
+      }
+      current = template.data?.layout;
     }
-    return template;
+    return true;
   }
 
   /**
-   * Merges the layout chain's variables into the document data, child
-   * values winning.
-   * @param {Record<string, any>} data
+   * Resolves the `{% layout %}`/`layout` chain: each parent template
+   * body replaces `{{ content }}` with the child body, walking until a
+   * template without its own `layout`. The chain's front-matter fields
+   * merge into the page context (inner layouts winning over outer
+   * ones, the document winning over both) — `class: index` on a layout
+   * reaches `page.class` the way Jekyll scopes layout variables.
+   * @param {Record<string, any>} templateData
    * @param {Error[]} errors
-   * @returns {Record<string, any>}
+   * @returns {{ body: string, data: Record<string, any> }}
    */
-  handleVariableInheritance(data, errors) {
-    if (!data.layout) {
-      return data;
+  handleInheritance(templateData, errors) {
+    let body = templateData.body ?? "";
+    let layoutName = /** @type {string | undefined} */ (templateData.layout);
+    /** @type {Record<string, any>} */
+    let data = {};
+    const seen = new Set();
+    while (layoutName) {
+      if (seen.has(layoutName)) {
+        errors.push(new Error(`Layout cycle at ${layoutName}`));
+        return { body, data };
+      }
+      seen.add(layoutName);
+      const parent = this.getTemplate(layoutName, errors);
+      if (!parent) {
+        return { body, data };
+      }
+      // A replacer function: string replacement would interpret `$`
+      // patterns in the substituted body
+      body = parent.body.replace("{{ content }}", () => body);
+      const { layout: _layout, ...fields } = parent.data ?? {};
+      data = { ...fields, ...data };
+      layoutName = parent.data?.layout;
     }
-    const parent = this.getTemplate(data.layout, errors);
-    if (!parent) {
-      return data;
-    }
-    // The parent template file carries no front-matter variables in the
-    // 1.x model beyond its body; the layout name is what propagates
-    return data;
+    return { body, data };
   }
 
   /**
@@ -259,27 +347,60 @@ export class DocumentBuilder extends Component {
   }
 
   /**
-   * Build the output messages for one resolvable document.
+   * Build the output messages for one resolvable document. The liquid
+   * context is the message itself: the document fields nest under
+   * `page` and the site data under `site`, the way Jekyll scopes
+   * template variables. The wrapped Template component receives the
+   * whole message as its scope (whole-message mapping), so these nest
+   * at the top level.
    * @param {Record<string, any>} msg
    * @returns {Array<Record<string, any>>}
    */
   build(msg) {
     /** @type {Error[]} */
     const errors = Array.isArray(msg.errors) ? [...msg.errors] : [];
-    const resolvedBody = this.handleInheritance(msg, errors);
+    const resolved = this.handleInheritance(msg, errors);
     if (errors.length > 0) {
       throw errors[0];
     }
-    if (this.hasPaginator(resolvedBody)) {
-      return this.paginate({ ...msg }, resolvedBody);
+    const page = { ...resolved.data, ...msg };
+    delete page.errors;
+    const site = {
+      name: this.config?.name,
+      time: this.config?.time,
+      posts: this.config?.posts ?? [],
+      categories: this.config?.categories ?? {},
+    };
+    const scoped = { ...msg, page, site };
+    if (this.hasPaginator(resolved.body)) {
+      return this.paginate(scoped, resolved.body);
     }
     return [
       {
-        ...msg,
-        template: resolvedBody,
-        variables: { ...msg, ...this.handleVariableInheritance(msg, errors) },
+        ...scoped,
+        template: resolved.body,
       },
     ];
+  }
+
+  /**
+   * Peek at the head document in the msg buffer without consuming it.
+   * @param {{ has(...args: unknown[]): boolean, scope: string | null }} input
+   * @returns {Record<string, any> | undefined}
+   */
+  headPeek(input) {
+    let seen = false;
+    /** @type {Record<string, any> | undefined} */
+    let head;
+    input.has("msg", (/** @type {{ type: string, data: any }} */ ip) => {
+      if (ip.type !== "data" || seen) {
+        return false;
+      }
+      seen = true;
+      head = ip.data;
+      return true;
+    });
+    return head;
   }
 
   /**
@@ -287,7 +408,7 @@ export class DocumentBuilder extends Component {
    * validator only accepts the first data IP in the buffer — `has` is
    * an any-match scan, and `get` consumes the head, so a match on a
    * later message would consume the wrong one.
-   * @param {{ has(...args: unknown[]): boolean }} input
+   * @param {{ has(...args: unknown[]): boolean, scope: string | null }} input
    * @returns {boolean}
    */
   headResolvable(input) {
@@ -310,11 +431,12 @@ export class DocumentBuilder extends Component {
    * first one still missing parts. The sends respect edge
    * backpressure; new arrivals fired while a drain is in flight are
    * picked up by the drain loop itself or re-checked after it unwinds.
-   * @param {{ has(...args: unknown[]): boolean, getData(port: string): any }} input
+   * @param {{ has(...args: unknown[]): boolean, getData(port: string): any, scope: string | null }} input
    * @param {{ send(map: Record<string, unknown>): Promise<void>, done(err?: Error): void }} output
    * @returns {Promise<void>}
    */
   async flush(input, output) {
+    const scope = input.scope;
     try {
       while (this.headResolvable(input)) {
         const msg = input.getData("msg");
@@ -332,7 +454,7 @@ export class DocumentBuilder extends Component {
         }
       }
     } finally {
-      this.draining = false;
+      this.draining.delete(scope);
     }
     // A message that arrived between the last buffer check and the
     // guard being lowered fired an activation that saw the guard up and
@@ -345,7 +467,7 @@ export class DocumentBuilder extends Component {
   }
 
   /**
-   * @param {{ has(...args: unknown[]): boolean, hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input
+   * @param {{ has(...args: unknown[]): boolean, hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any, scope: string | null }} input
    * @param {{ send(map: Record<string, unknown>): Promise<void>, done(err?: Error): void }} output
    */
   processMessage(input, output) {
@@ -357,9 +479,18 @@ export class DocumentBuilder extends Component {
     if (input.hasData("templates")) {
       this.addTemplate(input.getData("templates"));
     }
-    if (this.draining) {
-      // A drain is in flight; it sees the updated store on its next
-      // loop iteration or re-checks after unwinding
+    // Converted documents enrich the site collection as they pass:
+    // pages listing posts resolve once every collected post converted.
+    // The whole buffer is scanned non-consumingly — posts queueing
+    // behind an unresolvable page enrich too. This runs before the
+    // drain guard: arrivals during an in-flight drain must still
+    // enrich, or a listing page waiting for them deadlocks
+    if (input.hasData("msg")) {
+      this.enrichBuffered(input);
+    }
+    if (this.draining.has(input.scope)) {
+      // A drain for this scope is in flight; it sees the updated store
+      // on its next loop iteration or re-checks after unwinding
       output.done();
       return;
     }
@@ -367,7 +498,7 @@ export class DocumentBuilder extends Component {
       output.done();
       return;
     }
-    this.draining = true;
+    this.draining.add(input.scope);
     this.flush(input, output).catch((/** @type {Error} */ err) =>
       output.done(err),
     );
