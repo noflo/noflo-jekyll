@@ -43,11 +43,22 @@ export class BuildPostPath extends Component {
    * @returns {string}
    */
   handleCategories(permalink, categories) {
-    if (!categories) {
+    const clean = (categories ?? []).filter((category) => category);
+    if (clean.length === 0) {
+      // No categories: drop the whole segment, collapsing the slash
       return permalink.replace("/:categories", "");
     }
-    const clean = categories.filter((category) => category);
     return permalink.replace(":categories", clean.join("/"));
+  }
+
+  /**
+   * Zero-pads a date component the way Jekyll's permalink templates do.
+   * @param {number} value
+   * @param {number} [length]
+   * @returns {string}
+   */
+  pad(value, length = 2) {
+    return String(value).padStart(length, "0");
   }
 
   /**
@@ -60,44 +71,29 @@ export class BuildPostPath extends Component {
       return permalink;
     }
     return permalink
-      .replace(":year", String(date.getFullYear()))
-      .replace(":month", String(date.getMonth() + 1))
-      .replace(":day", String(date.getDate()));
+      .replace(":year", this.pad(date.getFullYear(), 4))
+      .replace(":month", this.pad(date.getMonth() + 1))
+      .replace(":day", this.pad(date.getDate()));
   }
 
   /**
+   * Jekyll's `:title` is the slug: the source name without its
+   * extension. The 1.x implementation kept the extension (the
+   * name-with-extension quirk); the Jekyll-generated reference is the
+   * contract.
    * @param {string} permalink
    * @param {string} name
    * @returns {string}
    */
   handleTitle(permalink, name) {
-    const permaExt = permalink.substring(permalink.lastIndexOf("."));
-    const nameExt = name.includes(".")
-      ? name.substring(name.lastIndexOf("."))
-      : "";
-    const endSlash = permalink.endsWith("/");
-
-    if (permaExt !== nameExt) {
-      // Remove the permalink extension
-      const dirName = permalink.slice(
-        0,
-        Math.max(permalink.lastIndexOf("/"), 0),
-      );
-      const baseName = permaExt
-        ? permalink.slice(
-            permalink.lastIndexOf("/") + 1,
-            permalink.lastIndexOf(permaExt),
-          )
-        : permalink.slice(permalink.lastIndexOf("/") + 1);
-      permalink = `${dirName}/${baseName}`;
-      if (endSlash && !permalink.endsWith("/")) {
-        permalink = `${permalink}/`;
-      }
-    }
-    return permalink.replace(":title", name);
+    const dot = name.lastIndexOf(".");
+    const slug = dot > 0 ? name.slice(0, dot) : name;
+    return permalink.replace(":title", slug);
   }
 
   /**
+   * A permalink ending with `/` writes `index.html` into that
+   * directory, the way Jekyll stores directory-style URLs.
    * @param {string} permalink
    * @returns {string}
    */
@@ -105,18 +101,7 @@ export class BuildPostPath extends Component {
     if (!permalink.endsWith("/")) {
       return permalink;
     }
-    const filePath = permalink.slice(0, -1);
-    const permaExt = filePath.includes(".")
-      ? filePath.substring(filePath.lastIndexOf("."))
-      : "";
-    const dirName = filePath.slice(0, Math.max(filePath.lastIndexOf("/"), 0));
-    const baseName = permaExt
-      ? filePath.slice(
-          filePath.lastIndexOf("/") + 1,
-          filePath.lastIndexOf(permaExt),
-        )
-      : filePath.slice(filePath.lastIndexOf("/") + 1);
-    return `${dirName}/${baseName}/index${permaExt}`;
+    return `${permalink}index.html`;
   }
 
   /**

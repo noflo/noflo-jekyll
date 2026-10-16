@@ -93,8 +93,49 @@ describe("BuildPostPath component", () => {
           date: new Date(2014, 2, 15),
         },
       });
-      assert.equal(out.path, "/out/news/2014/3/15/hello-world.md");
-      assert.equal(out.url, "/news/2014/3/15/hello-world.md");
+      assert.equal(out.path, "/out/news/2014/03/15/hello-world.html");
+      assert.equal(out.url, "/news/2014/03/15/hello-world.html");
+    } finally {
+      await c.shutdown();
+    }
+  });
+  it("writes directory-style permalinks as index.html", async () => {
+    const c = getBuildPostPath();
+    try {
+      const out = await run(c, "out", {
+        config: {
+          target: "/out",
+          permalink: "/blog/:year/:categories/:title/",
+        },
+        msg: {
+          errors: [],
+          name: "hello-world.md",
+          categories: ["news"],
+          date: new Date(2014, 2, 15),
+        },
+      });
+      assert.equal(out.path, "/out/blog/2014/news/hello-world/index.html");
+      assert.equal(out.url, "/blog/2014/news/hello-world/");
+    } finally {
+      await c.shutdown();
+    }
+  });
+  it("drops the categories segment when the post has none", async () => {
+    const c = getBuildPostPath();
+    try {
+      const out = await run(c, "out", {
+        config: {
+          target: "/out",
+          permalink: "/blog/:year/:categories/:title/",
+        },
+        msg: {
+          errors: [],
+          name: "hello-world.md",
+          categories: [],
+          date: new Date(2014, 2, 15),
+        },
+      });
+      assert.equal(out.path, "/out/blog/2014/hello-world/index.html");
     } finally {
       await c.shutdown();
     }

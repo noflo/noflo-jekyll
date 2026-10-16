@@ -36,7 +36,7 @@ describe("jekyll end-to-end", () => {
     const staticPage = readFileSync(join(target, "about.md"), "utf8");
     assert.equal(staticPage, "static about page");
     // The document leg: markdown converted, layout inheritance applied
-    const built = readFileSync(join(target, "hello.md"), "utf8");
+    const built = readFileSync(join(target, "hello.html"), "utf8");
     assert.match(built, /<article>/);
     assert.match(built, /<h1>Hello world<\/h1>/);
   });
