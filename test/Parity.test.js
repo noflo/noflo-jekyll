@@ -44,7 +44,7 @@ const reference = join(import.meta.dirname, "fixtures", "jekyll");
  */
 const gapFiles = [
   "blog/2012/baz/yet-another/index.html",
-  "baz.html",
+  "baz/index.html",
   "index.html",
   "page2/index.html",
   "index.txt",
