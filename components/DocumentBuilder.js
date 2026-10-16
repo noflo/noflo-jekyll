@@ -1,5 +1,6 @@
 import path from "node:path";
 import { Component, fail } from "@noflo/assembly";
+import { IP } from "@noflo/noflo";
 
 /**
  * Resolves template inheritance and pagination for document messages,
@@ -442,7 +443,12 @@ export class DocumentBuilder extends Component {
         const msg = input.getData("msg");
         try {
           for (const page of this.build(msg)) {
-            await output.send({ out: page });
+            // Unique scope per generated page: the wrapped adapters
+            // downstream correlate per scope, so concurrent renders
+            // cannot cross pairs inside an adapter
+            await output.send({
+              out: new IP("data", page, { scope: page.path }),
+            });
           }
         } catch (err) {
           await output.send({

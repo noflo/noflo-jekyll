@@ -1,4 +1,5 @@
 import { Component } from "@noflo/assembly";
+import { IP } from "@noflo/noflo";
 
 /**
  * Expands the flushed site config into one message per post, carrying
@@ -46,7 +47,12 @@ export class ExpandPosts extends Component {
     const config = input.getData("msg");
     output.send({ config });
     for (const post of config.posts ?? []) {
-      output.send({ out: { ...post, config } });
+      // Unique scope per post: the wrapped adapters downstream correlate
+      // their collectors per scope, so concurrent in-flight posts cannot
+      // cross pairs inside an adapter
+      output.send({
+        out: new IP("data", { ...post, config }, { scope: post.path }),
+      });
     }
     output.done();
   }

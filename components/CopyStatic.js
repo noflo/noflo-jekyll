@@ -66,14 +66,11 @@ export class CopyStatic extends Component {
    * @returns {Promise<void>}
    */
   async copyTree(src, dest) {
-    await mkdir(dest, { recursive: true });
     const entries = await readdir(src);
-    let copied = false;
     for (const entry of entries) {
       if (this.isIgnored(entry)) {
         continue;
       }
-      copied = true;
       const from = path.join(src, entry);
       const to = path.join(dest, entry);
       const info = await stat(from);
@@ -81,13 +78,13 @@ export class CopyStatic extends Component {
         await this.copyTree(from, to);
         continue;
       }
+      // The destination directory is created lazily, with the first
+      // copyable entry: an ignored-only tree (baz/ holding just
+      // _posts) leaves nothing behind, and a directory the document
+      // pipeline also writes into is never removed
+      await mkdir(dest, { recursive: true });
       const body = await readFile(from);
       await writeFile(to, body);
-    }
-    if (!copied) {
-      // Only ignored children: the tree contributes nothing — drop the
-      // directory the way Jekyll omits empty site directories
-      await rm(dest, { recursive: true, force: true });
     }
   }
 
