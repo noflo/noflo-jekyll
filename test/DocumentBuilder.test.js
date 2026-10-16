@@ -31,9 +31,46 @@ const run = async (c, outPort, inputs) => {
   return values;
 };
 
+/**
+ * Sends one IP now and another after a delay, collecting data values
+ * from the outport — used to assert order-tolerant buffering: the first
+ * arrival must produce nothing, the second resolves the buffered input.
+ * @param {import("@noflo/noflo").Component} c
+ * @param {string} outPort
+ * @param {Array<{ port: string, value: any, delay?: number }>} steps
+ * @returns {Promise<any[]>}
+ */
+const runStaged = async (c, outPort, steps) => {
+  const outSocket = noflo.internalSocket.createSocket();
+  /** @type {any[]} */
+  const values = [];
+  c.outPorts[outPort].attach(outSocket);
+  outSocket.addEventListener("ip", (/** @type {CustomEvent} */ event) => {
+    if (event.detail.type === "data") {
+      values.push(event.detail.data);
+    }
+  });
+  for (const step of steps) {
+    await new Promise((resolve) => setTimeout(resolve, step.delay ?? 50));
+    const socket = noflo.internalSocket.createSocket();
+    c.inPorts[step.port].attach(socket);
+    socket.post(new noflo.IP("data", step.value));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  return values;
+};
+
 const layout = {
   path: "_layouts/post.html",
   body: "<h1>{{ page.title }}</h1>{{ content }}",
+};
+
+const post = {
+  errors: [],
+  path: "/site/_posts/2014-03-15-hello.md",
+  body: "post body",
+  layout: "post",
+  title: "Hello",
 };
 
 describe("DocumentBuilder component", () => {
@@ -43,13 +80,7 @@ describe("DocumentBuilder component", () => {
       const values = await run(c, "out", {
         config: { posts: [], paginate: 2 },
         templates: layout,
-        msg: {
-          errors: [],
-          path: "/site/_posts/2014-03-15-hello.md",
-          body: "post body",
-          layout: "post",
-          title: "Hello",
-        },
+        msg: post,
       });
       assert.equal(values.length, 1);
       assert.equal(values[0].template, "<h1>{{ page.title }}</h1>post body");
@@ -58,27 +89,67 @@ describe("DocumentBuilder component", () => {
       await c.shutdown();
     }
   });
-  it("fails the message when the layout is missing", async () => {
+  it("buffers the document until its layout template arrives", async () => {
+    const c = getDocumentBuilder();
+    try {
+      // The document arrives before the template: nothing is emitted,
+      // nothing fails — the message stays buffered on the inport
+      const values = await runStaged(c, "out", [
+        { port: "msg", value: post },
+        { port: "templates", value: layout },
+        { port: "config", value: { posts: [], paginate: 2 } },
+      ]);
+      assert.equal(values.length, 1);
+      assert.equal(values[0].template, "<h1>{{ page.title }}</h1>post body");
+    } finally {
+      await c.shutdown();
+    }
+  });
+  it("buffers the document until the site config arrives", async () => {
+    const c = getDocumentBuilder();
+    try {
+      // Posts-referencing body with no config yet: held, not failed
+      const values = await runStaged(c, "out", [
+        {
+          port: "msg",
+          value: {
+            errors: [],
+            path: "/site/index.html",
+            body: "{{ site.posts }}",
+          },
+        },
+        { port: "config", value: { posts: [], paginate: 2 } },
+      ]);
+      assert.equal(values.length, 1);
+      assert.equal(values[0].template, "{{ site.posts }}");
+    } finally {
+      await c.shutdown();
+    }
+  });
+  it("keeps a document whose layout never arrives buffered without failing", async () => {
     const c = getDocumentBuilder();
     const failSocket = noflo.internalSocket.createSocket();
+    /** @type {any[]} */
+    const failed = [];
     c.outPorts.fail.attach(failSocket);
+    failSocket.addEventListener("ip", (/** @type {CustomEvent} */ event) => {
+      if (event.detail.type === "data") {
+        failed.push(event.detail.data);
+      }
+    });
+    const outSocket = noflo.internalSocket.createSocket();
+    /** @type {any[]} */
+    const out = [];
+    c.outPorts.out.attach(outSocket);
+    outSocket.addEventListener("ip", (/** @type {CustomEvent} */ event) => {
+      if (event.detail.type === "data") {
+        out.push(event.detail.data);
+      }
+    });
     try {
-      const failed = new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error("Timed out")), 2000);
-        failSocket.addEventListener(
-          "ip",
-          (/** @type {CustomEvent} */ event) => {
-            if (event.detail.type === "data") {
-              clearTimeout(timer);
-              resolve(event.detail.data);
-            }
-          },
-        );
-      });
-      // The config must arrive (control port) before the documents
-      const configSocket = noflo.internalSocket.createSocket();
-      c.inPorts.config.attach(configSocket);
-      configSocket.post(new noflo.IP("data", { posts: [], paginate: 2 }));
+      const socket = noflo.internalSocket.createSocket();
+      c.inPorts.config.attach(socket);
+      socket.post(new noflo.IP("data", { posts: [], paginate: 2 }));
       const inSocket = noflo.internalSocket.createSocket();
       c.inPorts.msg.attach(inSocket);
       inSocket.post(
@@ -89,9 +160,11 @@ describe("DocumentBuilder component", () => {
           layout: "nosuch",
         }),
       );
-      const msg = await failed;
-      assert.equal(msg.errors.length, 1);
-      assert.match(msg.errors[0].message, /Template nosuch not found/);
+      // A missing part is "not yet", never "never": nothing is emitted
+      // and nothing fails within the wait window
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      assert.equal(out.length, 0);
+      assert.equal(failed.length, 0);
     } finally {
       await c.shutdown();
     }
@@ -124,41 +197,6 @@ describe("DocumentBuilder component", () => {
       assert.equal(values[1].paginator.posts.length, 1);
       assert.equal(values[1].paginator.previous_page_path, "/index.html");
       assert.equal(values[1].paginator.next_page_path, null);
-    } finally {
-      await c.shutdown();
-    }
-  });
-  it("fails when the body references posts before they are available", async () => {
-    const c = getDocumentBuilder();
-    const failSocket = noflo.internalSocket.createSocket();
-    c.outPorts.fail.attach(failSocket);
-    try {
-      // No config arrival: posts unavailable
-      const failed = new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error("Timed out")), 2000);
-        failSocket.addEventListener(
-          "ip",
-          (/** @type {CustomEvent} */ event) => {
-            if (event.detail.type === "data") {
-              clearTimeout(timer);
-              resolve(event.detail.data);
-            }
-          },
-        );
-      });
-      const inSocket = noflo.internalSocket.createSocket();
-      c.inPorts.msg.attach(inSocket);
-      inSocket.post(
-        new noflo.IP("data", {
-          errors: [],
-          path: "/site/index.html",
-          body: "{{ site.posts }}",
-        }),
-      );
-      const msg = await failed;
-      assert.ok(
-        msg.errors.some((/** @type {Error} */ e) => /posts/.test(e.message)),
-      );
     } finally {
       await c.shutdown();
     }

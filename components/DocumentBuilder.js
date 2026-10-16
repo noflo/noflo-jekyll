@@ -7,11 +7,16 @@ import { Component, fail } from "@noflo/assembly";
  * `template` and inherited `variables` (work document #35: assembly
  * relay for the 1.x DocumentBuilder).
  *
- * The 1.x component queued documents and retried until every referenced
- * part arrived; the 2.x pipeline orders the wires instead — the site
- * config with posts and the template corpus arrive before the
- * documents — and a missing part fails the message with accumulated
- * errors instead of holding it.
+ * No ordering is assumed between the wires: in an asynchronous network
+ * documents, templates, and the site config arrive in any order (only
+ * within a stream is there an ordering guarantee). A document whose
+ * referenced parts have not arrived yet stays buffered on its inport —
+ * the has-first rule: the head message is peeked at non-consumingly,
+ * and consumed only when the current config and template store can
+ * resolve it. Config and template arrivals re-fire the process, which
+ * is what lets buffered documents resolve later. A message whose parts
+ * never arrive stays buffered until network shutdown discards it; the
+ * `fail` port is for unexpected processing errors, not missing parts.
  */
 export class DocumentBuilder extends Component {
   constructor() {
@@ -32,9 +37,9 @@ export class DocumentBuilder extends Component {
         },
         config: {
           datatype: "object",
-          description: "Site config with posts; arrives before the documents",
+          description:
+            "Site config with posts; consumed on arrival and stored — it may arrive after the documents",
           required: false,
-          control: true,
         },
       },
       outPorts: {
@@ -44,18 +49,22 @@ export class DocumentBuilder extends Component {
         },
         fail: {
           datatype: "object",
-          description: "The message with errors accumulated",
+          description: "The message with unexpected processing errors",
         },
       },
     });
     /** @type {Record<string, { path: string, body: string }>} */
     this.templates = {};
+    /** @type {Record<string, any> | null} */
     this.config = null;
+    /** Guards the drain loop against the concurrent activations that new arrivals fire while it is in flight */
+    this.draining = false;
   }
 
   tearDown() {
     this.templates = {};
     this.config = null;
+    this.draining = false;
     return Promise.resolve();
   }
 
@@ -134,6 +143,33 @@ export class DocumentBuilder extends Component {
   }
 
   /**
+   * Whether the current config and template store can resolve this
+   * document. Missing templates, includes, or posts are "not yet",
+   * never "never": without an end-of-stream signal there is no point
+   * at which a missing part could be declared definitively absent, so
+   * an unresolvable document stays buffered for later arrivals.
+   * @param {Record<string, any>} msg
+   * @returns {boolean}
+   */
+  canResolve(msg) {
+    /** @type {Error[]} */
+    const errors = [];
+    if (!this.checkIncludes(msg.body ?? "", errors)) {
+      return false;
+    }
+    if (!this.checkDataReferences(msg.body ?? "", errors)) {
+      return false;
+    }
+    if (msg.layout && !this.templates[msg.layout]) {
+      return false;
+    }
+    if (this.hasPaginator(msg.body ?? "") && !this.config?.posts) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Resolves the `{% layout %}`/`layout` chain: the parent template body
    * replaces `{{ content }}` with the child body.
    * @param {Record<string, any>} templateData
@@ -178,6 +214,9 @@ export class DocumentBuilder extends Component {
    * @returns {Array<Record<string, any>>}
    */
   paginate(document, resolvedBody) {
+    if (!this.config) {
+      throw new Error("Pagination requires the site config");
+    }
     const posts = this.config.posts;
     const perPage = this.config.paginate;
     const pages = Math.ceil(posts.length / perPage);
@@ -220,69 +259,118 @@ export class DocumentBuilder extends Component {
   }
 
   /**
-   * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any, hasStream(arg: unknown): boolean, attached(port: string): unknown }} input
-   * @param {{ sendDone(map: Record<string, unknown>): void, send(map: Record<string, unknown>): void, done(err?: Error): void }} output
+   * Build the output messages for one resolvable document.
+   * @param {Record<string, any>} msg
+   * @returns {Array<Record<string, any>>}
    */
-  processMessage(input, output) {
-    if (input.hasData("templates")) {
-      this.addTemplate(input.getData("templates"));
-      output.done();
-      return;
-    }
-    if (!input.hasData("msg")) {
-      return;
-    }
-    const msg = input.getData("msg");
-    // The config is a control port: the read is non-consuming, so the
-    // buffered IP is available on every activation
-    this.config = input.hasData("config")
-      ? { ...input.getData("config") }
-      : this.config;
+  build(msg) {
     /** @type {Error[]} */
     const errors = Array.isArray(msg.errors) ? [...msg.errors] : [];
-
-    if (!this.config?.posts) {
-      output.sendDone({
-        fail: fail(
-          msg,
-          new Error(
-            "DocumentBuilder requires the site config with posts before documents",
-          ),
-        ),
-      });
-      return;
-    }
-    if (!this.checkIncludes(msg.body ?? "", errors)) {
-      output.sendDone({ fail: { ...msg, errors } });
-      return;
-    }
-    if (!this.checkDataReferences(msg.body ?? "", errors)) {
-      output.sendDone({ fail: { ...msg, errors } });
-      return;
-    }
-
     const resolvedBody = this.handleInheritance(msg, errors);
     if (errors.length > 0) {
-      output.sendDone({ fail: { ...msg, errors } });
-      return;
+      throw errors[0];
     }
-
     if (this.hasPaginator(resolvedBody)) {
-      const pages = this.paginate({ ...msg }, resolvedBody);
-      // Multiple sends per activation: one message per generated page
-      for (const page of pages) {
-        output.send({ out: page });
-      }
-      output.done();
-      return;
+      return this.paginate({ ...msg }, resolvedBody);
     }
-    output.sendDone({
-      out: {
+    return [
+      {
         ...msg,
         template: resolvedBody,
         variables: { ...msg, ...this.handleVariableInheritance(msg, errors) },
       },
+    ];
+  }
+
+  /**
+   * Whether the head document in the msg buffer is resolvable. The
+   * validator only accepts the first data IP in the buffer — `has` is
+   * an any-match scan, and `get` consumes the head, so a match on a
+   * later message would consume the wrong one.
+   * @param {{ has(...args: unknown[]): boolean }} input
+   * @returns {boolean}
+   */
+  headResolvable(input) {
+    let seen = false;
+    let ok = false;
+    input.has("msg", (/** @type {{ type: string, data: any }} */ ip) => {
+      if (ip.type !== "data" || seen) {
+        return false;
+      }
+      seen = true;
+      ok = this.canResolve(ip.data);
+      return ok;
     });
+    return ok;
+  }
+
+  /**
+   * Drain the msg buffer head-first: consume and emit every document
+   * the current store can resolve, in arrival order, stopping at the
+   * first one still missing parts. The sends respect edge
+   * backpressure; new arrivals fired while a drain is in flight are
+   * picked up by the drain loop itself or re-checked after it unwinds.
+   * @param {{ has(...args: unknown[]): boolean, getData(port: string): any }} input
+   * @param {{ send(map: Record<string, unknown>): Promise<void>, done(err?: Error): void }} output
+   * @returns {Promise<void>}
+   */
+  async flush(input, output) {
+    try {
+      while (this.headResolvable(input)) {
+        const msg = input.getData("msg");
+        try {
+          for (const page of this.build(msg)) {
+            await output.send({ out: page });
+          }
+        } catch (err) {
+          await output.send({
+            fail: fail(
+              msg,
+              err instanceof Error ? err : new Error(String(err)),
+            ),
+          });
+        }
+      }
+    } finally {
+      this.draining = false;
+    }
+    // A message that arrived between the last buffer check and the
+    // guard being lowered fired an activation that saw the guard up and
+    // closed without draining — re-check here so it is not stranded
+    if (this.headResolvable(input)) {
+      await this.flush(input, output);
+      return;
+    }
+    output.done();
+  }
+
+  /**
+   * @param {{ has(...args: unknown[]): boolean, hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input
+   * @param {{ send(map: Record<string, unknown>): Promise<void>, done(err?: Error): void }} output
+   */
+  processMessage(input, output) {
+    // Consume config and templates as they arrive: their arrivals are
+    // the re-fire triggers that let buffered documents resolve
+    if (input.hasData("config")) {
+      this.config = { ...input.getData("config") };
+    }
+    if (input.hasData("templates")) {
+      this.addTemplate(input.getData("templates"));
+    }
+    if (this.draining) {
+      // A drain is in flight; it sees the updated store on its next
+      // loop iteration or re-checks after unwinding
+      output.done();
+      return;
+    }
+    if (!input.hasData("msg")) {
+      output.done();
+      return;
+    }
+    this.draining = true;
+    this.flush(input, output).catch((/** @type {Error} */ err) =>
+      output.done(err),
+    );
   }
 }
 
