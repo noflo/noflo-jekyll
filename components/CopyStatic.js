@@ -1,16 +1,25 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { Component, fail } from "@noflo/assembly";
 
 /**
- * Copies a source file to the site target directory: reads the file at
- * `msg.path` and writes it to `target/basename(path)`. The v1 static
- * copy is flat (nested source directories would need recursion).
+ * Copies a source entry to the site target directory: files are copied
+ * to `target/basename(path)`, directories recursively — skipping the
+ * Jekyll-ignored underscore and dot entries at every level, the way
+ * Jekyll's site copy excludes `_posts` and friends anywhere in the
+ * tree.
  */
 export class CopyStatic extends Component {
   constructor() {
     super({
-      description: "Copy a source file to the site target",
+      description: "Copy a source file or directory to the site target",
       icon: "files-copy",
       inPorts: {
         msg: {
@@ -38,6 +47,50 @@ export class CopyStatic extends Component {
     });
   }
 
+  /**
+   * Whether Jekyll would ignore this entry: names starting with an
+   * underscore or a dot.
+   * @param {string} entryPath
+   * @returns {boolean}
+   */
+  isIgnored(entryPath) {
+    const base = path.basename(entryPath);
+    return base.startsWith("_") || base.startsWith(".");
+  }
+
+  /**
+   * Recursively copies a directory tree, skipping ignored entries at
+   * every level.
+   * @param {string} src
+   * @param {string} dest
+   * @returns {Promise<void>}
+   */
+  async copyTree(src, dest) {
+    await mkdir(dest, { recursive: true });
+    const entries = await readdir(src);
+    let copied = false;
+    for (const entry of entries) {
+      if (this.isIgnored(entry)) {
+        continue;
+      }
+      copied = true;
+      const from = path.join(src, entry);
+      const to = path.join(dest, entry);
+      const info = await stat(from);
+      if (info.isDirectory()) {
+        await this.copyTree(from, to);
+        continue;
+      }
+      const body = await readFile(from, "utf8");
+      await writeFile(to, body, "utf8");
+    }
+    if (!copied) {
+      // Only ignored children: the tree contributes nothing — drop the
+      // directory the way Jekyll omits empty site directories
+      await rm(dest, { recursive: true, force: true });
+    }
+  }
+
   /** @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output */
   processMessage(input, output) {
     if (!input.hasData("msg")) {
@@ -56,13 +109,24 @@ export class CopyStatic extends Component {
       });
       return;
     }
+    if (this.isIgnored(msgPath)) {
+      // Jekyll-ignored: skip silently, nothing to emit
+      output.done();
+      return;
+    }
     const destination = path.join(target, path.basename(msgPath));
-    readFile(msgPath, "utf8")
-      .then((body) =>
-        mkdir(path.dirname(destination), { recursive: true }).then(() =>
-          writeFile(destination, body, "utf8"),
-        ),
-      )
+    stat(msgPath)
+      .then((info) => {
+        if (info.isDirectory()) {
+          // Directory tree: copy recursively, skipping ignored entries
+          return this.copyTree(msgPath, destination);
+        }
+        return readFile(msgPath, "utf8").then((body) =>
+          mkdir(path.dirname(destination), { recursive: true }).then(() =>
+            writeFile(destination, body, "utf8"),
+          ),
+        );
+      })
       .then(() => {
         output.sendDone({ out: { errors: [], path: msgPath, destination } });
       })

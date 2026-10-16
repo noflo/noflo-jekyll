@@ -1,8 +1,10 @@
 import { Component, fail } from "@noflo/assembly";
 import { parse } from "yaml";
 
-// Jekyll front matter: --- ... --- (YAML) at the top of the file
-const frontMatterMatcher = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
+// Jekyll front matter: --- ... --- (YAML) at the top of the file; the
+// newline before the closing fence is optional so empty front matter
+// (--- --- on consecutive lines) matches
+const frontMatterMatcher = /^---\r?\n([\s\S]*?)\r?\n?---\r?\n?/;
 
 /**
  * Splits a raw document body into YAML front matter and the markdown

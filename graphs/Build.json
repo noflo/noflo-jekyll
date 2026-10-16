@@ -8,10 +8,6 @@
     "target": {
       "process": "copystatic",
       "port": "target"
-    },
-    "config": {
-      "process": "collect",
-      "port": "config"
     }
   },
   "outports": {
@@ -76,6 +72,16 @@
       "metadata": {}
     },
     {
+      "id": "dirname",
+      "component": "filesystem/DirNameAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "mkdir",
+      "component": "filesystem/MakeDirAssembly",
+      "metadata": {}
+    },
+    {
       "id": "load_layout",
       "component": "jekyll/LoadDocument",
       "metadata": {}
@@ -88,6 +94,16 @@
     {
       "id": "copystatic",
       "component": "jekyll/CopyStatic",
+      "metadata": {}
+    },
+    {
+      "id": "splitstatic",
+      "component": "jekyll/SplitStatic",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter_page",
+      "component": "jekyll/FrontMatter",
       "metadata": {}
     }
   ],
@@ -228,6 +244,26 @@
         "port": "out"
       },
       "target": {
+        "id": "dirname",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "dirname",
+        "port": "out"
+      },
+      "target": {
+        "id": "mkdir",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "mkdir",
+        "port": "out"
+      },
+      "target": {
         "id": "write",
         "port": "msg"
       }
@@ -238,7 +274,37 @@
         "port": "static"
       },
       "target": {
+        "id": "splitstatic",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "splitstatic",
+        "port": "static"
+      },
+      "target": {
         "id": "copystatic",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "splitstatic",
+        "port": "page"
+      },
+      "target": {
+        "id": "frontmatter_page",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_page",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
         "port": "msg"
       }
     }

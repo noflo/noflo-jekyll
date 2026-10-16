@@ -108,9 +108,13 @@ addNode(build, "expand", "jekyll/ExpandPosts");
 addNode(build, "markdown", "markdown/ParseMarkdownAssembly");
 addNode(build, "builder", "jekyll/DocumentBuilder");
 addNode(build, "liquid", "liquid/TemplateAssembly");
+addNode(build, "dirname", "filesystem/DirNameAssembly");
+addNode(build, "mkdir", "filesystem/MakeDirAssembly");
 addNode(build, "load_layout", "jekyll/LoadDocument");
 addNode(build, "write", "filesystem/WriteFileAssembly");
 addNode(build, "copystatic", "jekyll/CopyStatic");
+addNode(build, "splitstatic", "jekyll/SplitStatic");
+addNode(build, "frontmatter_page", "jekyll/FrontMatter");
 
 // Scan wiring: the posts leg into the per-document pipeline
 build.addEdge({
@@ -168,20 +172,43 @@ build.addEdge({
   to: { node: "builder", port: "msg" },
 });
 
-// Build → liquid render → write
+// Build → liquid render → ensure the target directory exists → write.
+// The message flows sequentially through the dirname and mkdir relays,
+// so the write wrapper only sees messages whose directory exists
 build.addEdge({
   from: { node: "builder", port: "out" },
   to: { node: "liquid", port: "msg" },
 });
 build.addEdge({
   from: { node: "liquid", port: "out" },
+  to: { node: "dirname", port: "msg" },
+});
+build.addEdge({
+  from: { node: "dirname", port: "out" },
+  to: { node: "mkdir", port: "msg" },
+});
+build.addEdge({
+  from: { node: "mkdir", port: "out" },
   to: { node: "write", port: "msg" },
 });
 
-// The static leg: source files copied verbatim to the target
+// The static leg: root entries split into front-matter pages (routed
+// through the document pipeline) and verbatim copies
 build.addEdge({
   from: { node: "scan", port: "static" },
+  to: { node: "splitstatic", port: "msg" },
+});
+build.addEdge({
+  from: { node: "splitstatic", port: "static" },
   to: { node: "copystatic", port: "msg" },
+});
+build.addEdge({
+  from: { node: "splitstatic", port: "page" },
+  to: { node: "frontmatter_page", port: "msg" },
+});
+build.addEdge({
+  from: { node: "frontmatter_page", port: "out" },
+  to: { node: "builder", port: "msg" },
 });
 
 // The site source/target come in from the CLI
