@@ -43,7 +43,10 @@ function dump() {
   const load = new Map();
   const last = new Map();
   for (const [, eventType, payload] of state.chunks) {
-    if (eventType === EVENT_TYPE.ACTIVATION_BEGIN || eventType === EVENT_TYPE.ACTIVATION_END) {
+    if (
+      eventType === EVENT_TYPE.ACTIVATION_BEGIN ||
+      eventType === EVENT_TYPE.ACTIVATION_END
+    ) {
       const [node, value] = payload;
       load.set(node, value);
       last.set(node, eventType);
@@ -51,7 +54,8 @@ function dump() {
   }
   console.error("\n=== Final loads ===");
   for (const [node, value] of [...load.entries()].sort((a, b) => b[1] - a[1])) {
-    const lastEv = last.get(node) === EVENT_TYPE.ACTIVATION_BEGIN ? "ACT_BEGIN" : "ACT_END";
+    const lastEv =
+      last.get(node) === EVENT_TYPE.ACTIVATION_BEGIN ? "ACT_BEGIN" : "ACT_END";
     if (value > 0) console.error(`  ${node}: load=${value} last=${lastEv}`);
   }
   console.error(`\n=== ${state.chunks.length} events (last 60) ===`);
@@ -65,7 +69,10 @@ function dump() {
     if (data.length > 80) data = `${data.slice(0, 80)}…`;
     console.error(`  +${ts}ms ${type}${sub}${loc} ${data}`);
   }
-  writeFile(join(root, ".flowtrace-e2e.json"), JSON.stringify(state, null, 2)).then(() => {
+  writeFile(
+    join(root, ".flowtrace-e2e.json"),
+    JSON.stringify(state, null, 2),
+  ).then(() => {
     process.exit(0);
   });
 }
