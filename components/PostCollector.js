@@ -1,51 +1,28 @@
 import { Component } from "@noflo/assembly";
 
 /**
- * Sorts posts newest-first; same-date posts break the tie by path.
- * @param {Record<string, any>} post1
- * @param {Record<string, any>} post2
- * @returns {number}
- */
-const sortByDate = (post1, post2) => {
-  if (post1.date === post2.date) {
-    const path1 = post1.path.toLowerCase();
-    const path2 = post2.path.toLowerCase();
-    if (path1 === path2) {
-      return 0;
-    }
-    return path1 < path2 ? -1 : 1;
-  }
-  return post1.date < post2.date ? 1 : -1;
-};
-
-/**
- * Collects document messages into the site config: sorted `posts` and a
- * `categories` map. The 1.x component flushed on connection disconnect;
- * the assembly relay flushes on a `flush` bang, which the graph wires
- * from the end-of-sources signal.
+ * Builds the site collection from the bracketed posts stream: the scan
+ * subgraph emits each post as a message inside a bracketed substream,
+ * and the collector fires when the stream completes (work document #35:
+ * the 1.x disconnect-flush becomes the 2.x collect-until-bracket-close
+ * pattern). Stateless — the whole collection lives in the stream.
  */
 export class PostCollector extends Component {
   constructor() {
     super({
-      description: "Collect posts into the site config",
+      description: "Build the site collection from the posts stream",
       icon: "sort-amount-desc",
       inPorts: {
         msg: {
           datatype: "object",
-          description: "Document message to collect",
-          required: false,
+          description: "Bracketed stream of document messages",
+          required: true,
         },
         config: {
           datatype: "object",
-          description:
-            "Site config; posts and categories are reset when a new config arrives",
+          description: "Site config read non-consumingly",
           required: false,
           control: true,
-        },
-        flush: {
-          datatype: "bang",
-          description: "Sort and emit the collected config",
-          required: false,
         },
       },
       outPorts: {
@@ -55,84 +32,75 @@ export class PostCollector extends Component {
         },
       },
     });
-    /** @type {Record<string, any>[]} */
-    this.posts = [];
-    /** @type {Record<string, Record<string, any>[]>} */
-    this.categories = {};
-    this.config = null;
-  }
-
-  tearDown() {
-    this.posts = [];
-    this.categories = {};
-    this.config = null;
-    return Promise.resolve();
   }
 
   /**
    * @param {Record<string, any>} post
-   * @returns {void}
-   */
-  processPost(post) {
-    this.posts.push({ ...post, content: post.body });
-    if (!post.categories) {
-      return;
-    }
-    for (const category of post.categories) {
-      if (!this.categories[category]) {
-        this.categories[category] = [];
-      }
-      this.categories[category].push({ ...post, content: post.body });
-    }
-  }
-
-  /**
    * @returns {Record<string, any>}
    */
-  flush() {
-    const config = { ...this.config, posts: [...this.posts].sort(sortByDate) };
-    config.categories = config.categories ?? {};
-    for (const [name, category] of Object.entries(this.categories)) {
-      config.categories[name] = [...category].sort(sortByDate);
-    }
-    return config;
+  processPost(post) {
+    return { ...post, content: post.body };
   }
 
   /**
-   * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any, hasStream(arg: unknown): boolean, attached(port: string): unknown }} input
+   * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any, hasStream(arg: unknown): boolean, getStream(arg: unknown): import("@noflo/noflo").IP[], attached(port: string): unknown }} input
    * @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output
+   * @returns {void}
    */
   processMessage(input, output) {
-    // The config is a control port: the read is non-consuming, so the
-    // buffered IP can be re-read on every activation. Reference
-    // comparison detects a NEW config IP and re-initializes the
-    // collection then.
-    const config = input.hasData("config")
-      ? input.getData("config")
-      : undefined;
-    // Store the buffered reference itself so a later activation sees
-    // the same object; a NEW config IP is a different object and
-    // triggers the re-initialization
-    if (config && config !== this.config) {
-      this.config = config;
-      this.posts = [];
-      this.categories = {};
-    }
-    if (input.hasData("msg")) {
-      this.processPost(input.getData("msg"));
-    }
-    if (input.hasData("flush")) {
-      if (!this.config) {
-        output.done(
-          new Error("PostCollector requires a config before flushing"),
-        );
-        return;
-      }
-      input.getData("flush");
-      output.sendDone({ out: this.flush() });
+    if (!input.hasStream("msg")) {
       return;
     }
-    output.done();
+    // The config is a control port: the read is non-consuming, so the
+    // buffered IP is available on every activation
+    const config = input.hasData("config")
+      ? { ...input.getData("config") }
+      : undefined;
+    if (!config) {
+      output.done(
+        new Error(
+          "PostCollector requires the site config before the posts stream",
+        ),
+      );
+      return;
+    }
+    const stream = /** @type {import("@noflo/noflo").IP[]} */ (
+      input.getStream("msg")
+    );
+    /** @type {Record<string, any>[]} */
+    const posts = [];
+    /** @type {Record<string, Record<string, any>[]>} */
+    const categories = {};
+    for (const packet of stream) {
+      if (packet.type !== "data") {
+        continue;
+      }
+      const post = this.processPost(packet.data);
+      posts.push(post);
+      for (const category of post.categories ?? []) {
+        if (!categories[category]) {
+          categories[category] = [];
+        }
+        categories[category].push(post);
+      }
+    }
+    posts.sort((a, b) => {
+      if (a.date === b.date) {
+        const pathA = a.path.toLowerCase();
+        const pathB = b.path.toLowerCase();
+        if (pathA === pathB) {
+          return 0;
+        }
+        return pathA < pathB ? -1 : 1;
+      }
+      return a.date < b.date ? 1 : -1;
+    });
+    for (const name of Object.keys(categories)) {
+      categories[name].sort((a, b) => (a.date < b.date ? 1 : -1));
+    }
+    config.posts = posts;
+    config.categories = categories;
+    output.sendDone({ out: config });
   }
 }
 

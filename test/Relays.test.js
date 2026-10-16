@@ -129,49 +129,98 @@ describe("BuildPostPath component", () => {
 });
 
 describe("PostCollector component", () => {
-  it("collects posts, sorts them, and builds category maps", async () => {
+  /**
+   * Sends a bracketed posts stream plus the config, returns the emitted config.
+   * @param {import("@noflo/noflo").Component} c
+   * @param {Array<Record<string, any>>} posts
+   * @returns {Promise<any>}
+   */
+  const runStream = async (c, posts) => {
+    const outSocket = noflo.internalSocket.createSocket();
+    const received = new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("Timed out")), 2000);
+      outSocket.addEventListener("ip", (/** @type {CustomEvent} */ event) => {
+        if (event.detail.type === "data") {
+          clearTimeout(timer);
+          resolve(event.detail.data);
+        }
+      });
+    });
+    c.outPorts.out.attach(outSocket);
+    const configSocket = noflo.internalSocket.createSocket();
+    c.inPorts.config.attach(configSocket);
+    configSocket.post(
+      new noflo.IP("data", { source: "/site", permalink: "/:title.html" }),
+    );
+    const msgSocket = noflo.internalSocket.createSocket();
+    c.inPorts.msg.attach(msgSocket);
+    msgSocket.post(new noflo.IP("openBracket", "posts"));
+    for (const post of posts) {
+      msgSocket.post(new noflo.IP("data", post));
+    }
+    msgSocket.post(new noflo.IP("closeBracket", "posts"));
+    return received;
+  };
+
+  it("builds the collection from the bracketed posts stream", async () => {
     const c = getPostCollector();
     try {
-      // Collect silently: only the flush produces output
-      /** @param {string} port @param {any} value */
-      const post = (port, value) => {
-        const socket = noflo.internalSocket.createSocket();
-        c.inPorts[port].attach(socket);
-        socket.post(new noflo.IP("data", value));
-      };
-      post("config", { source: "/site", permalink: "/:title.html" });
-      post("msg", {
-        errors: [],
-        path: "/site/_posts/2014-01-01-a.md",
-        categories: ["news"],
-        date: new Date(2014, 0, 1),
-        body: "a",
-      });
-      post("msg", {
-        errors: [],
-        path: "/site/_posts/2014-06-01-b.md",
-        categories: ["news"],
-        date: new Date(2014, 5, 1),
-        body: "b",
-      });
-      const flushedPromise = new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error("Timed out")), 2000);
-        const outSocket = noflo.internalSocket.createSocket();
-        c.outPorts.out.attach(outSocket);
-        outSocket.addEventListener("ip", (/** @type {CustomEvent} */ event) => {
-          if (event.detail.type === "data") {
-            clearTimeout(timer);
-            resolve(event.detail.data);
-          }
-        });
-      });
-      post("flush", true);
-      const flushed = await flushedPromise;
-      assert.equal(flushed.posts.length, 2);
+      const config = await runStream(c, [
+        {
+          errors: [],
+          path: "/site/_posts/2014-01-01-a.md",
+          categories: ["news"],
+          date: new Date(2014, 0, 1),
+          body: "a",
+        },
+        {
+          errors: [],
+          path: "/site/_posts/2014-06-01-b.md",
+          categories: ["news"],
+          date: new Date(2014, 5, 1),
+          body: "b",
+        },
+        {
+          errors: [],
+          path: "/site/_posts/2014-03-01-c.md",
+          date: new Date(2014, 2, 1),
+          body: "c",
+        },
+      ]);
+      assert.equal(config.posts.length, 3);
       // Newest first
-      assert.equal(flushed.posts[0].path, "/site/_posts/2014-06-01-b.md");
-      assert.equal(flushed.posts[0].content, "b");
-      assert.equal(flushed.categories.news.length, 2);
+      assert.equal(config.posts[0].path, "/site/_posts/2014-06-01-b.md");
+      assert.equal(config.posts[0].content, "b");
+      assert.equal(config.categories.news.length, 2);
+      assert.equal(
+        config.categories.news[0].path,
+        "/site/_posts/2014-06-01-b.md",
+      );
+    } finally {
+      await c.shutdown();
+    }
+  });
+  it("is stateless: a second stream produces a fresh collection", async () => {
+    const c = getPostCollector();
+    try {
+      await runStream(c, [
+        {
+          errors: [],
+          path: "/site/_posts/2014-01-01-old.md",
+          date: new Date(2014, 0, 1),
+          body: "old",
+        },
+      ]);
+      const config = await runStream(c, [
+        {
+          errors: [],
+          path: "/site/_posts/2015-01-01-new.md",
+          date: new Date(2015, 0, 1),
+          body: "new",
+        },
+      ]);
+      assert.equal(config.posts.length, 1);
+      assert.equal(config.posts[0].path, "/site/_posts/2015-01-01-new.md");
     } finally {
       await c.shutdown();
     }
