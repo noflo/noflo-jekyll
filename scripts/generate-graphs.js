@@ -10,10 +10,11 @@
  * the scan brackets stripped for the per-message wrapped components and
  * re-added to gate the collection.
  */
-import { GraphModel, exportFbpJson } from "@noflo/noflo";
-import { writeFileSync, mkdirSync } from "node:fs";
+
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { exportFbpJson, GraphModel } from "@noflo/noflo";
 
 const pkgRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -111,6 +112,11 @@ addNode(build, "liquid", "liquid/TemplateAssembly");
 addNode(build, "dirname", "filesystem/DirNameAssembly");
 addNode(build, "mkdir", "filesystem/MakeDirAssembly");
 addNode(build, "load_layout", "jekyll/LoadDocument");
+addNode(build, "frontmatter_tpl", "jekyll/FrontMatter");
+addNode(build, "load_includes", "jekyll/LoadDocument");
+addNode(build, "frontmatter_incl", "jekyll/FrontMatter");
+addNode(build, "strip_tpl", "groups/RemoveGroups");
+addNode(build, "strip_incl", "groups/RemoveGroups");
 addNode(build, "write", "filesystem/WriteFileAssembly");
 addNode(build, "copystatic", "jekyll/CopyStatic");
 addNode(build, "splitstatic", "jekyll/SplitStatic");
@@ -122,18 +128,45 @@ build.addEdge({
   to: { node: "load_post", port: "path" },
 });
 
-// The template corpus: both legs load into the builder's template store
+// The template corpus: both legs load into the builder's template
+// store — through FrontMatter, so layouts arrive with their own front
+// matter parsed (the layout chain) and bodies stripped; the include
+// corpus also registers into the liquid engine's runtime includes
 build.addEdge({
   from: { node: "scan", port: "layouts" },
   to: { node: "load_layout", port: "path" },
 });
 build.addEdge({
   from: { node: "scan", port: "includes" },
-  to: { node: "load_layout", port: "path" },
+  to: { node: "load_includes", port: "path" },
 });
 build.addEdge({
   from: { node: "load_layout", port: "out" },
+  to: { node: "frontmatter_tpl", port: "msg" },
+});
+build.addEdge({
+  from: { node: "load_includes", port: "out" },
+  to: { node: "frontmatter_incl", port: "msg" },
+});
+build.addEdge({
+  from: { node: "frontmatter_tpl", port: "out" },
+  to: { node: "strip_tpl", port: "in" },
+});
+build.addEdge({
+  from: { node: "strip_tpl", port: "out" },
   to: { node: "builder", port: "templates" },
+});
+build.addEdge({
+  from: { node: "frontmatter_incl", port: "out" },
+  to: { node: "strip_incl", port: "in" },
+});
+build.addEdge({
+  from: { node: "strip_incl", port: "out" },
+  to: { node: "builder", port: "templates" },
+});
+build.addEdge({
+  from: { node: "frontmatter_incl", port: "out" },
+  to: { node: "liquid", port: "includes" },
 });
 
 // The per-document pipeline

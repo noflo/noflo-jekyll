@@ -81,8 +81,8 @@ export class CopyStatic extends Component {
         await this.copyTree(from, to);
         continue;
       }
-      const body = await readFile(from, "utf8");
-      await writeFile(to, body, "utf8");
+      const body = await readFile(from);
+      await writeFile(to, body);
     }
     if (!copied) {
       // Only ignored children: the tree contributes nothing — drop the

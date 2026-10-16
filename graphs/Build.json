@@ -87,6 +87,31 @@
       "metadata": {}
     },
     {
+      "id": "frontmatter_tpl",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    },
+    {
+      "id": "load_includes",
+      "component": "jekyll/LoadDocument",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter_incl",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    },
+    {
+      "id": "strip_tpl",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "strip_incl",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
       "id": "write",
       "component": "filesystem/WriteFileAssembly",
       "metadata": {}
@@ -134,7 +159,7 @@
         "port": "includes"
       },
       "target": {
-        "id": "load_layout",
+        "id": "load_includes",
         "port": "path"
       }
     },
@@ -144,8 +169,68 @@
         "port": "out"
       },
       "target": {
+        "id": "frontmatter_tpl",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "load_includes",
+        "port": "out"
+      },
+      "target": {
+        "id": "frontmatter_incl",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_tpl",
+        "port": "out"
+      },
+      "target": {
+        "id": "strip_tpl",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_tpl",
+        "port": "out"
+      },
+      "target": {
         "id": "builder",
         "port": "templates"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "strip_incl",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "templates"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "liquid",
+        "port": "includes"
       }
     },
     {
