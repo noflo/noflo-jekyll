@@ -6,12 +6,12 @@ import { Component } from "@noflo/assembly";
  * build pipeline — posts are processed for output only after the whole
  * collection is known).
  *
- * Per-message scopes (work document #35 update #15) are NOT stamped
- * yet: scoped messages currently race the wrapped subgraphs' lifecycle
- * — an inner network with a buffered unconsumed scoped IP and no active
- * components ends after its quiet window, stranding the message. Scope
- * stamping returns once the subgraph liveness rules account for
- * buffered IPs (work document #38 §3.4 territory).
+ * Per-message scopes (unique scope per post, stamped here) are the
+ * designed fix for the wrapped adapters' collector cross-pairing and
+ * are blocked on the closedown PR (noflo/noflo#1092): its closedown
+ * predicate counts stranded non-data buffers (bug: countBuffered
+ * includes brackets) and one observed closedown disconnect left a
+ * receiving socket non-terminal. Stamping returns when those land.
  */
 export class ExpandPosts extends Component {
   constructor() {
