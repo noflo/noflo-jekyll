@@ -31,7 +31,17 @@ const fixtureSite = () => {
 describe("jekyll end-to-end", () => {
   it("builds the fixture site", async () => {
     const { source, target } = fixtureSite();
-    await jekyll(source, target);
+    // Fail fast instead of hanging when the build stalls; the parity
+    // test's flowtrace artifact is the diagnostic for stalls
+    await Promise.race([
+      jekyll(source, target),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("the build did not close down within 30s")),
+          30000,
+        ),
+      ),
+    ]);
     // The static copy leg: verbatim passthrough
     const staticPage = readFileSync(join(target, "about.md"), "utf8");
     assert.equal(staticPage, "static about page");

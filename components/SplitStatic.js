@@ -98,11 +98,27 @@ export class SplitStatic extends Component {
             return;
           }
           // A page: routed into the document pipeline; the output path
-          // mirrors the source-relative location
+          // follows Jekyll's page URL convention (verified against the
+          // 3.9-generated reference): HTML pages write directory-style
+          // (404.html → 404/index.html) under a directory-style site
+          // permalink, the root index stays at the root, and non-HTML
+          // pages keep their file name
+          const rel = path.basename(entryPath);
+          const ext = path.extname(rel);
+          let outPath;
+          if (ext === ".html") {
+            const base = path.basename(rel, ext);
+            outPath =
+              base === "index"
+                ? path.join(config.target, "index.html")
+                : path.join(config.target, base, "index.html");
+          } else {
+            outPath = path.join(config.target, rel);
+          }
           output.send({
             page: {
               errors: [],
-              path: path.join(config.target, path.basename(entryPath)),
+              path: outPath,
               body,
             },
           });

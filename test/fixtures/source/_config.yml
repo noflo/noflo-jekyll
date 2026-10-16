@@ -1,4 +1,6 @@
 name: noflo-jekyll test
+plugins:
+  - jekyll-paginate
 permalink: /blog/:year/:categories/:title/
 markdown: rdiscount
 paginate: 3
