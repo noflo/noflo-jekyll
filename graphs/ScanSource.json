@@ -1,0 +1,145 @@
+{
+  "properties": {},
+  "inports": {
+    "source": {
+      "process": "split",
+      "port": "in"
+    }
+  },
+  "outports": {
+    "posts": {
+      "process": "read_posts",
+      "port": "out"
+    },
+    "layouts": {
+      "process": "read_layouts",
+      "port": "out"
+    },
+    "includes": {
+      "process": "read_includes",
+      "port": "out"
+    }
+  },
+  "nodes": [
+    {
+      "id": "split",
+      "component": "core/Split",
+      "metadata": {}
+    },
+    {
+      "id": "join_posts",
+      "component": "filesystem/JoinPath",
+      "metadata": {}
+    },
+    {
+      "id": "read_posts",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "join_layouts",
+      "component": "filesystem/JoinPath",
+      "metadata": {}
+    },
+    {
+      "id": "read_layouts",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "join_includes",
+      "component": "filesystem/JoinPath",
+      "metadata": {}
+    },
+    {
+      "id": "read_includes",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "join_posts",
+        "port": "directory"
+      }
+    },
+    {
+      "source": {
+        "id": "join_posts",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_posts",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "join_layouts",
+        "port": "directory"
+      }
+    },
+    {
+      "source": {
+        "id": "join_layouts",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_layouts",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "join_includes",
+        "port": "directory"
+      }
+    },
+    {
+      "source": {
+        "id": "join_includes",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_includes",
+        "port": "source"
+      }
+    }
+  ],
+  "inits": [
+    {
+      "data": "_posts",
+      "target": {
+        "id": "join_posts",
+        "port": "file"
+      }
+    },
+    {
+      "data": "_layouts",
+      "target": {
+        "id": "join_layouts",
+        "port": "file"
+      }
+    },
+    {
+      "data": "_includes",
+      "target": {
+        "id": "join_includes",
+        "port": "file"
+      }
+    }
+  ]
+}

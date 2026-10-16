@@ -1,0 +1,253 @@
+{
+  "properties": {},
+  "inports": {
+    "source": {
+      "process": "scan",
+      "port": "source"
+    },
+    "target": {
+      "process": "scan",
+      "port": "target"
+    }
+  },
+  "outports": {
+    "written": {
+      "process": "write",
+      "port": "out"
+    }
+  },
+  "nodes": [
+    {
+      "id": "scan",
+      "component": "jekyll/ScanSource",
+      "metadata": {}
+    },
+    {
+      "id": "strip_brackets",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "load_post",
+      "component": "jekyll/LoadDocument",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    },
+    {
+      "id": "markdown",
+      "component": "markdown/ParseMarkdown",
+      "metadata": {}
+    },
+    {
+      "id": "metadata",
+      "component": "jekyll/PathMetadata",
+      "metadata": {}
+    },
+    {
+      "id": "buildpath",
+      "component": "jekyll/BuildPostPath",
+      "metadata": {}
+    },
+    {
+      "id": "regroup",
+      "component": "groups/Group",
+      "metadata": {}
+    },
+    {
+      "id": "collect",
+      "component": "jekyll/PostCollector",
+      "metadata": {}
+    },
+    {
+      "id": "expand",
+      "component": "jekyll/ExpandPosts",
+      "metadata": {}
+    },
+    {
+      "id": "builder",
+      "component": "jekyll/DocumentBuilder",
+      "metadata": {}
+    },
+    {
+      "id": "liquid",
+      "component": "liquid/Template",
+      "metadata": {}
+    },
+    {
+      "id": "load_layout",
+      "component": "jekyll/LoadDocument",
+      "metadata": {}
+    },
+    {
+      "id": "write",
+      "component": "filesystem/WriteFile",
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": {
+        "id": "scan",
+        "port": "posts"
+      },
+      "target": {
+        "id": "strip_brackets",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_brackets",
+        "port": "out"
+      },
+      "target": {
+        "id": "load_post",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "layouts"
+      },
+      "target": {
+        "id": "load_layout",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "includes"
+      },
+      "target": {
+        "id": "load_layout",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "load_layout",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "templates"
+      }
+    },
+    {
+      "source": {
+        "id": "load_post",
+        "port": "out"
+      },
+      "target": {
+        "id": "frontmatter",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter",
+        "port": "out"
+      },
+      "target": {
+        "id": "markdown",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "markdown",
+        "port": "out"
+      },
+      "target": {
+        "id": "metadata",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "metadata",
+        "port": "out"
+      },
+      "target": {
+        "id": "buildpath",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "buildpath",
+        "port": "out"
+      },
+      "target": {
+        "id": "regroup",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "regroup",
+        "port": "out"
+      },
+      "target": {
+        "id": "collect",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "collect",
+        "port": "out"
+      },
+      "target": {
+        "id": "expand",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "expand",
+        "port": "config"
+      },
+      "target": {
+        "id": "builder",
+        "port": "config"
+      }
+    },
+    {
+      "source": {
+        "id": "expand",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "builder",
+        "port": "out"
+      },
+      "target": {
+        "id": "liquid",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "liquid",
+        "port": "out"
+      },
+      "target": {
+        "id": "write",
+        "port": "msg"
+      }
+    }
+  ]
+}
