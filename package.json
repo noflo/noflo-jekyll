@@ -17,7 +17,7 @@
     "@noflo/core": "^2.0.0-alpha.1",
     "@noflo/filesystem": "^2.0.0-alpha.1",
     "@noflo/groups": "^2.0.0-alpha.1",
-    "@noflo/liquid": "^2.0.0-alpha.1",
+    "@noflo/liquid": "^2.0.0-alpha.2",
     "@noflo/markdown": "^2.0.0-alpha.1",
     "@noflo/noflo": "^2.0.0-alpha.6",
     "yaml": "^2.9.1"
@@ -39,8 +39,8 @@
     "static-site"
   ],
   "scripts": {
-    "lint": "npx @biomejs/biome check --use-editorconfig=true components/ lib/ test/",
-    "format": "npx @biomejs/biome check --use-editorconfig=true --write components/ lib/ test/",
+    "lint": "npx @biomejs/biome check --use-editorconfig=true components/ lib/ test/*.js",
+    "format": "npx @biomejs/biome check --use-editorconfig=true --write components/ lib/ test/*.js",
     "types": "tsc --noEmit -p tsconfig.json",
     "test": "npm run types && npm run lint && npm run test:node",
     "test:node": "node --test --test-force-exit test/*.test.js",
