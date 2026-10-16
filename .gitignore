@@ -1,3 +1,7 @@
 node_modules/
 /fbp.json
 /noflo.json
+
+# Debug run artifacts
+/.flowtrace*.json
+/test/fixtures/target-*/
