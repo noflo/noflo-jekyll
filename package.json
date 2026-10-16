@@ -20,6 +20,7 @@
     "@biomejs/biome": "^2.0.0",
     "@noflo/fbp-spec-runner": "^2.0.0-alpha.5",
     "@noflo/loader-node": "^2.0.0-alpha.5",
+    "@noflo/manifest": "^2.0.0-alpha.5",
     "@types/node": "^24.0.0",
     "typescript": "^5.0.0"
   },

@@ -101,6 +101,7 @@ addNode(build, "builder", "jekyll/DocumentBuilder");
 addNode(build, "liquid", "liquid/Template");
 addNode(build, "load_layout", "jekyll/LoadDocument");
 addNode(build, "write", "filesystem/WriteFile");
+addNode(build, "copy", "filesystem/CopyFile");
 
 // Scan wiring: the posts leg into the per-document pipeline
 build.addEdge({
@@ -176,6 +177,12 @@ build.addEdge({
   to: { node: "write", port: "msg" },
 });
 
+// The static leg: source files copied verbatim to the target
+build.addEdge({
+  from: { node: "scan", port: "static" },
+  to: { node: "copy", port: "msg" },
+});
+
 // The site source/target come in from the CLI
 build.addExport({
   direction: "inport",
@@ -186,6 +193,11 @@ build.addExport({
   direction: "inport",
   public: "target",
   internal: { node: "scan", port: "target" },
+});
+build.addExport({
+  direction: "inport",
+  public: "config",
+  internal: { node: "collect", port: "config" },
 });
 build.addExport({
   direction: "outport",

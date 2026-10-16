@@ -8,6 +8,10 @@
     "target": {
       "process": "scan",
       "port": "target"
+    },
+    "config": {
+      "process": "collect",
+      "port": "config"
     }
   },
   "outports": {
@@ -85,6 +89,11 @@
     {
       "id": "write",
       "component": "filesystem/WriteFile",
+      "metadata": {}
+    },
+    {
+      "id": "copy",
+      "component": "filesystem/CopyFile",
       "metadata": {}
     }
   ],
@@ -246,6 +255,16 @@
       },
       "target": {
         "id": "write",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "static"
+      },
+      "target": {
+        "id": "copy",
         "port": "msg"
       }
     }

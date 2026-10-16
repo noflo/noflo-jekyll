@@ -151,18 +151,18 @@ export class BuildPostPath extends Component {
     const config = input.hasData("config")
       ? input.getData("config")
       : msg.config;
-    if (!config?.permalink || !config?.source) {
+    if (!config?.permalink || !config?.target) {
       output.sendDone({
         fail: fail(
           msg,
           new Error(
-            "BuildPostPath requires a config with source and permalink",
+            "BuildPostPath requires a config with target and permalink",
           ),
         ),
       });
       return;
     }
-    let newpath = `${config.source}${config.permalink}`;
+    let newpath = `${config.target}${config.permalink}`;
     newpath = this.handleCategories(newpath, msg.categories);
     newpath = this.handleDate(newpath, msg.date);
     newpath = this.handleTitle(newpath, msg.name);
@@ -171,7 +171,7 @@ export class BuildPostPath extends Component {
       out: {
         ...msg,
         path: newpath,
-        url: this.buildUrl(newpath, config.source),
+        url: this.buildUrl(newpath, config.target),
       },
     });
   }

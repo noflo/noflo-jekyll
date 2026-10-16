@@ -78,7 +78,7 @@ describe("PathMetadata component", () => {
 
 describe("BuildPostPath component", () => {
   const config = {
-    source: "/site",
+    target: "/out",
     permalink: "/:categories/:year/:month/:day/:title.html",
   };
   it("builds path and url from the permalink pattern", async () => {
@@ -93,7 +93,7 @@ describe("BuildPostPath component", () => {
           date: new Date(2014, 2, 15),
         },
       });
-      assert.equal(out.path, "/site/news/2014/3/15/hello-world.md");
+      assert.equal(out.path, "/out/news/2014/3/15/hello-world.md");
       assert.equal(out.url, "/news/2014/3/15/hello-world.md");
     } finally {
       await c.shutdown();
@@ -121,7 +121,7 @@ describe("BuildPostPath component", () => {
       inSocket.post(new noflo.IP("data", { errors: [], name: "x" }));
       const msg = await failed;
       assert.equal(msg.errors.length, 1);
-      assert.match(msg.errors[0].message, /source and permalink/);
+      assert.match(msg.errors[0].message, /target and permalink/);
     } finally {
       await c.shutdown();
     }

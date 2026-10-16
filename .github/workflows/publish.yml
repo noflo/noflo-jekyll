@@ -41,6 +41,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Generate the component manifest
+        run: node "$(node -p "require.resolve('@noflo/manifest/src/cli.js')")" . --revision "$GITHUB_SHA"
+
       - name: Publish
         run: |
           NAME=$(node -p "require('./package.json').name")
