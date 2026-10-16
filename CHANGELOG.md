@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Dependencies moved to the `@noflo` namespace (`@noflo/noflo`, `@noflo/assembly`, `@noflo/assembly-utils`, `@noflo/core`, `@noflo/filesystem`, `@noflo/groups`, `@noflo/liquid`, `@noflo/markdown`), all on the 2.x line; site config parsing uses `yaml`.
 - Document building is order-tolerant: no arrival ordering is assumed between the template corpus, the site config, and the documents — documents whose referenced parts have not arrived stay buffered and are retried on later arrivals, matching the 1.x retry semantics without WirePattern.
+- Permalinks follow Jekyll semantics: `:title` expands to the slug (source name without extension — a deliberate change from the 1.x name-with-extension quirk), `:month`/`:day` zero-pad, and trailing-slash permalinks write `index.html` into the directory.
+- Site root entries split at the static leg: files with YAML front matter render through layouts and liquid (including layout-chain variable inheritance and the paginator), files without front matter and directory trees copy verbatim with underscore/dot exclusions at every level.
 
 ### Removed
 
