@@ -38,7 +38,12 @@ export class LoadDocument extends Component {
   }
 
   /** @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output */
-  processMessage(input, output) {
+  forwardBrackets = { path: ["out", "fail"] };
+
+  /**
+   * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input
+   * @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output
+   */ processMessage(input, output) {
     if (!input.hasData("path")) {
       return;
     }

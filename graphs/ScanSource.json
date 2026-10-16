@@ -18,12 +18,21 @@
     "includes": {
       "process": "read_includes",
       "port": "out"
+    },
+    "static": {
+      "process": "read_root",
+      "port": "out"
     }
   },
   "nodes": [
     {
       "id": "split",
       "component": "core/Split",
+      "metadata": {}
+    },
+    {
+      "id": "read_root",
+      "component": "filesystem/ReadDir",
       "metadata": {}
     },
     {
@@ -58,6 +67,16 @@
     }
   ],
   "edges": [
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_root",
+        "port": "source"
+      }
+    },
     {
       "source": {
         "id": "split",

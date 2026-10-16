@@ -53,11 +53,17 @@ const wireReadDir = (graph, subDir) => {
   });
 };
 
+// The source root itself: static files (the top-level scan leg)
 // ---------------------------------------------------------------------------
 // jekyll/ScanSource: the source tree scan as bracketed directory streams
 // ---------------------------------------------------------------------------
 const scan = newGraph("ScanSource");
 addNode(scan, "split", "core/Split");
+addNode(scan, "read_root", "filesystem/ReadDir");
+scan.addEdge({
+  from: { node: "split", port: "out" },
+  to: { node: "read_root", port: "source" },
+});
 scan.addExport({
   direction: "inport",
   public: "source",
@@ -82,34 +88,33 @@ scan.addExport({
   public: "includes",
   internal: { node: "read_includes", port: "out" },
 });
+scan.addExport({
+  direction: "outport",
+  public: "static",
+  internal: { node: "read_root", port: "out" },
+});
 
 // ---------------------------------------------------------------------------
 // jekyll/Build: the full document pipeline
 // ---------------------------------------------------------------------------
 const build = newGraph("Build");
 addNode(build, "scan", "jekyll/ScanSource");
-addNode(build, "strip_brackets", "groups/RemoveGroups");
 addNode(build, "load_post", "jekyll/LoadDocument");
 addNode(build, "frontmatter", "jekyll/FrontMatter");
-addNode(build, "markdown", "markdown/ParseMarkdown");
 addNode(build, "metadata", "jekyll/PathMetadata");
 addNode(build, "buildpath", "jekyll/BuildPostPath");
-addNode(build, "regroup", "groups/Group");
 addNode(build, "collect", "jekyll/PostCollector");
 addNode(build, "expand", "jekyll/ExpandPosts");
+addNode(build, "markdown", "markdown/ParseMarkdownAssembly");
 addNode(build, "builder", "jekyll/DocumentBuilder");
-addNode(build, "liquid", "liquid/Template");
+addNode(build, "liquid", "liquid/TemplateAssembly");
 addNode(build, "load_layout", "jekyll/LoadDocument");
-addNode(build, "write", "filesystem/WriteFile");
-addNode(build, "copy", "filesystem/CopyFile");
+addNode(build, "write", "filesystem/WriteFileAssembly");
+addNode(build, "copystatic", "jekyll/CopyStatic");
 
 // Scan wiring: the posts leg into the per-document pipeline
 build.addEdge({
   from: { node: "scan", port: "posts" },
-  to: { node: "strip_brackets", port: "in" },
-});
-build.addEdge({
-  from: { node: "strip_brackets", port: "out" },
   to: { node: "load_post", port: "path" },
 });
 
@@ -134,10 +139,6 @@ build.addEdge({
 });
 build.addEdge({
   from: { node: "frontmatter", port: "out" },
-  to: { node: "markdown", port: "msg" },
-});
-build.addEdge({
-  from: { node: "markdown", port: "out" },
   to: { node: "metadata", port: "msg" },
 });
 build.addEdge({
@@ -146,10 +147,6 @@ build.addEdge({
 });
 build.addEdge({
   from: { node: "buildpath", port: "out" },
-  to: { node: "regroup", port: "in" },
-});
-build.addEdge({
-  from: { node: "regroup", port: "out" },
   to: { node: "collect", port: "msg" },
 });
 
@@ -164,6 +161,10 @@ build.addEdge({
 });
 build.addEdge({
   from: { node: "expand", port: "out" },
+  to: { node: "markdown", port: "msg" },
+});
+build.addEdge({
+  from: { node: "markdown", port: "out" },
   to: { node: "builder", port: "msg" },
 });
 
@@ -180,7 +181,7 @@ build.addEdge({
 // The static leg: source files copied verbatim to the target
 build.addEdge({
   from: { node: "scan", port: "static" },
-  to: { node: "copy", port: "msg" },
+  to: { node: "copystatic", port: "msg" },
 });
 
 // The site source/target come in from the CLI
@@ -192,17 +193,18 @@ build.addExport({
 build.addExport({
   direction: "inport",
   public: "target",
-  internal: { node: "scan", port: "target" },
+  internal: { node: "copystatic", port: "target" },
 });
-build.addExport({
-  direction: "inport",
-  public: "config",
-  internal: { node: "collect", port: "config" },
-});
+
 build.addExport({
   direction: "outport",
   public: "written",
   internal: { node: "write", port: "out" },
+});
+build.addExport({
+  direction: "outport",
+  public: "copied",
+  internal: { node: "copystatic", port: "out" },
 });
 
 mkdirSync(join(pkgRoot, "graphs"), { recursive: true });

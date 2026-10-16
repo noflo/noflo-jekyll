@@ -6,7 +6,7 @@
       "port": "source"
     },
     "target": {
-      "process": "scan",
+      "process": "copystatic",
       "port": "target"
     },
     "config": {
@@ -18,17 +18,16 @@
     "written": {
       "process": "write",
       "port": "out"
+    },
+    "copied": {
+      "process": "copystatic",
+      "port": "out"
     }
   },
   "nodes": [
     {
       "id": "scan",
       "component": "jekyll/ScanSource",
-      "metadata": {}
-    },
-    {
-      "id": "strip_brackets",
-      "component": "groups/RemoveGroups",
       "metadata": {}
     },
     {
@@ -42,11 +41,6 @@
       "metadata": {}
     },
     {
-      "id": "markdown",
-      "component": "markdown/ParseMarkdown",
-      "metadata": {}
-    },
-    {
       "id": "metadata",
       "component": "jekyll/PathMetadata",
       "metadata": {}
@@ -54,11 +48,6 @@
     {
       "id": "buildpath",
       "component": "jekyll/BuildPostPath",
-      "metadata": {}
-    },
-    {
-      "id": "regroup",
-      "component": "groups/Group",
       "metadata": {}
     },
     {
@@ -72,13 +61,18 @@
       "metadata": {}
     },
     {
+      "id": "markdown",
+      "component": "markdown/ParseMarkdownAssembly",
+      "metadata": {}
+    },
+    {
       "id": "builder",
       "component": "jekyll/DocumentBuilder",
       "metadata": {}
     },
     {
       "id": "liquid",
-      "component": "liquid/Template",
+      "component": "liquid/TemplateAssembly",
       "metadata": {}
     },
     {
@@ -88,12 +82,12 @@
     },
     {
       "id": "write",
-      "component": "filesystem/WriteFile",
+      "component": "filesystem/WriteFileAssembly",
       "metadata": {}
     },
     {
-      "id": "copy",
-      "component": "filesystem/CopyFile",
+      "id": "copystatic",
+      "component": "jekyll/CopyStatic",
       "metadata": {}
     }
   ],
@@ -102,16 +96,6 @@
       "source": {
         "id": "scan",
         "port": "posts"
-      },
-      "target": {
-        "id": "strip_brackets",
-        "port": "in"
-      }
-    },
-    {
-      "source": {
-        "id": "strip_brackets",
-        "port": "out"
       },
       "target": {
         "id": "load_post",
@@ -164,16 +148,6 @@
         "port": "out"
       },
       "target": {
-        "id": "markdown",
-        "port": "msg"
-      }
-    },
-    {
-      "source": {
-        "id": "markdown",
-        "port": "out"
-      },
-      "target": {
         "id": "metadata",
         "port": "msg"
       }
@@ -191,16 +165,6 @@
     {
       "source": {
         "id": "buildpath",
-        "port": "out"
-      },
-      "target": {
-        "id": "regroup",
-        "port": "in"
-      }
-    },
-    {
-      "source": {
-        "id": "regroup",
         "port": "out"
       },
       "target": {
@@ -231,6 +195,16 @@
     {
       "source": {
         "id": "expand",
+        "port": "out"
+      },
+      "target": {
+        "id": "markdown",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "markdown",
         "port": "out"
       },
       "target": {
@@ -264,7 +238,7 @@
         "port": "static"
       },
       "target": {
-        "id": "copy",
+        "id": "copystatic",
         "port": "msg"
       }
     }

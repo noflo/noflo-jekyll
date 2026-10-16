@@ -36,7 +36,12 @@ export class FrontMatter extends Component {
   }
 
   /** @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output */
-  processMessage(input, output) {
+  forwardBrackets = { msg: ["out"] };
+
+  /**
+   * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input
+   * @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output
+   */ processMessage(input, output) {
     if (!input.hasData("msg")) {
       return;
     }
