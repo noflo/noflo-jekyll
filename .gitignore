@@ -1,4 +1,8 @@
 node_modules/
-.node_shell
-bergie/
-npm-debug.log
+/fbp.json
+/noflo.json
+
+# Debug run artifacts
+/.flowtrace*.json
+/test/fixtures/target-*/
+.flowtrace/

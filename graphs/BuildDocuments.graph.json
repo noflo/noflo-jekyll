@@ -1,0 +1,494 @@
+{
+  "caseSensitive": false,
+  "properties": {
+    "name": ""
+  },
+  "inports": {
+    "layouts": {
+      "process": "Build",
+      "port": "layouts",
+      "metadata": {}
+    },
+    "includes": {
+      "process": "Includes",
+      "port": "in",
+      "metadata": {}
+    },
+    "in": {
+      "process": "Merge",
+      "port": "in",
+      "metadata": {}
+    },
+    "config": {
+      "process": "KickVar",
+      "port": "data",
+      "metadata": {}
+    }
+  },
+  "outports": {
+    "generated": {
+      "process": "Liquid",
+      "port": "out",
+      "metadata": {}
+    },
+    "readyconfig": {
+      "process": "Build",
+      "port": "config",
+      "metadata": {}
+    }
+  },
+  "groups": [],
+  "processes": {
+    "Includes": {
+      "component": "Split",
+      "metadata": {
+        "x": 50,
+        "y": 50
+      }
+    },
+    "Build": {
+      "component": "jekyll/DocumentBuilder",
+      "metadata": {
+        "x": 250,
+        "y": 50
+      }
+    },
+    "Liquid": {
+      "component": "liquid/Template",
+      "metadata": {
+        "x": 450,
+        "y": 50
+      }
+    },
+    "Buffer": {
+      "component": "MergeGroups",
+      "metadata": {
+        "x": 650,
+        "y": 50
+      }
+    },
+    "Merge": {
+      "component": "Merge",
+      "metadata": {
+        "x": 850,
+        "y": 50
+      }
+    },
+    "SplitDoc": {
+      "component": "Split",
+      "metadata": {
+        "x": 1050,
+        "y": 50
+      }
+    },
+    "SetPageVar": {
+      "component": "SetPropertyValue",
+      "metadata": {
+        "x": 1250,
+        "y": 50
+      }
+    },
+    "CreateVars": {
+      "component": "CreateObject",
+      "metadata": {
+        "x": 250,
+        "y": 200
+      }
+    },
+    "SetSiteVar": {
+      "component": "SetPropertyValue",
+      "metadata": {
+        "x": 450,
+        "y": 200
+      }
+    },
+    "SetPaginatorVar": {
+      "component": "SetPropertyValue",
+      "metadata": {
+        "x": 650,
+        "y": 200
+      }
+    },
+    "KickVar": {
+      "component": "Kick",
+      "metadata": {
+        "x": 850,
+        "y": 200
+      }
+    },
+    "GetPaginator": {
+      "component": "GetObjectKey",
+      "metadata": {
+        "x": 1050,
+        "y": 200
+      }
+    },
+    "CreateEmptyPaginator": {
+      "component": "CreateObject",
+      "metadata": {
+        "x": 1250,
+        "y": 200
+      }
+    },
+    "MergePaginator": {
+      "component": "Merge",
+      "metadata": {
+        "x": 250,
+        "y": 350
+      }
+    },
+    "SplitBufferResult": {
+      "component": "Split",
+      "metadata": {
+        "x": 450,
+        "y": 350
+      }
+    },
+    "GetTemplate": {
+      "component": "GetObjectKey",
+      "metadata": {
+        "x": 650,
+        "y": 350
+      }
+    },
+    "FirstOnly": {
+      "component": "FirstGroup",
+      "metadata": {
+        "x": 850,
+        "y": 350
+      }
+    },
+    "GetVariables": {
+      "component": "GetObjectKey",
+      "metadata": {
+        "x": 1050,
+        "y": 350
+      }
+    },
+    "SplitVariables": {
+      "component": "Split",
+      "metadata": {
+        "x": 1250,
+        "y": 350
+      }
+    }
+  },
+  "connections": [
+    {
+      "src": {
+        "process": "Includes",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "includes"
+      }
+    },
+    {
+      "src": {
+        "process": "Includes",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Liquid",
+        "port": "includes"
+      }
+    },
+    {
+      "src": {
+        "process": "Build",
+        "port": "template"
+      },
+      "tgt": {
+        "process": "Buffer",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Merge",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Build",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "Build",
+        "port": "variables"
+      },
+      "tgt": {
+        "process": "SplitDoc",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitDoc",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetPageVar",
+        "port": "value"
+      }
+    },
+    {
+      "src": {
+        "process": "CreateVars",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetPageVar",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SetPageVar",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetSiteVar",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SetSiteVar",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetPaginatorVar",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SetPaginatorVar",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Buffer",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "KickVar",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetSiteVar",
+        "port": "value"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitDoc",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "KickVar",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitDoc",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "GetPaginator",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitDoc",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "CreateVars",
+        "port": "start"
+      }
+    },
+    {
+      "src": {
+        "process": "GetPaginator",
+        "port": "missed"
+      },
+      "tgt": {
+        "process": "CreateEmptyPaginator",
+        "port": "start"
+      }
+    },
+    {
+      "src": {
+        "process": "CreateEmptyPaginator",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "MergePaginator",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GetPaginator",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "MergePaginator",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "MergePaginator",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SetPaginatorVar",
+        "port": "value"
+      }
+    },
+    {
+      "src": {
+        "process": "Buffer",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SplitBufferResult",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitBufferResult",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "GetTemplate",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GetTemplate",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "FirstOnly",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "FirstOnly",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Liquid",
+        "port": "template"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitBufferResult",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "GetVariables",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "GetVariables",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "SplitVariables",
+        "port": "in"
+      }
+    },
+    {
+      "src": {
+        "process": "SplitVariables",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "Liquid",
+        "port": "variables"
+      }
+    },
+    {
+      "data": "page",
+      "tgt": {
+        "process": "SetPageVar",
+        "port": "property"
+      },
+      "metadata": {
+        "x": 250,
+        "y": 500
+      }
+    },
+    {
+      "data": "site",
+      "tgt": {
+        "process": "SetSiteVar",
+        "port": "property"
+      },
+      "metadata": {
+        "x": 450,
+        "y": 500
+      }
+    },
+    {
+      "data": "paginator",
+      "tgt": {
+        "process": "GetPaginator",
+        "port": "key"
+      },
+      "metadata": {
+        "x": 650,
+        "y": 500
+      }
+    },
+    {
+      "data": "paginator",
+      "tgt": {
+        "process": "SetPaginatorVar",
+        "port": "property"
+      },
+      "metadata": {
+        "x": 850,
+        "y": 500
+      }
+    },
+    {
+      "data": "0",
+      "tgt": {
+        "process": "GetTemplate",
+        "port": "key"
+      },
+      "metadata": {
+        "x": 1050,
+        "y": 500
+      }
+    },
+    {
+      "data": "1",
+      "tgt": {
+        "process": "GetVariables",
+        "port": "key"
+      },
+      "metadata": {
+        "x": 1250,
+        "y": 500
+      }
+    }
+  ]
+}

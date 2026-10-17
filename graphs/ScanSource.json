@@ -1,0 +1,246 @@
+{
+  "properties": {},
+  "inports": {
+    "source": {
+      "process": "split",
+      "port": "in"
+    }
+  },
+  "outports": {
+    "posts_nested": {
+      "process": "read_nested",
+      "port": "out"
+    },
+    "posts": {
+      "process": "read_posts",
+      "port": "out"
+    },
+    "layouts": {
+      "process": "read_layouts",
+      "port": "out"
+    },
+    "includes_ready": {
+      "process": "kick_incl",
+      "port": "out"
+    },
+    "includes": {
+      "process": "read_includes",
+      "port": "out"
+    },
+    "static": {
+      "process": "read_root",
+      "port": "out"
+    }
+  },
+  "nodes": [
+    {
+      "id": "split",
+      "component": "core/Split",
+      "metadata": {}
+    },
+    {
+      "id": "read_root",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "join_posts",
+      "component": "filesystem/JoinPath",
+      "metadata": {}
+    },
+    {
+      "id": "read_posts",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "strip_nested",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "append_nested",
+      "component": "strings/Append",
+      "metadata": {}
+    },
+    {
+      "id": "read_nested",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "join_layouts",
+      "component": "filesystem/JoinPath",
+      "metadata": {}
+    },
+    {
+      "id": "read_layouts",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "join_includes",
+      "component": "filesystem/JoinPath",
+      "metadata": {}
+    },
+    {
+      "id": "read_includes",
+      "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "kick_incl",
+      "component": "core/Kick",
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_root",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "join_posts",
+        "port": "directory"
+      }
+    },
+    {
+      "source": {
+        "id": "join_posts",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_posts",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "read_root",
+        "port": "out"
+      },
+      "target": {
+        "id": "strip_nested",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_nested",
+        "port": "out"
+      },
+      "target": {
+        "id": "append_nested",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "append_nested",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_nested",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "join_layouts",
+        "port": "directory"
+      }
+    },
+    {
+      "source": {
+        "id": "join_layouts",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_layouts",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "split",
+        "port": "out"
+      },
+      "target": {
+        "id": "join_includes",
+        "port": "directory"
+      }
+    },
+    {
+      "source": {
+        "id": "join_includes",
+        "port": "out"
+      },
+      "target": {
+        "id": "read_includes",
+        "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "read_includes",
+        "port": "error"
+      },
+      "target": {
+        "id": "kick_incl",
+        "port": "in"
+      }
+    }
+  ],
+  "inits": [
+    {
+      "data": "_posts",
+      "target": {
+        "id": "join_posts",
+        "port": "file"
+      }
+    },
+    {
+      "data": "/_posts",
+      "target": {
+        "id": "append_nested",
+        "port": "append"
+      }
+    },
+    {
+      "data": "_layouts",
+      "target": {
+        "id": "join_layouts",
+        "port": "file"
+      }
+    },
+    {
+      "data": "_includes",
+      "target": {
+        "id": "join_includes",
+        "port": "file"
+      }
+    },
+    {
+      "data": null,
+      "target": {
+        "id": "kick_incl",
+        "port": "data"
+      }
+    }
+  ]
+}

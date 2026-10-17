@@ -1,0 +1,432 @@
+{
+  "properties": {},
+  "inports": {
+    "source": {
+      "process": "scan",
+      "port": "source"
+    },
+    "target": {
+      "process": "copystatic",
+      "port": "target"
+    }
+  },
+  "outports": {
+    "written": {
+      "process": "write",
+      "port": "out"
+    },
+    "copied": {
+      "process": "copystatic",
+      "port": "out"
+    }
+  },
+  "nodes": [
+    {
+      "id": "scan",
+      "component": "jekyll/ScanSource",
+      "metadata": {}
+    },
+    {
+      "id": "load_post",
+      "component": "jekyll/LoadDocument",
+      "metadata": {}
+    },
+    {
+      "id": "envelope",
+      "component": "jekyll/StreamEnvelope",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    },
+    {
+      "id": "metadata",
+      "component": "jekyll/PathMetadata",
+      "metadata": {}
+    },
+    {
+      "id": "buildpath",
+      "component": "jekyll/BuildPostPath",
+      "metadata": {}
+    },
+    {
+      "id": "collect",
+      "component": "jekyll/PostCollector",
+      "metadata": {}
+    },
+    {
+      "id": "expand",
+      "component": "jekyll/ExpandPosts",
+      "metadata": {}
+    },
+    {
+      "id": "markdown",
+      "component": "markdown/ParseMarkdownAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "builder",
+      "component": "jekyll/DocumentBuilder",
+      "metadata": {}
+    },
+    {
+      "id": "liquid",
+      "component": "liquid/TemplateAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "dirname",
+      "component": "filesystem/DirNameAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "mkdir",
+      "component": "filesystem/MakeDirAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "load_layout",
+      "component": "jekyll/LoadDocument",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter_tpl",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    },
+    {
+      "id": "load_includes",
+      "component": "jekyll/LoadDocument",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter_incl",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    },
+    {
+      "id": "strip_tpl",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "strip_incl",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "write",
+      "component": "filesystem/WriteFileAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "copystatic",
+      "component": "jekyll/CopyStatic",
+      "metadata": {}
+    },
+    {
+      "id": "splitstatic",
+      "component": "jekyll/SplitStatic",
+      "metadata": {}
+    },
+    {
+      "id": "frontmatter_page",
+      "component": "jekyll/FrontMatter",
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": {
+        "id": "scan",
+        "port": "posts"
+      },
+      "target": {
+        "id": "load_post",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "posts_nested"
+      },
+      "target": {
+        "id": "load_post",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "layouts"
+      },
+      "target": {
+        "id": "load_layout",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "includes"
+      },
+      "target": {
+        "id": "load_includes",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "load_layout",
+        "port": "out"
+      },
+      "target": {
+        "id": "frontmatter_tpl",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "load_includes",
+        "port": "out"
+      },
+      "target": {
+        "id": "frontmatter_incl",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_tpl",
+        "port": "out"
+      },
+      "target": {
+        "id": "strip_tpl",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_tpl",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "templates"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "strip_incl",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "templates"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "includes_ready"
+      },
+      "target": {
+        "id": "liquid",
+        "port": "includes"
+      }
+    },
+    {
+      "source": {
+        "id": "strip_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "liquid",
+        "port": "includes"
+      }
+    },
+    {
+      "source": {
+        "id": "load_post",
+        "port": "out"
+      },
+      "target": {
+        "id": "envelope",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "envelope",
+        "port": "out"
+      },
+      "target": {
+        "id": "frontmatter",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter",
+        "port": "out"
+      },
+      "target": {
+        "id": "metadata",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "metadata",
+        "port": "out"
+      },
+      "target": {
+        "id": "buildpath",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "buildpath",
+        "port": "out"
+      },
+      "target": {
+        "id": "collect",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "collect",
+        "port": "out"
+      },
+      "target": {
+        "id": "expand",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "expand",
+        "port": "config"
+      },
+      "target": {
+        "id": "builder",
+        "port": "config"
+      }
+    },
+    {
+      "source": {
+        "id": "expand",
+        "port": "out"
+      },
+      "target": {
+        "id": "markdown",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "markdown",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "builder",
+        "port": "out"
+      },
+      "target": {
+        "id": "liquid",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "liquid",
+        "port": "out"
+      },
+      "target": {
+        "id": "dirname",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "dirname",
+        "port": "out"
+      },
+      "target": {
+        "id": "mkdir",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "mkdir",
+        "port": "out"
+      },
+      "target": {
+        "id": "write",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
+        "port": "static"
+      },
+      "target": {
+        "id": "splitstatic",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "splitstatic",
+        "port": "static"
+      },
+      "target": {
+        "id": "copystatic",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "splitstatic",
+        "port": "page"
+      },
+      "target": {
+        "id": "frontmatter_page",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "frontmatter_page",
+        "port": "out"
+      },
+      "target": {
+        "id": "builder",
+        "port": "msg"
+      }
+    }
+  ]
+}

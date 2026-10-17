@@ -1,0 +1,61 @@
+import { Component } from "@noflo/assembly";
+import { IP } from "@noflo/noflo";
+
+/**
+ * Expands the flushed site config into one message per post, carrying
+ * the config for pagination (work document #35: the phase-2 head of the
+ * build pipeline — posts are processed for output only after the whole
+ * collection is known).
+ *
+ * Per-message scopes (unique scope per post, stamped here) are the
+ * designed fix for the wrapped adapters' collector cross-pairing and
+ * are blocked on the closedown PR (noflo/noflo#1092): its closedown
+ * predicate counts stranded non-data buffers (bug: countBuffered
+ * includes brackets) and one observed closedown disconnect left a
+ * receiving socket non-terminal. Stamping returns when those land.
+ */
+export class ExpandPosts extends Component {
+  constructor() {
+    super({
+      description: "Expand the flushed site config into per-post messages",
+      icon: "clone",
+      inPorts: {
+        msg: {
+          datatype: "object",
+          description: "The flushed config with posts and categories",
+          required: true,
+        },
+      },
+      outPorts: {
+        out: {
+          datatype: "object",
+          description: "One message per post, with the site config attached",
+        },
+        config: {
+          datatype: "object",
+          description: "The flushed config itself",
+        },
+      },
+    });
+  }
+
+  /** @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input @param {{ sendDone(map: Record<string, unknown>): void, send(map: Record<string, unknown>): void, done(err?: Error): void }} output */
+  processMessage(input, output) {
+    if (!input.hasData("msg")) {
+      return;
+    }
+    const config = input.getData("msg");
+    output.send({ config });
+    for (const post of config.posts ?? []) {
+      // Unique scope per post: the wrapped adapters downstream correlate
+      // their collectors per scope, so concurrent in-flight posts cannot
+      // cross pairs inside an adapter
+      output.send({
+        out: new IP("data", { ...post, config }, { scope: post.path }),
+      });
+    }
+    output.done();
+  }
+}
+
+export const getComponent = () => new ExpandPosts();
