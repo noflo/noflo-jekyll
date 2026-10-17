@@ -12,15 +12,15 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@noflo/assembly": "^2.0.0-alpha.7",
-    "@noflo/assembly-utils": "^2.0.0-alpha.7",
+    "@noflo/assembly": "^2.0.0-alpha.8",
+    "@noflo/assembly-utils": "^2.0.0-alpha.8",
     "@noflo/core": "^2.0.0-alpha.1",
     "@noflo/filesystem": "^2.0.0-alpha.1",
-    "@noflo/graph": "file:../../../../private/tmp/noflo-graph-pr1092",
+    "@noflo/graph": "^2.0.0-alpha.8",
     "@noflo/groups": "^2.0.0-alpha.1",
-    "@noflo/liquid": "^2.0.0-alpha.2",
+    "@noflo/liquid": "^2.0.0-alpha.3",
     "@noflo/markdown": "^2.0.0-alpha.1",
-    "@noflo/noflo": "file:../../../../private/tmp/noflo-pr1092",
+    "@noflo/noflo": "^2.0.0-alpha.8",
     "yaml": "^2.9.1"
   },
   "devDependencies": {
