@@ -18,7 +18,7 @@
     "@noflo/filesystem": "^2.0.0-alpha.1",
     "@noflo/graph": "^2.0.0-alpha.9",
     "@noflo/groups": "^2.0.0-alpha.1",
-    "@noflo/liquid": "^2.0.0-alpha.3",
+    "@noflo/liquid": "^2.0.0-alpha.4",
     "@noflo/markdown": "^2.0.0-alpha.1",
     "@noflo/noflo": "^2.0.0-alpha.9",
     "yaml": "^2.9.1"
