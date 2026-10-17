@@ -106,14 +106,21 @@ export class ScanSource extends Component {
   /**
    * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input
    * @param {{ sendDone(map: Record<string, unknown>): void, send(map: Record<string, unknown>): void, done(err?: Error): void }} output
-   * @returns {void}
+   * @returns {Promise<{ fail?: Record<string, unknown> } | undefined>} The
+   *   activation contract: a promise return holds the activation until
+   *   the asynchronous work completes; undefined resolves mean "already
+   *   sent in-activation"
    */
   processMessage(input, output) {
     if (!input.hasData("source", "target")) {
-      return;
+      return Promise.resolve(undefined);
     }
     const [source, target] = input.getData("source", "target");
-    stat(source)
+    // The activation contract: the walk is asynchronous, so the promise is
+    // returned and the sends happen in-activation while it is pending; the
+    // chain resolves undefined and the bridge completes the activation
+    // (the noflo/noflo #1092 review)
+    return stat(source)
       .then(async (stats) => {
         if (!stats.isDirectory()) {
           throw new Error(`${source} is not a directory`);
@@ -130,16 +137,17 @@ export class ScanSource extends Component {
         };
         await this.walk(source, source, target, base, emit);
         output.send({ completed: true });
-        output.done();
+        return undefined;
       })
-      .catch((error) => {
-        output.sendDone({
+      .then(
+        () => undefined,
+        (error) => ({
           fail: fail(
             { errors: [], path: source, out: target },
             error instanceof Error ? error : new Error(String(error)),
           ),
-        });
-      });
+        }),
+      );
   }
 }
 

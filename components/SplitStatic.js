@@ -83,19 +83,21 @@ export class SplitStatic extends Component {
       output.done();
       return;
     }
-    stat(entryPath)
+    // The activation contract: the classification is asynchronous, so the
+    // promise is returned and the sends happen in-activation while it is
+    // pending; the chain resolves undefined and the bridge completes the
+    // activation (the noflo/noflo #1092 review)
+    return stat(entryPath)
       .then((info) => {
         if (info.isDirectory()) {
           output.send({ static: entryPath });
-          output.done();
-          return;
+          return undefined;
         }
         return readFile(entryPath, "utf8").then((body) => {
           if (!frontMatterMatcher.test(body)) {
             // No front matter: a plain static file
             output.send({ static: entryPath });
-            output.done();
-            return;
+            return undefined;
           }
           // A page: routed into the document pipeline; the output path
           // follows Jekyll's page URL convention (verified against the
@@ -122,17 +124,18 @@ export class SplitStatic extends Component {
               body,
             },
           });
-          output.done();
+          return undefined;
         });
       })
-      .catch((error) => {
-        output.sendDone({
+      .then(
+        () => undefined,
+        (error) => ({
           fail: fail(
             { errors: [], path: entryPath },
             error instanceof Error ? error : new Error(String(error)),
           ),
-        });
-      });
+        }),
+      );
   }
 }
 

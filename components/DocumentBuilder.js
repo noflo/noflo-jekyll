@@ -10,14 +10,17 @@ import { IP } from "@noflo/noflo";
  *
  * No ordering is assumed between the wires: in an asynchronous network
  * documents, templates, and the site config arrive in any order (only
- * within a stream is there an ordering guarantee). A document whose
- * referenced parts have not arrived yet stays buffered on its inport —
- * the has-first rule: the head message is peeked at non-consumingly,
- * and consumed only when the current config and template store can
- * resolve it. Config and template arrivals re-fire the process, which
- * is what lets buffered documents resolve later. A message whose parts
- * never arrive stays buffered until network shutdown discards it; the
- * `fail` port is for unexpected processing errors, not missing parts.
+ * within a stream is there an ordering guarantee). Arriving documents are
+ * consumed immediately into a per-scope state store — waiting in the port
+ * buffer would strand them behind their scope, because later config and
+ * template arrivals are unscoped and a scopeless activation cannot see
+ * scoped buffers (the noflo/noflo #1092 review). Every activation —
+ * including the unscoped re-fires — drains every scope's queue head-first:
+ * a document whose referenced parts have not arrived stays queued in the
+ * store, and is consumed only when the current config and template store
+ * can resolve it. A document whose parts never arrive stays queued until
+ * network shutdown discards it; the `fail` port is for unexpected
+ * processing errors, not missing parts.
  */
 export class DocumentBuilder extends Component {
   constructor() {
@@ -62,14 +65,24 @@ export class DocumentBuilder extends Component {
     this.templates = {};
     /** @type {Record<string, any> | null} */
     this.config = null;
-    /** Guards the drain loop against the concurrent activations that new arrivals fire while it is in flight, per scope */
-    this.draining = new Set();
+    /**
+     * Documents consumed on arrival, queued head-first per scope for the
+     * drain. The port buffer cannot hold them: a scopeless re-fire (a
+     * config or template arrival) cannot read scoped buffers, so a
+     * document waiting there behind its scope is stranded forever
+     *
+     * @type {Map<string | null, Array<Record<string, any>>>}
+     */
+    this.pending = new Map();
+    /** Guards the drain loop against the concurrent activations that new arrivals fire while it is in flight */
+    this.draining = false;
   }
 
   tearDown() {
     this.templates = {};
     this.config = null;
-    this.draining.clear();
+    this.pending.clear();
+    this.draining = false;
     return Promise.resolve();
   }
 
@@ -158,29 +171,12 @@ export class DocumentBuilder extends Component {
   }
 
   /**
-   * Enriches the site context with every converted document currently
-   * buffered: posts flowing through the builder carry their rendered
-   * body, and the matching `config.posts` entry gains it as `content`
-   * — the two-pass shape (collection first, conversion second) without
-   * a second collect. Non-consuming: the scan touches every buffered
-   * data IP via a `has` validator.
-   * @param {{ has(...args: unknown[]): boolean, scope: string | null }} input
-   * @returns {void}
-   */
-  enrichBuffered(input) {
-    input.has("msg", (/** @type {{ type: string, data: any }} */ ip) => {
-      if (ip.type === "data") {
-        this.enrichSite(ip.data);
-      }
-      return false;
-    });
-  }
-
-  /**
    * Enriches the site context with a converted document: posts flowing
    * through the builder carry their rendered body, and the matching
    * `config.posts` entry gains it as `content` — the two-pass shape
    * (collection first, conversion second) without a second collect.
+   * Runs at consumption time: every converted document enriches exactly
+   * once, whether or not it resolves yet.
    * @param {Record<string, any>} msg
    * @returns {void}
    */
@@ -385,129 +381,118 @@ export class DocumentBuilder extends Component {
   }
 
   /**
-   * Peek at the head document in the msg buffer without consuming it.
-   * @param {{ has(...args: unknown[]): boolean, scope: string | null }} input
-   * @returns {Record<string, any> | undefined}
-   */
-  headPeek(input) {
-    let seen = false;
-    /** @type {Record<string, any> | undefined} */
-    let head;
-    input.has("msg", (/** @type {{ type: string, data: any }} */ ip) => {
-      if (ip.type !== "data" || seen) {
-        return false;
-      }
-      seen = true;
-      head = ip.data;
-      return true;
-    });
-    return head;
-  }
-
-  /**
-   * Whether the head document in the msg buffer is resolvable. The
-   * validator only accepts the first data IP in the buffer — `has` is
-   * an any-match scan, and `get` consumes the head, so a match on a
-   * later message would consume the wrong one.
-   * @param {{ has(...args: unknown[]): boolean, scope: string | null }} input
-   * @returns {boolean}
-   */
-  headResolvable(input) {
-    let seen = false;
-    let ok = false;
-    input.has("msg", (/** @type {{ type: string, data: any }} */ ip) => {
-      if (ip.type !== "data" || seen) {
-        return false;
-      }
-      seen = true;
-      ok = this.canResolve(ip.data);
-      return ok;
-    });
-    return ok;
-  }
-
-  /**
-   * Drain the msg buffer head-first: consume and emit every document
-   * the current store can resolve, in arrival order, stopping at the
-   * first one still missing parts. The sends respect edge
-   * backpressure; new arrivals fired while a drain is in flight are
-   * picked up by the drain loop itself or re-checked after it unwinds.
-   * @param {{ has(...args: unknown[]): boolean, getData(port: string): any, scope: string | null }} input
+   * Drain the pending store: consume and emit every document the current
+   * store can resolve, head-first within each scope's queue and skipping
+   * ahead across scopes (one scope's missing parts must not block another
+   * scope's resolvable document), repeating until no queue makes
+   * progress. The sends respect edge backpressure; arrivals during the
+   * drain queue in the store and are picked up by the loop itself or
+   * re-checked after the guard lowers.
    * @param {{ send(map: Record<string, unknown>): Promise<void>, done(err?: Error): void }} output
-   * @returns {Promise<void>}
+   * @returns {Promise<undefined>} Resolves undefined: the sends happened
+   *   in-activation while the promise was pending, and the bridge
+   *   completes the activation on resolution — flush must not call
+   *   done() itself (a double-done re-activates a deactivated context)
    */
-  async flush(input, output) {
-    const scope = input.scope;
+  async flush(output) {
     try {
-      while (this.headResolvable(input)) {
-        const msg = input.getData("msg");
-        try {
-          for (const page of this.build(msg)) {
-            // Unique scope per generated page: the wrapped adapters
-            // downstream correlate per scope, so concurrent renders
-            // cannot cross pairs inside an adapter
-            await output.send({
-              out: new IP("data", page, { scope: page.path }),
-            });
+      let progressed = true;
+      while (progressed) {
+        progressed = false;
+        for (const queue of this.pending.values()) {
+          while (queue.length > 0 && this.canResolve(queue[0])) {
+            const msg = /** @type {Record<string, any>} */ (queue.shift());
+            progressed = true;
+            try {
+              for (const page of this.build(msg)) {
+                // Unique scope per generated page: the wrapped adapters
+                // downstream correlate per scope, so concurrent renders
+                // cannot cross pairs inside an adapter
+                await output.send({
+                  out: new IP("data", page, { scope: page.path }),
+                });
+              }
+            } catch (err) {
+              await output.send({
+                fail: fail(
+                  /** @type {import("@noflo/assembly").AssemblyMessage} */ (
+                    msg
+                  ),
+                  err instanceof Error ? err : new Error(String(err)),
+                ),
+              });
+            }
           }
-        } catch (err) {
-          await output.send({
-            fail: fail(
-              msg,
-              err instanceof Error ? err : new Error(String(err)),
-            ),
-          });
         }
       }
     } finally {
-      this.draining.delete(scope);
+      this.draining = false;
     }
-    // A message that arrived between the last buffer check and the
-    // guard being lowered fired an activation that saw the guard up and
-    // closed without draining — re-check here so it is not stranded
-    if (this.headResolvable(input)) {
-      await this.flush(input, output);
-      return;
+    // An arrival that landed between the last progress check and the
+    // guard lowering fired an activation that saw the guard up and
+    // closed without draining — re-check so nothing is stranded
+    for (const queue of this.pending.values()) {
+      if (queue.length > 0 && this.canResolve(queue[0])) {
+        return this.flush(output);
+      }
     }
-    output.done();
+    return undefined;
   }
 
   /**
+   * Consume config, templates, and documents as they arrive; then drain
+   * the pending store. The document consumption is the load-bearing part:
+   * the activation fired by an arrival shares the arrival's scope, so the
+   * port buffer is readable here — but a document left waiting in it is
+   * stranded behind its scope, because the config and template arrivals
+   * that re-fire the process are unscoped and a scopeless activation
+   * cannot see scoped buffers (the noflo/noflo #1092 review).
    * @param {{ has(...args: unknown[]): boolean, hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any, scope: string | null }} input
    * @param {{ send(map: Record<string, unknown>): Promise<void>, done(err?: Error): void }} output
+   * @returns {Promise<undefined> | void}
    */
   processMessage(input, output) {
-    // Consume config and templates as they arrive: their arrivals are
-    // the re-fire triggers that let buffered documents resolve
+    // Config and templates consume into the stores; their arrivals are
+    // the re-fire triggers that let queued documents resolve
     if (input.hasData("config")) {
       this.config = { ...input.getData("config") };
     }
     if (input.hasData("templates")) {
       this.addTemplate(input.getData("templates"));
     }
-    // Converted documents enrich the site collection as they pass:
-    // pages listing posts resolve once every collected post converted.
-    // The whole buffer is scanned non-consumingly — posts queueing
-    // behind an unresolvable page enrich too. This runs before the
-    // drain guard: arrivals during an in-flight drain must still
-    // enrich, or a listing page waiting for them deadlocks
-    if (input.hasData("msg")) {
-      this.enrichBuffered(input);
+    while (input.hasData("msg")) {
+      const msg = input.getData("msg");
+      this.enrichSite(msg);
+      const scope = input.scope ?? null;
+      let queue = this.pending.get(scope);
+      if (!queue) {
+        queue = [];
+        this.pending.set(scope, queue);
+      }
+      queue.push(msg);
     }
-    if (this.draining.has(input.scope)) {
-      // A drain for this scope is in flight; it sees the updated store
-      // on its next loop iteration or re-checks after unwinding
+    if (this.draining) {
+      // A drain is in flight; it re-scans every queue and re-checks after
+      // the guard lowers
       output.done();
       return;
     }
-    if (!input.hasData("msg")) {
-      output.done();
-      return;
-    }
-    this.draining.add(input.scope);
-    this.flush(input, output).catch((/** @type {Error} */ err) =>
-      output.done(err),
+    const resolvable = [...this.pending.values()].some(
+      (/** @type {Array<Record<string, any>>} */ q) =>
+        q.length > 0 && this.canResolve(q[0]),
     );
+    if (!resolvable) {
+      output.done();
+      return;
+    }
+    this.draining = true;
+    // The activation contract: the drain is asynchronous, so the promise
+    // is returned and the activation holds until the flush completes —
+    // the drain's sends happen in-activation. The fire-and-forget form
+    // closed the activation immediately and the flush's sends raced
+    // drain-based closing, re-opening the ended network (the
+    // noflo/noflo #1092 review)
+    return this.flush(output);
   }
 }
 

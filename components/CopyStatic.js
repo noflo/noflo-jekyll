@@ -112,7 +112,11 @@ export class CopyStatic extends Component {
       return;
     }
     const destination = path.join(target, path.basename(msgPath));
-    stat(msgPath)
+    // The activation contract: the copy is asynchronous, so the promise is
+    // returned and the send happens in-activation when it resolves. A void
+    // return means "already sent" — the deferred sendDone inside the
+    // callback raced drain-based closing (the noflo/noflo #1092 review)
+    return stat(msgPath)
       .then((info) => {
         if (info.isDirectory()) {
           // Directory tree: copy recursively, skipping ignored entries
@@ -124,17 +128,15 @@ export class CopyStatic extends Component {
           ),
         );
       })
-      .then(() => {
-        output.sendDone({ out: { errors: [], path: msgPath, destination } });
-      })
-      .catch((error) => {
-        output.sendDone({
+      .then(
+        () => ({ out: { errors: [], path: msgPath, destination } }),
+        (error) => ({
           fail: fail(
             { errors: [], path: msgPath },
             error instanceof Error ? error : new Error(String(error)),
           ),
-        });
-      });
+        }),
+      );
   }
 }
 

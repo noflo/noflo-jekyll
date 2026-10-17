@@ -43,26 +43,30 @@ export class LoadDocument extends Component {
   /**
    * @param {{ hasData(...args: unknown[]): boolean, getData(...args: unknown[]): any }} input
    * @param {{ sendDone(map: Record<string, unknown>): void, done(err?: Error): void }} output
-   */ processMessage(input, output) {
+   * @returns {Promise<{ out?: Record<string, unknown>, fail?: Record<string, unknown> } | undefined>} The
+   *   activation contract: the read is asynchronous, so the promise is
+   *   returned and the send happens in-activation when it resolves. A
+   *   void return means "already sent" — the deferred sendDone inside the
+   *   callback raced drain-based closing and re-opened the ended network
+   *   (the noflo/noflo #1092 review corpus race)
+   */
+  processMessage(input, output) {
     if (!input.hasData("path")) {
-      return;
+      return Promise.resolve(undefined);
     }
     const filePath = input.getData("path");
     const source = input.hasData("source") ? input.getData("source") : "";
-    readFile(filePath, "utf8")
-      .then((body) => {
-        output.sendDone({
-          out: { errors: [], path: filePath, source, body },
-        });
-      })
-      .catch((error) => {
-        output.sendDone({
-          fail: fail(
-            { errors: [], path: filePath, source },
-            error instanceof Error ? error : new Error(String(error)),
-          ),
-        });
-      });
+    return readFile(filePath, "utf8").then(
+      (body) => ({
+        out: { errors: [], path: filePath, source, body },
+      }),
+      (error) => ({
+        fail: fail(
+          { errors: [], path: filePath, source },
+          error instanceof Error ? error : new Error(String(error)),
+        ),
+      }),
+    );
   }
 }
 
