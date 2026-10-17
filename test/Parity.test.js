@@ -38,9 +38,15 @@ const source = join(import.meta.dirname, "fixtures", "source");
 const reference = join(import.meta.dirname, "fixtures", "jekyll");
 
 /**
- * The known gap: files whose build output depends on the nested
- * `_posts` discovery (baz/_posts) that is not implemented yet. The
- * nested post shifts every listing and the pagination.
+ * The known gap: files whose build output depends on features the
+ * reimplementation does not implement yet — the nested `_posts`
+ * discovery (baz/_posts, shifting every listing and the pagination) and
+ * the nested front-matter pages (tango/index.md, which the static-copy
+ * leg takes verbatim). The four root posts were gap-set exclusions of
+ * the firing-model strand (work document #35 updates #19–#22); with the
+ * gate semantics released (noflo 2.0.0-alpha.10), their writes are
+ * deterministic and byte-identical, and the strict comparison covers
+ * them again.
  */
 const gapFiles = [
   "blog/2012/baz/yet-another/index.html",
@@ -49,11 +55,9 @@ const gapFiles = [
   "page2/index.html",
   "index.txt",
   "tango/index.html",
+  // The static-copy leg takes the nested front-matter page verbatim;
+  // the reference renders it (tango/index.html above)
   "tango/index.md",
-  "blog/2013/bar/more-work-here/index.html",
-  "blog/2012/bar/another-post/index.html",
-  "blog/2012/bar/hello-again/index.html",
-  "blog/2012/foo/bar/hello-world/index.html",
 ];
 
 /**
@@ -197,14 +201,11 @@ describe("jekyll parity", () => {
     );
   });
 
-  // The known gap, kept visible until it closes: the nested _posts
+  // The known gap, kept visible until it closes: the nested `_posts`
   // discovery (baz/_posts, with the path-derived category) and the
-  // five files whose output depends on it. When it lands, move these
-  // files out of gapFiles and the strict comparison covers them.
+  // nested front-matter pages. When it lands, move these files out of
+  // gapFiles and the strict comparison covers them.
   it.todo(
     "renders the nested baz/_posts post with its path-derived category, the listings and pagination that include it (baz.html, index.html, page2/index.html, index.txt), and nested front-matter pages (tango/index.md)",
-  );
-  it.todo(
-    "writes all four posts — the collection-order post drops under the scoped drain in DocumentBuilder, and the remaining posts drop under CI timing when the corpus leg loses the race to the posts leg (work document #35 updates #19–#20)",
   );
 });

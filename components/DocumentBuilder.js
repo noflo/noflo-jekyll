@@ -46,7 +46,13 @@ export class DocumentBuilder extends Component {
           required: false,
           // The documents carry per-message scopes; the edge-delivered
           // standing config is unscoped and must stay readable from
-          // scoped activations
+          // scoped activations. A firing port, not a control port: the
+          // config arrival must itself trigger the drain, and the drain's
+          // work lives in the component's per-scope state store, which
+          // the gate machinery cannot see. When the builder returns to
+          // buffer-waiting under the one-firing-rule pump (the port
+          // buffer becoming the store again), this reverts to a control
+          // port
           scoped: false,
         },
       },
