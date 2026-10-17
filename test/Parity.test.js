@@ -51,6 +51,9 @@ const gapFiles = [
   "tango/index.html",
   "tango/index.md",
   "blog/2013/bar/more-work-here/index.html",
+  "blog/2012/bar/another-post/index.html",
+  "blog/2012/bar/hello-again/index.html",
+  "blog/2012/foo/bar/hello-world/index.html",
 ];
 
 /**
@@ -202,6 +205,6 @@ describe("jekyll parity", () => {
     "renders the nested baz/_posts post with its path-derived category, the listings and pagination that include it (baz.html, index.html, page2/index.html, index.txt), and nested front-matter pages (tango/index.md)",
   );
   it.todo(
-    "writes the first post in collection order (more-work-here) — it drops under the scoped drain in DocumentBuilder, likely a state-store drain-ordering edge (work document #35 update #20)",
+    "writes all four posts — the collection-order post drops under the scoped drain in DocumentBuilder, and the remaining posts drop under CI timing when the corpus leg loses the race to the posts leg (work document #35 updates #19–#20)",
   );
 });

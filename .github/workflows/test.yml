@@ -30,3 +30,4 @@ jobs:
           name: flowtrace-${{ matrix.node-version }}
           path: .flowtrace/
           if-no-files-found: ignore
+          include-hidden-files: true
