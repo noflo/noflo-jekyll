@@ -16,7 +16,7 @@
       "port": "out"
     },
     "includes": {
-      "process": "read_includes",
+      "process": "merge_incl",
       "port": "out"
     },
     "static": {
@@ -63,6 +63,16 @@
     {
       "id": "read_includes",
       "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "kick_incl",
+      "component": "core/Kick",
+      "metadata": {}
+    },
+    {
+      "id": "merge_incl",
+      "component": "core/Merge",
       "metadata": {}
     }
   ],
@@ -136,6 +146,36 @@
         "id": "read_includes",
         "port": "source"
       }
+    },
+    {
+      "source": {
+        "id": "read_includes",
+        "port": "error"
+      },
+      "target": {
+        "id": "kick_incl",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "kick_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "merge_incl",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "read_includes",
+        "port": "out"
+      },
+      "target": {
+        "id": "merge_incl",
+        "port": "in"
+      }
     }
   ],
   "inits": [
@@ -158,6 +198,13 @@
       "target": {
         "id": "join_includes",
         "port": "file"
+      }
+    },
+    {
+      "data": null,
+      "target": {
+        "id": "kick_incl",
+        "port": "data"
       }
     }
   ]

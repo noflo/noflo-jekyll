@@ -225,7 +225,7 @@
     },
     {
       "source": {
-        "id": "frontmatter_incl",
+        "id": "strip_incl",
         "port": "out"
       },
       "target": {
