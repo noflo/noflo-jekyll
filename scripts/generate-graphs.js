@@ -1,7 +1,9 @@
 /**
  * Generates the 2.x build graphs for the Jekyll pipeline. Run from the
  * package root: `node scripts/generate-graphs.js`. The outputs are
- * committed so the package manifest (`noflo.json`) can ship them.
+ * committed so the package ships them: the loader's discovery walks the
+ * installed package's `components/` and `graphs/` directories directly
+ * (work document #24), so no manifest file is needed.
  *
  * The 0.x-era graph set was fragmented by its constraints (groups as
  * metadata, disconnect-driven flushing, WirePattern queues). The 2.x
