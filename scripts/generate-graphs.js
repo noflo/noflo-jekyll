@@ -164,7 +164,12 @@ addNode(build, "load_layout", "jekyll/LoadDocument");
 addNode(build, "frontmatter_tpl", "jekyll/FrontMatter");
 addNode(build, "load_includes", "jekyll/LoadDocument");
 addNode(build, "frontmatter_incl", "jekyll/FrontMatter");
-addNode(build, "strip_tpl", "groups/RemoveGroups");
+// The template corpus (layouts + includes listings) merges into one
+// outer-framed stream for the builder's control gate: the control buffer
+// keeps the latest stream, so two separate listing groups would discard
+// each other. The includes stay separately stripped for the liquid
+// engine's include registration
+addNode(build, "corpus_envelope", "jekyll/StreamEnvelope");
 addNode(build, "strip_incl", "groups/RemoveGroups");
 addNode(build, "write", "filesystem/WriteFileAssembly");
 addNode(build, "copystatic", "jekyll/CopyStatic");
@@ -203,19 +208,19 @@ build.addEdge({
 });
 build.addEdge({
   from: { node: "frontmatter_tpl", port: "out" },
-  to: { node: "strip_tpl", port: "in" },
+  to: { node: "corpus_envelope", port: "msg" },
 });
 build.addEdge({
-  from: { node: "strip_tpl", port: "out" },
+  from: { node: "frontmatter_incl", port: "out" },
+  to: { node: "corpus_envelope", port: "msg" },
+});
+build.addEdge({
+  from: { node: "corpus_envelope", port: "out" },
   to: { node: "builder", port: "templates" },
 });
 build.addEdge({
   from: { node: "frontmatter_incl", port: "out" },
   to: { node: "strip_incl", port: "in" },
-});
-build.addEdge({
-  from: { node: "strip_incl", port: "out" },
-  to: { node: "builder", port: "templates" },
 });
 build.addEdge({
   from: { node: "scan", port: "includes_ready" },
