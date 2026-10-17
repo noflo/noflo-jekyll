@@ -107,8 +107,8 @@
       "metadata": {}
     },
     {
-      "id": "strip_tpl",
-      "component": "groups/RemoveGroups",
+      "id": "corpus_envelope",
+      "component": "jekyll/StreamEnvelope",
       "metadata": {}
     },
     {
@@ -204,13 +204,23 @@
         "port": "out"
       },
       "target": {
-        "id": "strip_tpl",
-        "port": "in"
+        "id": "corpus_envelope",
+        "port": "msg"
       }
     },
     {
       "source": {
-        "id": "strip_tpl",
+        "id": "frontmatter_incl",
+        "port": "out"
+      },
+      "target": {
+        "id": "corpus_envelope",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "corpus_envelope",
         "port": "out"
       },
       "target": {
@@ -226,16 +236,6 @@
       "target": {
         "id": "strip_incl",
         "port": "in"
-      }
-    },
-    {
-      "source": {
-        "id": "strip_incl",
-        "port": "out"
-      },
-      "target": {
-        "id": "builder",
-        "port": "templates"
       }
     },
     {
