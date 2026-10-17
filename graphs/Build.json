@@ -32,6 +32,11 @@
       "metadata": {}
     },
     {
+      "id": "envelope",
+      "component": "jekyll/StreamEnvelope",
+      "metadata": {}
+    },
+    {
       "id": "frontmatter",
       "component": "jekyll/FrontMatter",
       "metadata": {}
@@ -146,6 +151,16 @@
     {
       "source": {
         "id": "scan",
+        "port": "posts_nested"
+      },
+      "target": {
+        "id": "load_post",
+        "port": "path"
+      }
+    },
+    {
+      "source": {
+        "id": "scan",
         "port": "layouts"
       },
       "target": {
@@ -246,6 +261,16 @@
     {
       "source": {
         "id": "load_post",
+        "port": "out"
+      },
+      "target": {
+        "id": "envelope",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "envelope",
         "port": "out"
       },
       "target": {

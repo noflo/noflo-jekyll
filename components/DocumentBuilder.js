@@ -264,10 +264,12 @@ export class DocumentBuilder extends Component {
   /**
    * Resolves the `{% layout %}`/`layout` chain: each parent template
    * body replaces `{{ content }}` with the child body, walking until a
-   * template without its own `layout`. The chain's front-matter fields
-   * merge into the page context (inner layouts winning over outer
-   * ones, the document winning over both) — `class: index` on a layout
-   * reaches `page.class` the way Jekyll scopes layout variables.
+   * template without its own `layout`. The chain's front matter is the
+   * layouts' own variables, not page variables — the Jekyll-generated
+   * reference is the contract: a `class: index` on a layout does not
+   * reach `page.class` (the nocontent page, which uses the layout but
+   * carries no class of its own, renders a bare `<body>`), so the chain
+   * contributes the content substitution only.
    * @param {Record<string, any>} templateData
    * @param {Error[]} errors
    * @returns {{ body: string, data: Record<string, any> }}
@@ -275,27 +277,39 @@ export class DocumentBuilder extends Component {
   handleInheritance(templateData, errors) {
     let body = templateData.body ?? "";
     let layoutName = /** @type {string | undefined} */ (templateData.layout);
-    /** @type {Record<string, any>} */
-    let data = {};
     const seen = new Set();
     while (layoutName) {
       if (seen.has(layoutName)) {
         errors.push(new Error(`Layout cycle at ${layoutName}`));
-        return { body, data };
+        return { body, data: {} };
       }
       seen.add(layoutName);
       const parent = this.getTemplate(layoutName, errors);
       if (!parent) {
-        return { body, data };
+        return { body, data: {} };
       }
       // A replacer function: string replacement would interpret `$`
       // patterns in the substituted body
       body = parent.body.replace("{{ content }}", () => body);
-      const { layout: _layout, ...fields } = parent.data ?? {};
-      data = { ...fields, ...data };
       layoutName = parent.data?.layout;
     }
-    return { body, data };
+    return { body, data: {} };
+  }
+
+  /**
+   * The site URL of an output path, the Jekyll page URL convention: an
+   * `index.html` maps to its directory (the site root's `index.html` to
+   * `/`), other paths to their directory.
+   * @param {string} docPath
+   * @returns {string}
+   */
+  urlForPage(docPath) {
+    const rel = path.relative(this.config?.target ?? "", docPath);
+    const dir = path.dirname(rel);
+    if (dir === ".") {
+      return "/";
+    }
+    return `/${dir}/`;
   }
 
   /**
@@ -335,8 +349,13 @@ export class DocumentBuilder extends Component {
         const base = path.dirname(document.path);
         page.path = `${base}/page${current}/index.html`;
         page.paginator.previous_page = current - 1;
+        // Page 1 of a paginated document is the document itself, at its
+        // own URL — the Jekyll page URL convention (index.html maps to
+        // its directory)
         page.paginator.previous_page_path =
-          current === 2 ? "/index.html" : `/page${current - 1}`;
+          current === 2
+            ? this.urlForPage(document.path)
+            : `/page${current - 1}`;
       }
       if (current === pages) {
         page.paginator.next_page_path = null;

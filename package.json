@@ -21,6 +21,7 @@
     "@noflo/liquid": "^2.0.0-alpha.4",
     "@noflo/markdown": "^2.0.0-alpha.1",
     "@noflo/noflo": "^2.0.0-alpha.10",
+    "@noflo/strings": "^2.0.0-alpha.3",
     "yaml": "^2.9.1"
   },
   "devDependencies": {

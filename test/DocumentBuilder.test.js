@@ -191,6 +191,7 @@ describe("DocumentBuilder component", () => {
         },
       ],
       paginate: 2,
+      target: "/site",
     };
     try {
       const values = await run(c, "out", {
@@ -208,7 +209,10 @@ describe("DocumentBuilder component", () => {
       assert.equal(values[0].paginator.previous_page_path, null);
       assert.equal(values[1].path, "/site/page2/index.html");
       assert.equal(values[1].paginator.posts.length, 1);
-      assert.equal(values[1].paginator.previous_page_path, "/index.html");
+      // Page 1 of the paginated document is the document itself, at its
+      // own URL — the Jekyll page URL convention (the site root's
+      // index.html maps to "/")
+      assert.equal(values[1].paginator.previous_page_path, "/");
       assert.equal(values[1].paginator.next_page_path, null);
     } finally {
       await c.shutdown();

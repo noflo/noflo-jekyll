@@ -71,6 +71,35 @@ scan.addExport({
   internal: { node: "split", port: "in" },
 });
 wireReadDir(scan, "_posts");
+// The nested discovery: each root entry joined with `/_posts` and read.
+// The root listing's brackets are stripped first — the Append's standing
+// suffix must not carry the listing's framing (it would nest the nested
+// listings inside the root listing's frame and strand the frame close on
+// the silent sends), and the nested listings re-frame per directory
+addNode(scan, "strip_nested", "groups/RemoveGroups");
+addNode(scan, "append_nested", "strings/Append");
+addNode(scan, "read_nested", "filesystem/ReadDir");
+scan.addEdge({
+  from: { node: "read_root", port: "out" },
+  to: { node: "strip_nested", port: "in" },
+});
+scan.addEdge({
+  from: { node: "strip_nested", port: "out" },
+  to: { node: "append_nested", port: "in" },
+});
+scan.addIIP({
+  data: "/_posts",
+  to: { node: "append_nested", port: "append" },
+});
+scan.addEdge({
+  from: { node: "append_nested", port: "out" },
+  to: { node: "read_nested", port: "source" },
+});
+scan.addExport({
+  direction: "outport",
+  public: "posts_nested",
+  internal: { node: "read_nested", port: "out" },
+});
 wireReadDir(scan, "_layouts");
 wireReadDir(scan, "_includes");
 
@@ -115,6 +144,12 @@ scan.addExport({
 const build = newGraph("Build");
 addNode(build, "scan", "jekyll/ScanSource");
 addNode(build, "load_post", "jekyll/LoadDocument");
+// The posts leg fans in two bracketed listings (the root _posts and the
+// discovered nested ones); the envelope merges them into one outer
+// bracket frame that closes at the leg's EOT, so the collector flushes
+// once over the complete collection — one source group completing is
+// not the collection being complete
+addNode(build, "envelope", "jekyll/StreamEnvelope");
 addNode(build, "frontmatter", "jekyll/FrontMatter");
 addNode(build, "metadata", "jekyll/PathMetadata");
 addNode(build, "buildpath", "jekyll/BuildPostPath");
@@ -139,6 +174,10 @@ addNode(build, "frontmatter_page", "jekyll/FrontMatter");
 // Scan wiring: the posts leg into the per-document pipeline
 build.addEdge({
   from: { node: "scan", port: "posts" },
+  to: { node: "load_post", port: "path" },
+});
+build.addEdge({
+  from: { node: "scan", port: "posts_nested" },
   to: { node: "load_post", port: "path" },
 });
 
@@ -190,6 +229,10 @@ build.addEdge({
 // The per-document pipeline
 build.addEdge({
   from: { node: "load_post", port: "out" },
+  to: { node: "envelope", port: "msg" },
+});
+build.addEdge({
+  from: { node: "envelope", port: "out" },
   to: { node: "frontmatter", port: "msg" },
 });
 build.addEdge({

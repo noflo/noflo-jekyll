@@ -25,6 +25,9 @@ export class PathMetadata extends Component {
           description: "Site source directory",
           required: false,
           control: true,
+          // Standing configuration: the unscoped source IIP must stay
+          // readable from the documents' scoped activations
+          scoped: false,
         },
       },
       outPorts: {
