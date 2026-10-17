@@ -94,18 +94,15 @@ scan.addEdge({
   from: { node: "read_includes", port: "error" },
   to: { node: "kick_incl", port: "in" },
 });
-scan.addEdge({
-  from: { node: "kick_incl", port: "out" },
-  to: { node: "merge_incl", port: "in" },
-});
-scan.addEdge({
-  from: { node: "read_includes", port: "out" },
-  to: { node: "merge_incl", port: "in" },
+scan.addExport({
+  direction: "outport",
+  public: "includes_ready",
+  internal: { node: "kick_incl", port: "out" },
 });
 scan.addExport({
   direction: "outport",
   public: "includes",
-  internal: { node: "merge_incl", port: "out" },
+  internal: { node: "read_includes", port: "out" },
 });
 scan.addExport({
   direction: "outport",
@@ -181,6 +178,10 @@ build.addEdge({
 build.addEdge({
   from: { node: "strip_incl", port: "out" },
   to: { node: "builder", port: "templates" },
+});
+build.addEdge({
+  from: { node: "scan", port: "includes_ready" },
+  to: { node: "liquid", port: "includes" },
 });
 build.addEdge({
   from: { node: "strip_incl", port: "out" },

@@ -15,8 +15,12 @@
       "process": "read_layouts",
       "port": "out"
     },
+    "includes_ready": {
+      "process": "kick_incl",
+      "port": "out"
+    },
     "includes": {
-      "process": "merge_incl",
+      "process": "read_includes",
       "port": "out"
     },
     "static": {
@@ -154,26 +158,6 @@
       },
       "target": {
         "id": "kick_incl",
-        "port": "in"
-      }
-    },
-    {
-      "source": {
-        "id": "kick_incl",
-        "port": "out"
-      },
-      "target": {
-        "id": "merge_incl",
-        "port": "in"
-      }
-    },
-    {
-      "source": {
-        "id": "read_includes",
-        "port": "out"
-      },
-      "target": {
-        "id": "merge_incl",
         "port": "in"
       }
     }

@@ -225,6 +225,16 @@
     },
     {
       "source": {
+        "id": "scan",
+        "port": "includes_ready"
+      },
+      "target": {
+        "id": "liquid",
+        "port": "includes"
+      }
+    },
+    {
+      "source": {
         "id": "strip_incl",
         "port": "out"
       },
