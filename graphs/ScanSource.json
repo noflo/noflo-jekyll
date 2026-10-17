@@ -73,11 +73,6 @@
       "id": "kick_incl",
       "component": "core/Kick",
       "metadata": {}
-    },
-    {
-      "id": "merge_incl",
-      "component": "core/Merge",
-      "metadata": {}
     }
   ],
   "edges": [

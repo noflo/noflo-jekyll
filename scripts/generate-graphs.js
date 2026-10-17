@@ -85,7 +85,6 @@ scan.addExport({
   internal: { node: "read_layouts", port: "out" },
 });
 addNode(scan, "kick_incl", "core/Kick");
-addNode(scan, "merge_incl", "core/Merge");
 scan.addIIP({
   data: null,
   to: { node: "kick_incl", port: "data" },
