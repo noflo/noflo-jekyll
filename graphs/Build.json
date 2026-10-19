@@ -18,6 +18,10 @@
     "copied": {
       "process": "copystatic",
       "port": "out"
+    },
+    "failed": {
+      "process": "builder",
+      "port": "fail"
     }
   },
   "nodes": [
@@ -27,13 +31,35 @@
       "metadata": {}
     },
     {
-      "id": "load_post",
-      "component": "jekyll/LoadDocument",
+      "id": "envelope",
+      "component": "jekyll/StreamEnvelope",
       "metadata": {}
     },
     {
-      "id": "envelope",
-      "component": "jekyll/StreamEnvelope",
+      "id": "posts_strip",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "posts_toasm",
+      "component": "assembly-utils/ToAssembly",
+      "metadata": {
+        "assembly.field": "path"
+      }
+    },
+    {
+      "id": "posts_dup",
+      "component": "objects/DuplicatePropertyAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "posts_scoper",
+      "component": "packets/ScopeFromObject",
+      "metadata": {}
+    },
+    {
+      "id": "posts_read",
+      "component": "filesystem/ReadFileAssembly",
       "metadata": {}
     },
     {
@@ -87,18 +113,8 @@
       "metadata": {}
     },
     {
-      "id": "load_layout",
-      "component": "jekyll/LoadDocument",
-      "metadata": {}
-    },
-    {
       "id": "frontmatter_tpl",
       "component": "jekyll/FrontMatter",
-      "metadata": {}
-    },
-    {
-      "id": "load_includes",
-      "component": "jekyll/LoadDocument",
       "metadata": {}
     },
     {
@@ -135,6 +151,60 @@
       "id": "frontmatter_page",
       "component": "jekyll/FrontMatter",
       "metadata": {}
+    },
+    {
+      "id": "layouts_strip",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "layouts_toasm",
+      "component": "assembly-utils/ToAssembly",
+      "metadata": {
+        "assembly.field": "path"
+      }
+    },
+    {
+      "id": "layouts_dup",
+      "component": "objects/DuplicatePropertyAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "layouts_scoper",
+      "component": "packets/ScopeFromObject",
+      "metadata": {}
+    },
+    {
+      "id": "layouts_read",
+      "component": "filesystem/ReadFileAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "includes_strip",
+      "component": "groups/RemoveGroups",
+      "metadata": {}
+    },
+    {
+      "id": "includes_toasm",
+      "component": "assembly-utils/ToAssembly",
+      "metadata": {
+        "assembly.field": "path"
+      }
+    },
+    {
+      "id": "includes_dup",
+      "component": "objects/DuplicatePropertyAssembly",
+      "metadata": {}
+    },
+    {
+      "id": "includes_scoper",
+      "component": "packets/ScopeFromObject",
+      "metadata": {}
+    },
+    {
+      "id": "includes_read",
+      "component": "filesystem/ReadFileAssembly",
+      "metadata": {}
     }
   ],
   "edges": [
@@ -144,8 +214,58 @@
         "port": "posts"
       },
       "target": {
-        "id": "load_post",
-        "port": "path"
+        "id": "posts_strip",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "posts_strip",
+        "port": "out"
+      },
+      "target": {
+        "id": "posts_toasm",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "posts_toasm",
+        "port": "out"
+      },
+      "target": {
+        "id": "posts_dup",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "posts_dup",
+        "port": "out"
+      },
+      "target": {
+        "id": "posts_scoper",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "posts_scoper",
+        "port": "out"
+      },
+      "target": {
+        "id": "posts_read",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "posts_read",
+        "port": "out"
+      },
+      "target": {
+        "id": "envelope",
+        "port": "msg"
       }
     },
     {
@@ -154,8 +274,8 @@
         "port": "posts_nested"
       },
       "target": {
-        "id": "load_post",
-        "port": "path"
+        "id": "posts_strip",
+        "port": "in"
       }
     },
     {
@@ -164,23 +284,53 @@
         "port": "layouts"
       },
       "target": {
-        "id": "load_layout",
-        "port": "path"
+        "id": "layouts_strip",
+        "port": "in"
       }
     },
     {
       "source": {
-        "id": "scan",
-        "port": "includes"
+        "id": "layouts_strip",
+        "port": "out"
       },
       "target": {
-        "id": "load_includes",
-        "port": "path"
+        "id": "layouts_toasm",
+        "port": "in"
       }
     },
     {
       "source": {
-        "id": "load_layout",
+        "id": "layouts_toasm",
+        "port": "out"
+      },
+      "target": {
+        "id": "layouts_dup",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "layouts_dup",
+        "port": "out"
+      },
+      "target": {
+        "id": "layouts_scoper",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "layouts_scoper",
+        "port": "out"
+      },
+      "target": {
+        "id": "layouts_read",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "layouts_read",
         "port": "out"
       },
       "target": {
@@ -190,7 +340,57 @@
     },
     {
       "source": {
-        "id": "load_includes",
+        "id": "scan",
+        "port": "includes"
+      },
+      "target": {
+        "id": "includes_strip",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "includes_strip",
+        "port": "out"
+      },
+      "target": {
+        "id": "includes_toasm",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "includes_toasm",
+        "port": "out"
+      },
+      "target": {
+        "id": "includes_dup",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "includes_dup",
+        "port": "out"
+      },
+      "target": {
+        "id": "includes_scoper",
+        "port": "in"
+      }
+    },
+    {
+      "source": {
+        "id": "includes_scoper",
+        "port": "out"
+      },
+      "target": {
+        "id": "includes_read",
+        "port": "msg"
+      }
+    },
+    {
+      "source": {
+        "id": "includes_read",
         "port": "out"
       },
       "target": {
@@ -256,16 +456,6 @@
       "target": {
         "id": "liquid",
         "port": "includes"
-      }
-    },
-    {
-      "source": {
-        "id": "load_post",
-        "port": "out"
-      },
-      "target": {
-        "id": "envelope",
-        "port": "msg"
       }
     },
     {
@@ -426,6 +616,71 @@
       "target": {
         "id": "builder",
         "port": "msg"
+      }
+    }
+  ],
+  "inits": [
+    {
+      "data": "path=scope",
+      "target": {
+        "id": "posts_dup",
+        "port": "property"
+      }
+    },
+    {
+      "data": "/",
+      "target": {
+        "id": "posts_dup",
+        "port": "separator"
+      }
+    },
+    {
+      "data": "utf8",
+      "target": {
+        "id": "posts_read",
+        "port": "encoding"
+      }
+    },
+    {
+      "data": "path=scope",
+      "target": {
+        "id": "layouts_dup",
+        "port": "property"
+      }
+    },
+    {
+      "data": "/",
+      "target": {
+        "id": "layouts_dup",
+        "port": "separator"
+      }
+    },
+    {
+      "data": "utf8",
+      "target": {
+        "id": "layouts_read",
+        "port": "encoding"
+      }
+    },
+    {
+      "data": "path=scope",
+      "target": {
+        "id": "includes_dup",
+        "port": "property"
+      }
+    },
+    {
+      "data": "/",
+      "target": {
+        "id": "includes_dup",
+        "port": "separator"
+      }
+    },
+    {
+      "data": "utf8",
+      "target": {
+        "id": "includes_read",
+        "port": "encoding"
       }
     }
   ]

@@ -17,6 +17,13 @@ export class PostCollector extends Component {
           datatype: "object",
           description: "Bracketed stream of document messages",
           required: true,
+          // The load leg scopes each message (the wrapped ReadFile's
+          // correlation), and the collector is a single-scope stream
+          // consumer: the scoped packets must land in one unpartitioned
+          // buffer, or every scope's single message reads as a complete
+          // bare stream and the collector flushes per message with one
+          // post each
+          scoped: false,
         },
         config: {
           datatype: "object",

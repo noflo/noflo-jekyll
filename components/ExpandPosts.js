@@ -49,7 +49,8 @@ export class ExpandPosts extends Component {
     for (const post of config.posts ?? []) {
       // Unique scope per post: the wrapped adapters downstream correlate
       // their collectors per scope, so concurrent in-flight posts cannot
-      // cross pairs inside an adapter
+      // cross pairs inside an adapter (the BISECT baseline: the original
+      // stamping, the stock chain unwired)
       output.send({
         out: new IP("data", { ...post, config }, { scope: post.path }),
       });

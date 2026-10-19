@@ -76,6 +76,11 @@ export class DocumentBuilder extends Component {
         fail: {
           datatype: "object",
           description: "The message with unexpected processing errors",
+          // An unattached fail leg is how a caught build error vanishes
+          // without a trace (the Shape B signature class): a required
+          // outport escalates the unattached send in checkRequired —
+          // work document #48's no-silent-loss surface
+          required: true,
         },
       },
     });
@@ -94,12 +99,27 @@ export class DocumentBuilder extends Component {
      * @type {Set<string | null>}
      */
     this.drainingScopes = new Set();
+    /**
+     * The two-pass conversion record: each post's converted body, keyed
+     * by its source path. The gate for pages listing posts tests this
+     * record — the collection entries carry a raw `content` from the
+     * collector (the raw body), so field presence cannot distinguish
+     * converted from unconverted, and a page rendering before the last
+     * post converted baked raw markdown into the listing (the Shape C
+     * content variant). The record also survives config arrivals: a
+     * config replacing the posts array must not reset a converted
+     * post's content to the raw body
+     *
+     * @type {Map<string, string>}
+     */
+    this.postContent = new Map();
   }
 
   tearDown() {
     this.templates = {};
     this.config = null;
     this.drainingScopes.clear();
+    this.postContent.clear();
     return Promise.resolve();
   }
 
@@ -198,7 +218,14 @@ export class DocumentBuilder extends Component {
    * @returns {void}
    */
   enrichSite(msg) {
-    if (!this.config?.posts || !msg.path) {
+    if (!msg.path) {
+      return;
+    }
+    // Record the conversion regardless of the config's presence: the
+    // record is what the resolvability gate tests, and a post draining
+    // before the config arrival must still count as converted
+    this.postContent.set(msg.path, msg.body);
+    if (!this.config?.posts) {
       return;
     }
     for (const post of this.config.posts) {
@@ -229,23 +256,66 @@ export class DocumentBuilder extends Component {
     if (msg.layout && !this.chainPresent(msg.layout)) {
       return false;
     }
-    if (this.hasPaginator(msg.body ?? "") && !this.config?.posts) {
+    if (this.chainReferencesPosts(msg) && !this.config?.posts) {
+      // Pagination or a posts listing (in the page or its layout chain)
+      // needs the site config's collection
       return false;
     }
     // Pages listing posts or paginating need every collected post
     // converted first: the rendered content flows through this builder
-    // and enriches the collection as it passes
+    // and enriches the collection as it passes. The test is the
+    // conversion record, not field presence — the collector's raw
+    // entries carry `content` (the raw body), so a presence check is
+    // vacuously satisfied and the page renders with raw markdown. The
+    // reference test walks the layout chain: the root fixture index's
+    // own body is a bare paragraph — its posts listing lives in the
+    // `index` layout — so a body-only test leaves the front page ungated
     if (
-      (this.hasPaginator(msg.body ?? "") ||
-        (msg.body ?? "").includes("site.posts")) &&
+      this.chainReferencesPosts(msg) &&
       this.config?.posts &&
-      !this.config.posts.every(
-        (/** @type {Record<string, any>} */ p) => p.content,
+      !this.config.posts.every((/** @type {{ path: string }} */ p) =>
+        this.postContent.has(p.path),
       )
     ) {
+      // Some collected posts have not converted through this builder yet
       return false;
     }
     return true;
+  }
+
+  /**
+   * Whether any body in the page's inheritance chain references the
+   * site's posts — the page's own body or any layout body along the
+   * chain. The root fixture index carries a bare `<p>Welcome</p>` body:
+   * the posts listing lives in its `index` layout, so a page-body-only
+   * test lets the front page render with a half-raw collection whenever
+   * it drains before the posts converted (the Shape C content race).
+   * @param {{ body?: string, layout?: string }} msg
+   * @returns {boolean}
+   */
+  chainReferencesPosts(msg) {
+    let body = msg.body ?? "";
+    if (this.hasPaginator(body) || body.includes("site.posts")) {
+      return true;
+    }
+    let current = msg.layout;
+    const seen = new Set();
+    while (current) {
+      if (seen.has(current)) {
+        return false;
+      }
+      seen.add(current);
+      const template = this.templates[current];
+      if (!template) {
+        return false;
+      }
+      body = template.body ?? "";
+      if (this.hasPaginator(body) || body.includes("site.posts")) {
+        return true;
+      }
+      current = template.data?.layout;
+    }
+    return false;
   }
 
   /**
@@ -505,7 +575,20 @@ export class DocumentBuilder extends Component {
     // stores; their arrivals are the re-fire triggers that let buffered
     // documents resolve
     if (input.hasData("config")) {
-      this.config = { ...input.getData("config") };
+      // Adopt the arrival, but carry the conversion record over: a
+      // config arriving after posts converted must not reset their
+      // content to the raw collection body (the two-pass enrichment
+      // would silently un-convert)
+      const incoming = { ...input.getData("config") };
+      incoming.posts = (incoming.posts ?? []).map(
+        (/** @type {{ path: string, content?: string }} */ post) => {
+          const converted = this.postContent.get(post.path);
+          return converted === undefined
+            ? post
+            : { ...post, content: converted };
+        },
+      );
+      this.config = incoming;
     }
     if (input.hasData("templates")) {
       // The corpus is a bracketed control stream, read non-consumingly:

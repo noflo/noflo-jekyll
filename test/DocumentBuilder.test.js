@@ -194,26 +194,58 @@ describe("DocumentBuilder component", () => {
       target: "/site",
     };
     try {
-      const values = await run(c, "out", {
-        config,
-        msg: {
-          errors: [],
-          path: "/site/index.html",
-          body: "{% for post in paginator.posts %}{{ post.title }}{% endfor %}",
+      // The two-pass shape: every post converts through the builder
+      // before a listing page can resolve — the resolvability gate
+      // tests the conversion record, not field presence (the raw
+      // collection entries carry `content` already)
+      const values = await runStaged(c, "out", [
+        { port: "config", value: config },
+        {
+          port: "msg",
+          value: {
+            errors: [],
+            path: "/site/_posts/2014-01-01-a.md",
+            body: "<p>A</p>",
+          },
         },
-      });
-      assert.equal(values.length, 2);
-      assert.equal(values[0].paginator.page, 1);
-      assert.equal(values[0].paginator.posts.length, 2);
-      assert.equal(values[0].paginator.total_pages, 2);
-      assert.equal(values[0].paginator.previous_page_path, null);
-      assert.equal(values[1].path, "/site/page2/index.html");
-      assert.equal(values[1].paginator.posts.length, 1);
+        {
+          port: "msg",
+          value: {
+            errors: [],
+            path: "/site/_posts/2014-02-01-b.md",
+            body: "<p>B</p>",
+          },
+        },
+        {
+          port: "msg",
+          value: {
+            errors: [],
+            path: "/site/_posts/2014-03-01-c.md",
+            body: "<p>C</p>",
+          },
+        },
+        {
+          port: "msg",
+          value: {
+            errors: [],
+            path: "/site/index.html",
+            body: "{% for post in paginator.posts %}{{ post.title }}{% endfor %}",
+          },
+        },
+      ]);
+      const paged = values.filter((/** @type {any} */ v) => v.paginator);
+      assert.equal(paged.length, 2);
+      assert.equal(paged[0].paginator.page, 1);
+      assert.equal(paged[0].paginator.posts.length, 2);
+      assert.equal(paged[0].paginator.total_pages, 2);
+      assert.equal(paged[0].paginator.previous_page_path, null);
+      assert.equal(paged[1].path, "/site/page2/index.html");
+      assert.equal(paged[1].paginator.posts.length, 1);
       // Page 1 of the paginated document is the document itself, at its
       // own URL — the Jekyll page URL convention (the site root's
       // index.html maps to "/")
-      assert.equal(values[1].paginator.previous_page_path, "/");
-      assert.equal(values[1].paginator.next_page_path, null);
+      assert.equal(paged[1].paginator.previous_page_path, "/");
+      assert.equal(paged[1].paginator.next_page_path, null);
     } finally {
       await c.shutdown();
     }

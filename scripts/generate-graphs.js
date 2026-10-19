@@ -37,6 +37,77 @@ const addNode = (graph, id, component, metadata = {}) => {
 };
 
 /**
+ * Wires one file-loading leg: the scan's bracketed listing is stripped
+ * to bare path strings, the ToAssembly envelope turns each into an
+ * assembly message (the `assembly.field` node metadata names the
+ * field), and the wrapped filesystem/ReadFile reads it — the jekyll
+ * LoadDocument relay retires (work document #35 update #23's
+ * substitution, enabled by noflo/noflo#1097's ToAssembly field option).
+ * @param {GraphModel} graph
+ * @param {string} scanPort
+ * @param {string} stripId
+ * @param {string} toId
+ * @param {string} readId
+ * @param {{ node: string, port: string }} to
+ */
+const wireLoadedLeg = (graph, scanPort, prefix, to) => {
+  // The load leg: the scan's bracketed listing is stripped to bare path
+  // strings, the ToAssembly envelope turns each into an assembly message,
+  // the message's path becomes its correlation scope (DuplicateProperty
+  // wraps the field, ScopeFromObject consumes it into the IP scope — the
+  // wrapped ReadFile is asynchronous, so unscoped in-flight messages
+  // would pair positionally and cross, the work document #36 limitation),
+  // and the wrapped filesystem/ReadFile reads it. The jekyll LoadDocument
+  // relay retires (work document #35 update #23's substitution, enabled
+  // by noflo/noflo#1097's ToAssembly field option and the out-mapping
+  // null replace).
+  addNode(graph, `${prefix}_strip`, "groups/RemoveGroups");
+  addNode(graph, `${prefix}_toasm`, "assembly-utils/ToAssembly", {
+    "assembly.field": "path",
+  });
+  addNode(graph, `${prefix}_dup`, "objects/DuplicatePropertyAssembly");
+  addNode(graph, `${prefix}_scoper`, "packets/ScopeFromObject");
+  addNode(graph, `${prefix}_read`, "filesystem/ReadFileAssembly");
+  // DuplicateProperty's property is in "original=new" form (the code's
+  // semantics — its description says "new=original", which is inverted):
+  // data.scope = data.path. Port defaults are inert under the 2.x
+  // engine, so the separator (default "/") is fed too
+  graph.addIIP({
+    data: "path=scope",
+    to: { node: `${prefix}_dup`, port: "property" },
+  });
+  graph.addIIP({
+    data: "/",
+    to: { node: `${prefix}_dup`, port: "separator" },
+  });
+  // Port defaults are inert under the 2.x engine: the wrapped ReadFile's
+  // encoding control (default "utf-8") must be fed, or fs.readFile
+  // resolves Buffers into the message body
+  graph.addIIP({ data: "utf8", to: { node: `${prefix}_read`, port: "encoding" } });
+  graph.addEdge({
+    from: { node: "scan", port: scanPort },
+    to: { node: `${prefix}_strip`, port: "in" },
+  });
+  graph.addEdge({
+    from: { node: `${prefix}_strip`, port: "out" },
+    to: { node: `${prefix}_toasm`, port: "in" },
+  });
+  graph.addEdge({
+    from: { node: `${prefix}_toasm`, port: "out" },
+    to: { node: `${prefix}_dup`, port: "msg" },
+  });
+  graph.addEdge({
+    from: { node: `${prefix}_dup`, port: "out" },
+    to: { node: `${prefix}_scoper`, port: "in" },
+  });
+  graph.addEdge({
+    from: { node: `${prefix}_scoper`, port: "out" },
+    to: { node: `${prefix}_read`, port: "msg" },
+  });
+  graph.addEdge({ from: { node: `${prefix}_read`, port: "out" }, to });
+};
+
+/**
  * Wires one filesystem/ReadDir leg for a known source subdirectory.
  * @param {GraphModel} graph
  * @param {string} subDir
@@ -63,9 +134,18 @@ const wireReadDir = (graph, subDir) => {
 const scan = newGraph("ScanSource");
 addNode(scan, "split", "core/Split");
 addNode(scan, "read_root", "filesystem/ReadDir");
+// The static leg's listing framing is stripped before the export: the
+// SplitStatic relay reads entries as pure data, and its consumption
+// cannot take forwarded brackets (the head getData eats the open bracket
+// and the close strands — update #20's cosmetic residue)
+addNode(scan, "strip_static", "groups/RemoveGroups");
 scan.addEdge({
   from: { node: "split", port: "out" },
   to: { node: "read_root", port: "source" },
+});
+scan.addEdge({
+  from: { node: "read_root", port: "out" },
+  to: { node: "strip_static", port: "in" },
 });
 scan.addExport({
   direction: "inport",
@@ -137,7 +217,7 @@ scan.addExport({
 scan.addExport({
   direction: "outport",
   public: "static",
-  internal: { node: "read_root", port: "out" },
+  internal: { node: "strip_static", port: "out" },
 });
 
 // ---------------------------------------------------------------------------
@@ -145,13 +225,22 @@ scan.addExport({
 // ---------------------------------------------------------------------------
 const build = newGraph("Build");
 addNode(build, "scan", "jekyll/ScanSource");
-addNode(build, "load_post", "jekyll/LoadDocument");
 // The posts leg fans in two bracketed listings (the root _posts and the
 // discovered nested ones); the envelope merges them into one outer
 // bracket frame that closes at the leg's EOT, so the collector flushes
 // once over the complete collection — one source group completing is
 // not the collection being complete
 addNode(build, "envelope", "jekyll/StreamEnvelope");
+wireLoadedLeg(build, "posts", "posts", {
+  node: "envelope",
+  port: "msg",
+});
+// The nested _posts discovery's listing joins the root listing on the
+// same load leg: both brackets are stripped, both paths scope and load
+build.addEdge({
+  from: { node: "scan", port: "posts_nested" },
+  to: { node: "posts_strip", port: "in" },
+});
 addNode(build, "frontmatter", "jekyll/FrontMatter");
 addNode(build, "metadata", "jekyll/PathMetadata");
 addNode(build, "buildpath", "jekyll/BuildPostPath");
@@ -162,9 +251,7 @@ addNode(build, "builder", "jekyll/DocumentBuilder");
 addNode(build, "liquid", "liquid/TemplateAssembly");
 addNode(build, "dirname", "filesystem/DirNameAssembly");
 addNode(build, "mkdir", "filesystem/MakeDirAssembly");
-addNode(build, "load_layout", "jekyll/LoadDocument");
 addNode(build, "frontmatter_tpl", "jekyll/FrontMatter");
-addNode(build, "load_includes", "jekyll/LoadDocument");
 addNode(build, "frontmatter_incl", "jekyll/FrontMatter");
 // The template corpus (layouts + includes listings) merges into one
 // outer-framed stream for the builder's control gate: the control buffer
@@ -179,34 +266,19 @@ addNode(build, "splitstatic", "jekyll/SplitStatic");
 addNode(build, "frontmatter_page", "jekyll/FrontMatter");
 
 // Scan wiring: the posts leg into the per-document pipeline
-build.addEdge({
-  from: { node: "scan", port: "posts" },
-  to: { node: "load_post", port: "path" },
-});
-build.addEdge({
-  from: { node: "scan", port: "posts_nested" },
-  to: { node: "load_post", port: "path" },
-});
+
 
 // The template corpus: both legs load into the builder's template
 // store — through FrontMatter, so layouts arrive with their own front
 // matter parsed (the layout chain) and bodies stripped; the include
 // corpus also registers into the liquid engine's runtime includes
-build.addEdge({
-  from: { node: "scan", port: "layouts" },
-  to: { node: "load_layout", port: "path" },
+wireLoadedLeg(build, "layouts", "layouts", {
+  node: "frontmatter_tpl",
+  port: "msg",
 });
-build.addEdge({
-  from: { node: "scan", port: "includes" },
-  to: { node: "load_includes", port: "path" },
-});
-build.addEdge({
-  from: { node: "load_layout", port: "out" },
-  to: { node: "frontmatter_tpl", port: "msg" },
-});
-build.addEdge({
-  from: { node: "load_includes", port: "out" },
-  to: { node: "frontmatter_incl", port: "msg" },
+wireLoadedLeg(build, "includes", "includes", {
+  node: "frontmatter_incl",
+  port: "msg",
 });
 build.addEdge({
   from: { node: "frontmatter_tpl", port: "out" },
@@ -235,10 +307,6 @@ build.addEdge({
 
 // The per-document pipeline
 build.addEdge({
-  from: { node: "load_post", port: "out" },
-  to: { node: "envelope", port: "msg" },
-});
-build.addEdge({
   from: { node: "envelope", port: "out" },
   to: { node: "frontmatter", port: "msg" },
 });
@@ -264,6 +332,11 @@ build.addEdge({
   from: { node: "expand", port: "config" },
   to: { node: "builder", port: "config" },
 });
+// The per-message scopes are stock: DuplicateProperty wraps the post's
+// path into a `scope` field (the whole-message mapping, the replace
+// semantics of the out-mapping null), and ScopeFromObject consumes the
+// field into the IP scope — the wrapped adapters downstream correlate
+// per scope, so concurrent in-flight posts cannot cross pairs
 build.addEdge({
   from: { node: "expand", port: "out" },
   to: { node: "markdown", port: "msg" },
@@ -333,6 +406,15 @@ build.addExport({
   direction: "outport",
   public: "copied",
   internal: { node: "copystatic", port: "out" },
+});
+// The builder's fail port is wired out: a page whose build throws must
+// surface in the build result, not vanish into an unconnected outport
+// (the work document #35 update #12 footgun — the anomaly investigation
+// showed root pages silently lost through their builds throwing)
+build.addExport({
+  direction: "outport",
+  public: "failed",
+  internal: { node: "builder", port: "fail" },
 });
 
 mkdirSync(join(pkgRoot, "graphs"), { recursive: true });
