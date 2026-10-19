@@ -114,19 +114,30 @@ describe("jekyll parity", () => {
     // with the diagnosable artifact instead of hanging to the runner
     // timeout
     let watchdog;
+    /** @type {any} */
+    let networkRef;
     try {
       await Promise.race([
-        jekyll(source, target, { flowtrace: trace }),
+        jekyll(source, target, {
+          flowtrace: trace,
+          networkCallback: (n) => {
+            networkRef = n;
+          },
+        }),
         new Promise((_, reject) => {
-          watchdog = setTimeout(
-            () =>
-              reject(
-                new Error(
-                  "the build did not close down within 30s — the flowtrace at .flowtrace/parity.trace shows where it stalled",
-                ),
-              ),
-            30000,
-          );
+          watchdog = setTimeout(async () => {
+            console.error("WATCHDOG: stopping for the closedown dump");
+            try {
+              await networkRef?.stop();
+              console.error("stop completed");
+            } catch (err) {
+              console.error(
+                "stop failed:",
+                /** @type {Error} */ (err)?.message,
+              );
+            }
+            reject(new Error("the build did not close down within 30s"));
+          }, 30000);
         }),
       ]);
     } finally {

@@ -28,7 +28,7 @@
       "port": "out"
     },
     "static": {
-      "process": "read_root",
+      "process": "strip_static",
       "port": "out"
     }
   },
@@ -41,6 +41,11 @@
     {
       "id": "read_root",
       "component": "filesystem/ReadDir",
+      "metadata": {}
+    },
+    {
+      "id": "strip_static",
+      "component": "groups/RemoveGroups",
       "metadata": {}
     },
     {
@@ -103,6 +108,16 @@
       "target": {
         "id": "read_root",
         "port": "source"
+      }
+    },
+    {
+      "source": {
+        "id": "read_root",
+        "port": "out"
+      },
+      "target": {
+        "id": "strip_static",
+        "port": "in"
       }
     },
     {
